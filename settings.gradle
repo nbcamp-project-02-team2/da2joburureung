@@ -1,3 +1,4 @@
 rootProject.name = 'da2joburereung'
 
 include 'common-libs:common'
+include 'hub-service'
