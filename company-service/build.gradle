@@ -1,9 +1,18 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '3.5.12'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.da2jobu'
 version = '0.0.1-SNAPSHOT'
+description = 'company-service'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 
 repositories {
     mavenCentral()
@@ -13,7 +22,7 @@ ext {
 }
 
 dependencies {
-    // ── FeignClient (허브 존재 확인용) ────────────────────
+    // ── FeignClient ──────────────────────────────────────
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     // ── Eureka Client ────────────────────────────────────
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
@@ -42,7 +51,7 @@ dependencies {
     implementation project(':common-libs:common')
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
 }
 dependencyManagement {
