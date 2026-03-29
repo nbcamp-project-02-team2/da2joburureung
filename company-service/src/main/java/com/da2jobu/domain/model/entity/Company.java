@@ -46,7 +46,6 @@ public class Company extends BaseEntity {
     // ── Factory Method ────────────────────────────────────────────────────────
     public static Company create(
             CompanyId companyId,
-            ManagerId managerId,
             HubId hubId,
             String name,
             CompanyType type,
@@ -54,7 +53,6 @@ public class Company extends BaseEntity {
     ) {
         Company company = new Company();
         company.companyId = companyId;
-        company.managerId = managerId;
         company.hubId = hubId;
         company.name = name;
         company.type = type;

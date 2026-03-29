@@ -33,7 +33,6 @@ public class CompanyController {
     ) {
         validateCreatePermission(userRole, userHubId, request.hubId());
         CreateCompanyCommand createCompanyCommand = new CreateCompanyCommand(
-                request.managerId(),
                 request.hubId(),
                 request.name(),
                 request.type(),

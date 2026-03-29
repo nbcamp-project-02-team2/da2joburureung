@@ -16,7 +16,6 @@ dependencies {
     // ── FeignClient (허브 존재 확인용) ────────────────────
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     // ── Eureka Client ────────────────────────────────────
-
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     // ── 웹 ───────────────────────────────────────────────
     implementation 'org.springframework.boot:spring-boot-starter-web'

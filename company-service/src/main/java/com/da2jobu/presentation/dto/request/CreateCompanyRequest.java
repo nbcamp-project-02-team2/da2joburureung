@@ -9,9 +9,6 @@ import java.util.UUID;
 
 public record CreateCompanyRequest(
 
-        @NotNull(message = "업체 담당자 ID는 필수입니다.")
-        UUID managerId,
-
         @NotNull(message = "관리 허브 ID는 필수입니다.")
         UUID hubId,
 
