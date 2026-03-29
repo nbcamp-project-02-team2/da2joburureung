@@ -1,39 +1,33 @@
 package com.da2jobu.domain.model.entity;
 
-import com.da2jobu.domain.model.vo.CompanyType;
-import com.da2jobu.domain.model.vo.Location;
+import com.da2jobu.domain.model.vo.*;
+import common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "p_company")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Company {
+public class Company extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "company_id")
-    private UUID companyId;
+    @EmbeddedId
+    @AttributeOverride(name = "companyId", column = @Column(name = "company_id"))
+    private CompanyId companyId;
 
-    @Column(name = "manager_id", nullable = false)
-    private UUID managerId;
+    @Embedded
+    @AttributeOverride(name = "managerId", column = @Column(name = "manager_id"))
+    private ManagerId managerId;
 
-    @Column(name = "hub_id", nullable = false)
-    private UUID hubId;
+    @Embedded
+    @AttributeOverride(name = "hubId", column = @Column(name = "hub_id"))
+    private HubId hubId;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -41,41 +35,25 @@ public class Company {
     private CompanyType type;
 
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "address", column = @Column(name = "address")),
+            @AttributeOverride(name = "latitude", column = @Column(name = "latitude")),
+            @AttributeOverride(name = "longitude", column = @Column(name = "longitude"))
+    })
     private Location location;
 
-    // ── Audit Fields ──────────────────────────────────────────────────────────
-    // TODO: 공통모듈 BaseEntity 완성 시 해당 필드들을 BaseEntity 상속으로 교체
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @CreatedBy
-    @Column(name = "created_by", nullable = false, updatable = false, length = 100)
-    private String createdBy;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @LastModifiedBy
-    @Column(name = "updated_by", length = 100)
-    private String updatedBy;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @Column(name = "deleted_by", length = 100)
-    private String deletedBy;
 
     // ── Factory Method ────────────────────────────────────────────────────────
     public static Company create(
-            UUID managerId,
-            UUID hubId,
+            CompanyId companyId,
+            ManagerId managerId,
+            HubId hubId,
             String name,
             CompanyType type,
             Location location
     ) {
         Company company = new Company();
+        company.companyId = companyId;
         company.managerId = managerId;
         company.hubId = hubId;
         company.name = name;
@@ -83,14 +61,5 @@ public class Company {
         company.location = location;
         return company;
     }
-
-    // ── Business Methods ──────────────────────────────────────────────────────
-    public void delete(String deletedBy) {
-        this.deletedAt = LocalDateTime.now();
-        this.deletedBy = deletedBy;
-    }
-
-    public boolean isDeleted() {
-        return this.deletedAt != null;
-    }
+    // ── Factory Method ────────────────────────────────────────────────────────
 }

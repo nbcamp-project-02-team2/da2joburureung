@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
-@FeignClient(name = "hub-service")
-public interface HubFeignClient {
+@FeignClient(name = "user-service")
+public interface UserFeignClient {
 
-    @GetMapping("/api/hubs/{hubId}")
-    HubResponse getHub(@PathVariable("hubId") UUID hubId);
+    @GetMapping("/api/users/{userId}")
+    HubResponse getUser(@PathVariable UUID userId);
 }

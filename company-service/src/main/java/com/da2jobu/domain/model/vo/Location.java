@@ -1,6 +1,5 @@
 package com.da2jobu.domain.model.vo;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,13 +12,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Location {
 
-    @Column(nullable = false, length = 500)
     private String address;
-
-    @Column(nullable = false, precision = 10, scale = 7)
     private BigDecimal latitude;
-
-    @Column(nullable = false, precision = 10, scale = 7)
     private BigDecimal longitude;
 
     public static Location of(String address, BigDecimal latitude, BigDecimal longitude) {
@@ -41,5 +35,6 @@ public class Location {
         if (longitude == null || longitude.compareTo(new BigDecimal("-180")) < 0 || longitude.compareTo(new BigDecimal("180")) > 0) {
             throw new IllegalArgumentException("경도는 -180 ~ 180 사이여야 합니다.");
         }
+        //주소 == 위경도 검증
     }
 }

@@ -1,10 +1,9 @@
 package com.da2jobu.presentation.dto.response;
 
-import com.da2jobu.domain.model.entity.Company;
+import com.da2jobu.application.dto.result.CompanyResult;
 import com.da2jobu.domain.model.vo.CompanyType;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record CompanyResponse(
@@ -15,22 +14,18 @@ public record CompanyResponse(
         CompanyType type,
         String address,
         BigDecimal latitude,
-        BigDecimal longitude,
-        LocalDateTime createdAt,
-        String createdBy
+        BigDecimal longitude
 ) {
-    public static CompanyResponse from(Company company) {
+    public static CompanyResponse from(CompanyResult result) {
         return new CompanyResponse(
-                company.getCompanyId(),
-                company.getManagerId(),
-                company.getHubId(),
-                company.getName(),
-                company.getType(),
-                company.getLocation().getAddress(),
-                company.getLocation().getLatitude(),
-                company.getLocation().getLongitude(),
-                company.getCreatedAt(),
-                company.getCreatedBy()
+                result.companyId(),
+                result.managerId(),
+                result.hubId(),
+                result.name(),
+                result.type(),
+                result.address(),
+                result.latitude(),
+                result.longitude()
         );
     }
 }
