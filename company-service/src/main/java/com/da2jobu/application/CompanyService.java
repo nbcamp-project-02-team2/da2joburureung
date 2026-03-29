@@ -1,10 +1,15 @@
 package com.da2jobu.application;
 
-import com.da2jobu.presentation.dto.request.CreateCompanyRequest;
-import com.da2jobu.presentation.dto.response.CompanyResponse;
-import com.da2jobu.domain.model.entity.Company;
-import com.da2jobu.domain.model.vo.Location;
+import com.da2jobu.application.dto.command.CreateCompanyCommand;
+import com.da2jobu.application.dto.result.CompanyResult;
 import com.da2jobu.application.service.HubClient;
+import com.da2jobu.application.service.LocationClient;
+import com.da2jobu.application.service.UserClient;
+import com.da2jobu.domain.model.entity.Company;
+import com.da2jobu.domain.model.vo.CompanyId;
+import com.da2jobu.domain.model.vo.HubId;
+import com.da2jobu.domain.model.vo.Location;
+import com.da2jobu.domain.model.vo.ManagerId;
 import com.da2jobu.domain.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,28 +20,40 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CompanyService {
-
+    // ========== Application Services ==========
+    private final LocationClient locationClient;
+    private final HubClient hubClient;
+    private final UserClient userClient;
+    // ========== Domain ==========
     private final CompanyRepository companyRepository;
-    private final HubClient hubValidator;
+
 
     @Transactional
-    public CompanyResponse create(CreateCompanyRequest request) {
-        validateHubExists(request.hubId());
-
-        Location location = Location.of(request.address(), request.latitude(), request.longitude());
+    public CompanyResult create(CreateCompanyCommand command) {
+        validateHubExists(command.hubId());
+        validateUserExists(command.managerId());
+        Location location = locationClient.resolveLocation(command.address());
 
         Company company = Company.create(
-                request.managerId(),
-                request.hubId(),
-                request.name(),
-                request.type(),
+                CompanyId.of(),
+                ManagerId.of(command.managerId()),
+                HubId.of(command.hubId()),
+                command.name(),
+                command.type(),
                 location
         );
-
-        return CompanyResponse.from(companyRepository.save(company));
+        Company savedCompany = companyRepository.save(company);
+        /**
+         * kafka 로 user쪽 연계로직 :  company id 업데이트
+         */
+        return CompanyResult.from(savedCompany);
     }
 
     private void validateHubExists(UUID hubId) {
-        hubValidator.validateExists(hubId);
+        hubClient.validateHubExists(hubId);
+    }
+
+    private void validateUserExists(UUID managerId) {
+        userClient.validateUserExistsAndRole(managerId);
     }
 }

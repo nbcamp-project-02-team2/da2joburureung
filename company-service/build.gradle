@@ -40,7 +40,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     // ── 공통모듈 ───────────────────────────────────────────
-    implementation project(':common-libs')
+    implementation project(':common-libs:common')
 }
 
 test {

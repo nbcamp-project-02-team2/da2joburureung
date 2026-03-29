@@ -1,12 +1,14 @@
 package com.da2jobu.presentation.controller;
 
+import com.da2jobu.application.CompanyService;
+import com.da2jobu.application.dto.command.CreateCompanyCommand;
+import com.da2jobu.application.dto.result.CompanyResult;
 import com.da2jobu.presentation.dto.request.CreateCompanyRequest;
 import com.da2jobu.presentation.dto.response.CompanyResponse;
-import com.da2jobu.application.CompanyService;
+import common.dto.CommonResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +16,7 @@ import java.util.UUID;
 
 @Tag(name = "Company", description = "업체 관리 API")
 @RestController
-@RequestMapping("/api/company")
+@RequestMapping("/api/companies")
 @RequiredArgsConstructor
 public class CompanyController {
 
@@ -24,14 +26,23 @@ public class CompanyController {
      * 업체 생성
      */
     @PostMapping
-    public ResponseEntity<CompanyResponse> createCompany(
+    public ResponseEntity<CommonResponse<CompanyResponse>> createCompany(
             @Valid @RequestBody CreateCompanyRequest request,
             @RequestHeader("X-User-Role") String userRole,
             @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId
     ) {
         validateCreatePermission(userRole, userHubId, request.hubId());
-        CompanyResponse response = companyService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        CreateCompanyCommand createCompanyCommand = new CreateCompanyCommand(
+                request.managerId(),
+                request.hubId(),
+                request.name(),
+                request.type(),
+                request.address()
+        );
+
+        CompanyResult result = companyService.create(createCompanyCommand);
+        CompanyResponse response = CompanyResponse.from(result);
+        return CommonResponse.created("업체 생성 완료", response);
     }
 
     private void validateCreatePermission(String userRole, UUID userHubId, UUID requestedHubId) {
