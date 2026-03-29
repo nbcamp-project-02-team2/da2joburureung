@@ -1,0 +1,49 @@
+services:
+  company-db:
+    image: postgres:latest
+    container_name: company-db
+    restart: always
+    environment:
+      POSTGRES_DB: company
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Asia/Seoul
+    ports:
+      - "5433:5432"
+    volumes:
+      - company_db_data:/var/lib/postgresql/18/data
+    networks:
+      - company-network
+
+  company-zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: company-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - company-network
+
+  company-kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: company-kafka
+    depends_on:
+      - company-zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: company-zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - company-network
+
+networks:
+  company-network:
+    driver: bridge
+
+volumes:
+  company_db_data:

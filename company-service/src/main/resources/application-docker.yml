@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://company-db:5432/company
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  Kafka:
+    bootstrap-servers: company-kafka:9092

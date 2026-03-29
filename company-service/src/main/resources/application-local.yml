@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/company
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  Kafka:
+    bootstrap-servers: localhost:9092
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false

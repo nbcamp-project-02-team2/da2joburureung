@@ -1,0 +1,49 @@
+package com.da2jobu.presentation.controller;
+
+import com.da2jobu.presentation.dto.request.CreateCompanyRequest;
+import com.da2jobu.presentation.dto.response.CompanyResponse;
+import com.da2jobu.application.CompanyService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@Tag(name = "Company", description = "업체 관리 API")
+@RestController
+@RequestMapping("/api/company")
+@RequiredArgsConstructor
+public class CompanyController {
+
+    private final CompanyService companyService;
+
+    /**
+     * 업체 생성
+     */
+    @PostMapping
+    public ResponseEntity<CompanyResponse> createCompany(
+            @Valid @RequestBody CreateCompanyRequest request,
+            @RequestHeader("X-User-Role") String userRole,
+            @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId
+    ) {
+        validateCreatePermission(userRole, userHubId, request.hubId());
+        CompanyResponse response = companyService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    private void validateCreatePermission(String userRole, UUID userHubId, UUID requestedHubId) {
+        if ("MASTER".equals(userRole)) {
+            return;
+        }
+        if ("HUB_MANAGER".equals(userRole)) {
+            if (userHubId == null || !userHubId.equals(requestedHubId)) {
+                throw new IllegalArgumentException("담당 허브에만 업체를 생성할 수 있습니다.");
+            }
+            return;
+        }
+        throw new SecurityException("업체 생성 권한이 없습니다. role: " + userRole);
+    }
+}

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: company-service
+  profiles:
+    active: local
+
+server:
+  port: 8083
+
+logging:
+  level:
+    com.sparta.company: DEBUG
+    org.hibernate.SQL: DEBUG
