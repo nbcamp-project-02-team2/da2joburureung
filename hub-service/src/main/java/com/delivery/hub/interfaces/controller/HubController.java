@@ -1,5 +1,6 @@
 package com.delivery.hub.interfaces.controller;
 
+import com.delivery.hub.application.dto.CreateHubCommand;
 import com.delivery.hub.interfaces.dto.Request.CreateHubRequest;
 import com.delivery.hub.interfaces.dto.Respone.CreateHubResponse;
 import common.dto.CommonResponse;
@@ -10,10 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,13 +23,13 @@ public class HubController {
 
     private final HubApiService hubApiService;
 
-    @PostMapping("/new")
+    @PostMapping
     @Operation(summary = "신규 허브 저장", description = "새로운 허브를 저장합니다.")
     public ResponseEntity<CommonResponse<CreateHubResponse>> createHub(@RequestBody @Valid CreateHubRequest request) {
 
-        Hub createdHub = hubApiService.createHub(request.toCommand());
+        CreateHubCommand command = CreateHubCommand.of(request.hub_name(),request.address());
 
-        CreateHubResponse response = CreateHubResponse.from(createdHub);
+        CreateHubResponse response = hubApiService.createHub(command);
 
         return CommonResponse.created("허브가 성공적으로 생성되었습니다.", response);
     }

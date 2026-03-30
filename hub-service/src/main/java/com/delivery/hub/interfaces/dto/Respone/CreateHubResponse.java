@@ -8,7 +8,6 @@ import java.util.UUID;
 
 @Schema(description = "허브 정보 응답")
 public record CreateHubResponse(
-        UUID hubId,
         String name,
         String address,
         BigDecimal latitude,
@@ -17,8 +16,7 @@ public record CreateHubResponse(
 {
     public static CreateHubResponse from(Hub hub) {
         return new CreateHubResponse(
-                hub.getHubId(),
-                hub.getName(),
+                hub.getHub_name(),
                 hub.getAddress(),
                 hub.getLatitude(),
                 hub.getLongitude()
