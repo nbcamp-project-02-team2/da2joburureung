@@ -34,7 +34,19 @@ public enum ErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "FORBIDDEN", "접근 권한이 없습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다."),
     INVALID_PAGE_SIZE(HttpStatus.BAD_REQUEST, "INVALID_PAGE_SIZE", "페이지 크기는 10, 30, 50만 가능합니다."),
-    INVALID_SORT_BY(HttpStatus.BAD_REQUEST, "INVALID_SORT_BY", "정렬 기준이 올바르지 않습니다.");
+    INVALID_SORT_BY(HttpStatus.BAD_REQUEST, "INVALID_SORT_BY", "정렬 기준이 올바르지 않습니다."),
+
+    // ── Company ───────────────────────────────────────
+    COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPANY_NOT_FOUND", "존재하지 않는 업체입니다."),
+    COMPANY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "COMPANY_ACCESS_DENIED", "업체에 대한 접근 권한이 없습니다."),
+    COMPANY_CREATE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_CREATE_FORBIDDEN", "업체 생성 권한이 없습니다."),
+    COMPANY_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_UPDATE_FORBIDDEN", "업체 수정 권한이 없습니다."),
+    COMPANY_HUB_MISMATCH(HttpStatus.FORBIDDEN, "COMPANY_HUB_MISMATCH", "담당 허브의 업체만 접근할 수 있습니다."),
+    COMPANY_MANAGER_FIELD_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_MANAGER_FIELD_FORBIDDEN", "업체 담당자는 허브 ID, 업체 타입, 담당자 ID를 수정할 수 없습니다."),
+    HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "HUB_NOT_FOUND", "존재하지 않는 허브입니다."),
+    HUB_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "HUB_SERVICE_ERROR", "허브 서비스 호출 중 오류가 발생했습니다."),
+    MANAGER_ALREADY_ASSIGNED(HttpStatus.CONFLICT, "MANAGER_ALREADY_ASSIGNED", "이미 다른 업체에 등록된 담당자입니다."),
+    USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "USER_SERVICE_ERROR", "유저 서비스 호출 중 오류가 발생했습니다.");
 
     // 각 모듈 별로 담당자가 추가
 

@@ -13,7 +13,7 @@ import java.util.UUID;
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HubId {
-    private UUID HubId;
+    private UUID hubId;
 
     public static HubId of(UUID hubId) {
         return new HubId(hubId);

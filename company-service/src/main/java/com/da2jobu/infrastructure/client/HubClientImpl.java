@@ -1,6 +1,8 @@
 package com.da2jobu.infrastructure.client;
 
 import com.da2jobu.application.service.HubClient;
+import common.exception.CustomException;
+import common.exception.ErrorCode;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,12 +19,13 @@ public class HubClientImpl implements HubClient {
     public void validateHubExists(UUID hubId) {
         try {
             /**
-             * todo : 허브 매니저는 본인 담당 허브(hub_id)인지 허브 id가 존재하는지 검증**/
+             * todo : 허브 매니저는 본인 담당 허브(hub_id)인지 허브 id가 존재하는지 검증
+             */
             hubFeignClient.getHub(hubId);
         } catch (FeignException.NotFound e) {
-            throw new IllegalArgumentException("존재하지 않는 허브입니다. hubId: " + hubId);
+            throw new CustomException(ErrorCode.HUB_NOT_FOUND);
         } catch (FeignException e) {
-            throw new IllegalStateException("허브 서비스 호출 중 오류가 발생했습니다.", e);
+            throw new CustomException(ErrorCode.HUB_SERVICE_ERROR);
         }
     }
 }
