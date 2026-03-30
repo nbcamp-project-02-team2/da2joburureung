@@ -1,4 +1,4 @@
-package com.da2jobu.presentation.dto.response;
+package com.da2jobu.interfaces.dto.response;
 
 import com.da2jobu.application.dto.result.CompanyResult;
 import com.da2jobu.domain.model.vo.CompanyType;

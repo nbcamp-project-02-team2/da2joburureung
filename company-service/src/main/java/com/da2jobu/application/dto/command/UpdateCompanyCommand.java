@@ -4,12 +4,13 @@ import com.da2jobu.domain.model.vo.CompanyType;
 
 import java.util.UUID;
 
-public record CreateCompanyCommand(
+public record UpdateCompanyCommand(
+        UUID companyId,
         String userRole,
         UUID userHubId,
+        UUID userId,
         UUID hubId,
         String name,
         CompanyType type,
         String address
-) {
-}
+) {}

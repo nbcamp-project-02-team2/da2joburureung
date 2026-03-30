@@ -23,5 +23,6 @@ public class CompanyId {
         if (companyId == null) {
             throw new IllegalArgumentException("유효하지 않은 업체 id 입니다");
         }
+        this.companyId = companyId;
     }
 }
