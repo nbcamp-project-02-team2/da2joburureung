@@ -2,6 +2,13 @@ spring:
   application:
     name: hub-service
 
+  data:
+    redis:
+      host: localhost
+      port: 6380
+    cache:
+      type: redis
+
   datasource:
       url: jdbc:postgresql://db-hub.c5uuwiy2enpx.ap-southeast-2.rds.amazonaws.com:5432/postgres
       username: master
@@ -26,6 +33,7 @@ spring:
 logging:
   level:
     org.hibernate.SQL: debug
+    org.springframework.cache: TRACE
     org.hibernate.orm.jdbc.bind: trace
 
 kakao:
