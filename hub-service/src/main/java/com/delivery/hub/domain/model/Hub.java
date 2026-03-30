@@ -1,5 +1,6 @@
 package com.delivery.hub.domain.model;
 
+import com.delivery.hub.application.dto.CreateHubCommand;
 import common.entity.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -28,7 +29,7 @@ public class Hub extends BaseEntity{
 
     @Column(name = "hub_name", nullable = false)
     @Schema(description = "허브 이름", example = "경기 남부 허브")
-    private String name;
+    private String hub_name;
 
     @Column(name = "address", nullable = false)
     @Schema(description = "허브 주소", example = "경기도 이천시 ...")
@@ -42,8 +43,17 @@ public class Hub extends BaseEntity{
     @Schema(description = "경도 (예: 127.1234)")
     private BigDecimal longitude;
 
-    public void updateHub(String name, String address, BigDecimal latitude, BigDecimal longitude) {
-        this.name = name;
+    public static Hub createHub(String hub_name, String address, BigDecimal latitude, BigDecimal longitude) {
+        Hub hub = new Hub();
+        hub.hub_name = hub_name;
+        hub.address = address;
+        hub.latitude = latitude;
+        hub.longitude = longitude;
+        return hub;
+    }
+
+    public void updateHub(String hub_name, String address, BigDecimal latitude, BigDecimal longitude) {
+        this.hub_name = hub_name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
