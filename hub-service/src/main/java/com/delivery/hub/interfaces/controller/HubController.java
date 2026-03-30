@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -46,6 +47,16 @@ public class HubController {
             @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         SearchHubCommand command = SearchHubCommand.of(searchRequest.hub_name(),searchRequest.address());
+
+        int size = pageable.getPageSize();
+        if (size != 10 && size != 30 && size != 50) {
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+
+                    10,
+                    pageable.getSort()
+            );
+        }
 
         Page<HubResponse> response = hubApiService.getHubs(command, pageable);
 
