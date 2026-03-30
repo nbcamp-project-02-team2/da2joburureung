@@ -23,7 +23,6 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
     public Page<HubResponse> searchHubs(SearchHubCommand command, Pageable pageable) {
         QHub hub = QHub.hub;
 
-        // 데이터 조회 (페이징 적용)
         List<Hub> content = queryFactory
                 .selectFrom(hub)
                 .where(

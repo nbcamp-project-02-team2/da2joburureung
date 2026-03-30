@@ -2,6 +2,7 @@ package com.delivery.hub.interfaces.controller;
 
 import com.delivery.hub.application.dto.CreateHubCommand;
 import com.delivery.hub.application.dto.SearchHubCommand;
+import com.delivery.hub.infrastructure.config.Redis.RestPage;
 import com.delivery.hub.interfaces.dto.Request.CreateHubRequest;
 import com.delivery.hub.interfaces.dto.Request.SearchHubRequest;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;
@@ -18,8 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,8 +57,8 @@ public class HubController {
             );
         }
 
-        Page<HubResponse> response = hubApiService.getHubs(command, pageable);
+        RestPage<HubResponse> response = hubApiService.getHubs(command, pageable);
 
-        return CommonResponse.ok(response);
+        return CommonResponse.ok(response.toPage());
     }
 }

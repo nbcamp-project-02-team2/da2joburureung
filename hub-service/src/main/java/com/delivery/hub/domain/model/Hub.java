@@ -27,7 +27,7 @@ public class Hub extends BaseEntity{
     @Schema(description = "허브 식별자 (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID hubId;
 
-    @Column(name = "hub_name", nullable = false)
+    @Column(name = "hub_name", nullable = false,unique = true)
     @Schema(description = "허브 이름", example = "경기 남부 허브")
     private String hub_name;
 
