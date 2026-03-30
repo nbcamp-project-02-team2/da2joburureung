@@ -1,6 +1,5 @@
 package com.delivery.hub.domain.model;
 
-import com.delivery.hub.application.dto.CreateHubCommand;
 import common.entity.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -9,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -44,12 +44,14 @@ public class Hub extends BaseEntity{
     private BigDecimal longitude;
 
     public static Hub createHub(String hub_name, String address, BigDecimal latitude, BigDecimal longitude) {
-        Hub hub = new Hub();
-        hub.hub_name = hub_name;
-        hub.address = address;
-        hub.latitude = latitude;
-        hub.longitude = longitude;
-        return hub;
+        return Hub.builder()
+                .hub_name(hub_name)
+                .address(address)
+                .latitude(latitude)
+                .longitude(longitude)
+                .createdBy("master")
+                .createdAt(LocalDateTime.now())
+                .build();
     }
 
     public void updateHub(String hub_name, String address, BigDecimal latitude, BigDecimal longitude) {

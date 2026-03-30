@@ -25,5 +25,9 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: debug              # 실행되는 SQL 출력
-    org.hibernate.orm.jdbc.bind: trace    # ? 자리에 들어가는 파라미터 값 출력
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+kakao:
+  api:
+    key: "496564f3c310718b565e9b52f14c43a0"
