@@ -6,6 +6,7 @@ import com.delivery.hub.domain.model.Hub;
 import com.delivery.hub.domain.repository.HubRepository;
 import com.delivery.hub.infrastructure.client.KakaoAddressService;
 import com.delivery.hub.infrastructure.config.Redis.RestPage;
+import com.delivery.hub.interfaces.dto.Request.UpdateHubRequest;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
@@ -60,5 +62,36 @@ public class HubApiService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브를 찾을 수 없습니다. ID: " + hubId));
 
         return HubResponse.detailFrom(hub);
+    }
+
+    @CacheEvict(cacheNames = "hubPages", allEntries = true)
+    public HubResponse updateHub(UUID hubId, @Valid UpdateHubRequest request) {
+
+        Hub hub = hubrepository.findById(hubId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 허브가 존재하지 않습니다."));
+
+        if (request.hub_name() != null && !hub.getHub_name().equals(request.hub_name())) {
+            if (hubrepository.existsByHubName(request.hub_name())) {
+                throw new IllegalArgumentException("이미 사용 중인 이름입니다.");
+            }
+        }
+
+        BigDecimal newLat = hub.getLatitude();
+        BigDecimal newLon = hub.getLongitude();
+        if (request.address() != null && !hub.getAddress().equals(request.address())) {
+            KakaoAddressService.GeoPoint geoPoint = kakaoaddressservice.getGeoPoint(request.address());
+            newLat = geoPoint.latitude();
+            newLon = geoPoint.longitude();
+        }
+
+        hub.updateHub(
+                request.hub_name() != null ? request.hub_name() : hub.getHub_name(),
+                request.address() != null ? request.address() : hub.getAddress(),
+                newLat,
+                newLon,
+                "master"
+        );
+
+        return HubResponse.from(hub);
     }
 }

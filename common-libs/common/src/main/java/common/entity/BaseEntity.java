@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-@SuperBuilder // ✅ Hub와 동일하게 적용
-@NoArgsConstructor(access = AccessLevel.PROTECTED) // ✅ 필수
+@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public abstract class BaseEntity {
 
@@ -45,6 +45,11 @@ public abstract class BaseEntity {
 
     @Column(name = "deleted_by")
     private String deletedBy;
+
+    protected void update(String updatedBy) {
+        this.updatedBy = updatedBy;
+        this.updatedAt = LocalDateTime.now();
+    }
 
     public void softDelete(String deletedBy) {
         this.deletedAt = LocalDateTime.now();

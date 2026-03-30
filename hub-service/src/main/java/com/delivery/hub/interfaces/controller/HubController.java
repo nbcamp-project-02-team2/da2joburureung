@@ -5,6 +5,7 @@ import com.delivery.hub.application.dto.SearchHubCommand;
 import com.delivery.hub.infrastructure.config.Redis.RestPage;
 import com.delivery.hub.interfaces.dto.Request.CreateHubRequest;
 import com.delivery.hub.interfaces.dto.Request.SearchHubRequest;
+import com.delivery.hub.interfaces.dto.Request.UpdateHubRequest;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;
 import common.dto.CommonResponse;
 import com.delivery.hub.application.service.HubApiService;
@@ -69,6 +70,15 @@ public class HubController {
     public ResponseEntity<CommonResponse<HubResponse>> getHub(@Valid @PathVariable("hub_id") UUID hubId) {
 
         HubResponse response = hubApiService.getHub(hubId);
+
+        return CommonResponse.ok(response);
+    }
+
+    @PatchMapping("/{hub_id}")
+    @Operation(summary = "특정 허브 수정", description = "특정 허브의 내용을 수정합니다")
+    public ResponseEntity<CommonResponse<HubResponse>> updateHub(@Valid @RequestBody UpdateHubRequest request, @PathVariable UUID hub_id) {
+
+        HubResponse response = hubApiService.updateHub(hub_id, request);
 
         return CommonResponse.ok(response);
     }
