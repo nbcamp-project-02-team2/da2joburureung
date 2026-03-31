@@ -1,0 +1,118 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: da2joburureung-zookeeper
+    ports:
+      - "${ZOOKEEPER_CLIENT_PORT}:${ZOOKEEPER_CLIENT_PORT}"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT}
+    networks:
+      - kafka-network
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: da2joburureung-notification
+    ports:
+      - "${NOTIFICATION_SERVER_PORT}:${NOTIFICATION_SERVER_PORT}"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notification-postgres:5432/${NOTIFICATION_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs  # Optional: for persistent logs
+    depends_on:
+       notification-postgres:
+         condition: service_healthy
+       redis:
+         condition: service_healthy
+
+  notification-postgres:
+    image: pgvector/pgvector:pg17
+    container_name: da2joburureung-notification-postgres
+    ports:
+      - "${NOTIFICATION_DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${NOTIFICATION_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - ./notification-service/script:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${NOTIFICATION_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: da2joburureung-redis
+    ports:
+      - "${SPRING_DATA_REDIS_PORT}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: da2joburureung-kafka
+    ports:
+      - "${KAFKA_PORT}:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_CLIENT_PORT}
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:${KAFKA_EXTERNAL_PORT}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:${KAFKA_EXTERNAL_PORT}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    depends_on:
+      - zookeeper
+    networks:
+      - kafka-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "${KAFKA_UI_PORT}:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:${ZOOKEEPER_CLIENT_PORT}
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - kafka-network
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  kafka-network:
+    driver: bridge
