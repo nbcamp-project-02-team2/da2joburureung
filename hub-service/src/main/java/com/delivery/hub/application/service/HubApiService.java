@@ -4,7 +4,7 @@ import com.delivery.hub.application.dto.CreateHubCommand;
 import com.delivery.hub.application.dto.SearchHubCommand;
 import com.delivery.hub.domain.model.Hub;
 import com.delivery.hub.domain.repository.HubRepository;
-import com.delivery.hub.infrastructure.client.KakaoAddressService;
+import common.client.KakaoAddressService;
 import com.delivery.hub.infrastructure.config.Redis.RestPage;
 import com.delivery.hub.interfaces.dto.Request.UpdateHubRequest;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;

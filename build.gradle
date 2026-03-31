@@ -61,3 +61,8 @@ subprojects {
         }
     }
 }
+
+project(':common-libs:common') {
+    bootJar.enabled = false
+    jar.enabled = true
+}

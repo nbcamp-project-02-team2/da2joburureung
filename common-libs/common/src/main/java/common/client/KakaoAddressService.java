@@ -1,4 +1,4 @@
-package com.delivery.hub.infrastructure.client;
+package common.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
