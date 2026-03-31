@@ -54,7 +54,11 @@ project(':hub-service') {
         implementation project(':common-libs')
     }
 }
-
+project(':hubpath-service') {
+    dependencies {
+        implementation project(':common-libs')
+    }
+}
 project(':common-libs') {
     bootJar.enabled = false
     jar.enabled = true

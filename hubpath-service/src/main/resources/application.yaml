@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: hubpath-service
+
+  datasource:
+    url: jdbc:postgresql://db-hub.c5uuwiy2enpx.ap-southeast-2.rds.amazonaws.com:5432/postgres
+    username: master
+    password: 'o90o90o90!'
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 6380
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  cache:
+    type: redis
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.cache: TRACE
