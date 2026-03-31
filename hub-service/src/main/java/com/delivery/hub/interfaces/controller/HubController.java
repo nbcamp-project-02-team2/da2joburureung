@@ -42,7 +42,7 @@ public class HubController {
     }
 
     @GetMapping
-    @Operation(summary = "허브 조회 및 검색", description = "전체 허브를 조회하거나 검색합니다")
+    @Operation(summary = "허브 조회 및 검색", description = "전체 허브를 조회하거나 검색합니다.")
     public ResponseEntity<CommonResponse<Page<HubResponse>>> getHubs(
             @ModelAttribute SearchHubRequest searchRequest,
             @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -65,7 +65,7 @@ public class HubController {
     }
 
     @GetMapping("/{hub_id}")
-    @Operation(summary = "특정 허브 검색", description = "특정 허브의 상세 정보를 받아옵니다")
+    @Operation(summary = "특정 허브 검색", description = "특정 허브의 상세 정보를 받아옵니다.")
     public ResponseEntity<CommonResponse<HubResponse>> getHub(@Valid @PathVariable("hub_id") UUID hubId) {
 
         HubResponse response = hubApiService.getHub(hubId);
