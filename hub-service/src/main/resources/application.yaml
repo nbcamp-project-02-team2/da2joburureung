@@ -39,3 +39,6 @@ logging:
 kakao:
   api:
     key: "496564f3c310718b565e9b52f14c43a0"
+
+server:
+  port: 8084

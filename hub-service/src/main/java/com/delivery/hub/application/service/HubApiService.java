@@ -48,14 +48,16 @@ public class HubApiService {
     }
 
     //허브 전체 조회 및 검색
-    @Cacheable(cacheNames = "hubPages", key = "{#command.hub_name(), #command.address(), #pageable.pageNumber, #pageable.pageSize, #pageable.sort.toString()}")
+    @Cacheable(
+            cacheNames = "hubPages",
+            key = "{#command.hub_name(), #command.address(), #pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
     public RestPage<HubResponse> getHubs(SearchHubCommand command, Pageable pageable) {
         Page<HubResponse> result = hubrepository.searchHubs(command, pageable);
-
         return new RestPage<>(result);
     }
 
     //특정 허브 상세 내용 조회
+    @Cacheable(cacheNames = "hubDetails", key = "#hubId")
     public HubResponse getHub(@Valid UUID hubId) {
         Hub hub = hubrepository.findById(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브를 찾을 수 없습니다. ID: " + hubId));
@@ -64,8 +66,8 @@ public class HubApiService {
     }
 
     // 허브 내용 수정
-    @CacheEvict(cacheNames = "hubPages", allEntries = true)
     @Transactional
+    @CacheEvict(cacheNames = "hubPages", allEntries = true)
     public HubResponse updateHub(UUID hubId, @Valid UpdateHubRequest request) {
 
         Hub hub = hubrepository.findById(hubId)
@@ -92,7 +94,7 @@ public class HubApiService {
                 "master"
         );
 
-        return HubResponse.from(hub);
+        return HubResponse.detailFrom(hub);
     }
 
     // 허브 삭제
