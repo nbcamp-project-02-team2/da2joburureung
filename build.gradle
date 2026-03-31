@@ -47,22 +47,15 @@ subprojects {
     tasks.named('test') {
         useJUnitPlatform()
     }
+}
 
-    project(':hub-service') {
-        jar {
-            enabled = true
-            manifest {
-                attributes('Start-Class': 'com.example.hub.HubApplication')
-            }
-        }
-
-        bootJar {
-            enabled = true
-        }
+project(':hub-service') {
+    dependencies {
+        implementation project(':common-libs')
     }
 }
 
-project(':common-libs:common') {
+project(':common-libs') {
     bootJar.enabled = false
     jar.enabled = true
 }

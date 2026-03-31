@@ -1,4 +1,4 @@
 rootProject.name = 'da2joburereung'
 
 include 'common-libs:common'
-include 'notification-service'
+include 'hub-service'
