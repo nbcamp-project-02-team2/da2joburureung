@@ -90,6 +90,25 @@ public class User extends BaseEntity {
                 .build();
     }
 
+    public static User createApprovedAdmin(
+            String username,
+            String password,
+            String name,
+            String slackId
+    ) {
+        return User.builder()
+                .userId(UUID.randomUUID())
+                .username(username)
+                .password(password)
+                .name(name)
+                .slackId(slackId)
+                .role(UserRole.MASTER)
+                .status(UserStatus.APPROVED)
+                .hubId(null)
+                .companyId(null)
+                .build();
+    }
+
     public void approve() {
         this.status = UserStatus.APPROVED;
     }
