@@ -4,7 +4,6 @@ import common.dto.CommonResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,25 +37,11 @@ public class GlobalExceptionHandler {
         return CommonResponse.error(ErrorCode.INVALID_INPUT, message);
     }
 
-    // @PreAuthorize 권한 거부시 던지는 예외
-//    @ExceptionHandler(AuthorizationDeniedException.class)
-//    public ResponseEntity<CommonResponse<?>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
-//        log.warn("[AuthorizationDeniedException] message={}", e.getMessage());
-//        return CommonResponse.error(ErrorCode.FORBIDDEN);
-//    }
-
     // Request JSON 필드 비어있는 경우 던지는 예외
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<CommonResponse<?>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         log.warn("[HttpMessageNotReadableException] message={}", e.getMessage());
         return CommonResponse.error(ErrorCode.INVALID_INPUT);
-    }
-
-    // 기타 접근 거부 (Filter레벨)
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<CommonResponse<?>> handleAccessDeniedException(AccessDeniedException e) {
-        log.warn("[AccessDeniedException] message={}", e.getMessage());
-        return CommonResponse.error(ErrorCode.FORBIDDEN);
     }
 
     // 나머지 예상 못한 예외상황
