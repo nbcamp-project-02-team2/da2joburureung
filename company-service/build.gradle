@@ -23,7 +23,7 @@ ext {
 
 dependencies {
     // ── 공통모듈 ───────────────────────────────────────────
-    implementation project(':common-libs:common')
+    implementation project(':common')
     // ── FeignClient ──────────────────────────────────────
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     // ── Circuit Breaker (Resilience4j) ───────────────────
@@ -57,6 +57,20 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     // ── Redis ─────────────────────────────────────────────
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+}
+
+def querydslDir = "$projectDir/src/main/generated"
+
+sourceSets {
+    main.java.srcDirs += [querydslDir]
+}
+
+tasks.withType(JavaCompile) {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
+}
+
+clean.doLast {
+    file(querydslDir).deleteDir()
 }
 
 tasks.named('test') {
