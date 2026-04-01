@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(':common-libs:common')
+    implementation project(':common')
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
