@@ -7,9 +7,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
+import java.util.Optional;
 
 @Repository
 public interface HubRepository extends JpaRepository<Hub, UUID>, HubRepositoryCustom {
-    @Query("SELECT COUNT(h) > 0 FROM Hub h WHERE h.hub_name = :hubName")
+
+    @Query("SELECT COUNT(h) > 0 FROM Hub h WHERE h.hubName = :hubName")
     boolean existsByHubName(@Param("hubName") String hubName);
+
+    Optional<Hub> findByHubNameAndDeletedAtIsNull(String hubName);
 }

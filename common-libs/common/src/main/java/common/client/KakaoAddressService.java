@@ -3,6 +3,8 @@ package common.client;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -16,44 +18,87 @@ public class KakaoAddressService {
     private final WebClient webClient;
 
     public KakaoAddressService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://dapi.kakao.com").build();
+        this.webClient = webClientBuilder.build();
+    }
+
+    private String getAuthHeader() {
+        return "KakaoAK " + apiKey;
     }
 
     public GeoPoint getGeoPoint(String address) {
-
-        String authHeader = "KakaoAK " + apiKey;
-
         try {
-            // API 호출 및 Map으로 응답 받기
             Map response = webClient.get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/v2/local/search/address.json")
-                            .queryParam("query", address)
-                            .build())
-                    .header("Authorization", authHeader)
+                    .uri("https://dapi.kakao.com/v2/local/search/address.json?query=" + address)
+                    .header("Authorization", getAuthHeader())
                     .retrieve()
-                    .bodyToMono(Map.class) // String 대신 Map으로 받으면 파싱이 쉽습니다.
+                    .bodyToMono(Map.class)
                     .block();
 
             List<Map<String, Object>> documents = (List<Map<String, Object>>) response.get("documents");
 
             if (documents != null && !documents.isEmpty()) {
                 Map<String, Object> addressInfo = documents.get(0);
-
-                // 카카오는 x가 경도(longitude), y가 위도(latitude)입니다.
-                BigDecimal longitude = new BigDecimal(addressInfo.get("x").toString());
-                BigDecimal latitude = new BigDecimal(addressInfo.get("y").toString());
-
-                return new GeoPoint(latitude, longitude);
+                return new GeoPoint(
+                        new BigDecimal(addressInfo.get("y").toString()),
+                        new BigDecimal(addressInfo.get("x").toString())
+                );
             }
-
         } catch (Exception e) {
-            System.err.println("호출 실패: " + e.getMessage());
-            throw e;
+            throw new RuntimeException("Kakao Local API 호출 실패: " + e.getMessage());
+        }
+        throw new IllegalArgumentException("좌표를 찾을 수 없는 주소: " + address);
+    }
+
+    public RouteSummary getRouteSummary(GeoPoint origin, GeoPoint destination, GeoPoint waypoint) {
+        String originParam = origin.longitude() + "," + origin.latitude();
+        String destParam = destination.longitude() + "," + destination.latitude();
+
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder
+                .fromHttpUrl("https://apis-navi.kakaomobility.com/v1/directions")
+                .queryParam("origin", originParam)
+                .queryParam("destination", destParam)
+                .queryParam("priority", "RECOMMEND");
+
+        if (waypoint != null) {
+            uriBuilder.queryParam("waypoints", waypoint.longitude() + "," + waypoint.latitude());
         }
 
-        throw new IllegalArgumentException("해당 주소의 좌표를 찾을 수 없습니다: " + address);
+        try {
+            Map response = webClient.get()
+                    .uri(uriBuilder.build().toUri())
+                    .header("Authorization", getAuthHeader())
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            List<Map<String, Object>> routes = (List<Map<String, Object>>) response.get("routes");
+            if (routes == null || routes.isEmpty()) {
+                throw new RuntimeException("경로를 찾을 수 없습니다.");
+            }
+
+            Map<String, Object> summary = (Map<String, Object>) routes.get(0).get("summary");
+
+            return new RouteSummary(
+                    Integer.parseInt(summary.get("distance").toString()),
+                    Integer.parseInt(summary.get("duration").toString())
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Kakao Mobility API 호출 실패: " + e.getMessage());
+        }
+    }
+
+    public String generateMapUrl(String departName, GeoPoint origin, String arriveName, GeoPoint destination, String middleName, GeoPoint waypoint) {
+        if (waypoint != null) {
+            return String.format("https://map.kakao.com/link/by/car/%s,%f,%f/%s,%f,%f/%s,%f,%f",
+                    departName, origin.latitude(), origin.longitude(),
+                    middleName, waypoint.latitude(), waypoint.longitude(),
+                    arriveName, destination.latitude(), destination.longitude());
+        }
+        return String.format("https://map.kakao.com/link/from/%s,%f,%f/to/%s,%f,%f",
+                departName, origin.latitude(), origin.longitude(),
+                arriveName, destination.latitude(), destination.longitude());
     }
 
     public record GeoPoint(BigDecimal latitude, BigDecimal longitude) {}
+    public record RouteSummary(int distanceMeter, int durationSecond) {}
 }

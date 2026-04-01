@@ -35,7 +35,7 @@ public class HubController {
     @Operation(summary = "신규 허브 저장", description = "새로운 허브를 저장합니다.")
     public ResponseEntity<CommonResponse<HubResponse>> createHub(@RequestBody @Valid CreateHubRequest request) {
 
-        CreateHubCommand command = CreateHubCommand.of(request.hub_name(),request.address());
+        CreateHubCommand command = CreateHubCommand.of(request.hub_name(), request.address());
 
         HubResponse response = hubApiService.createHub(command);
 
@@ -48,7 +48,7 @@ public class HubController {
             @ModelAttribute SearchHubRequest searchRequest,
             @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        SearchHubCommand command = SearchHubCommand.of(searchRequest.hub_name(),searchRequest.address());
+        SearchHubCommand command = SearchHubCommand.of(searchRequest.hub_name(), searchRequest.address());
 
         int size = pageable.getPageSize();
         if (size != 10 && size != 30 && size != 50) {
@@ -89,5 +89,12 @@ public class HubController {
         hubApiService.deleteHub(hub_id);
 
         return CommonResponse.noContent();
+    }
+
+    @GetMapping("/search-name")
+    @Operation(summary = "이름으로 허브 상세 조회", description = "허브 이름을 통해 상세 정보를 가져옵니다.")
+    public ResponseEntity<CommonResponse<HubResponse>> getHubByName(@RequestParam("hubname") String hubname) {
+        HubResponse response = hubApiService.getHubByName(hubname);
+        return CommonResponse.ok(response);
     }
 }

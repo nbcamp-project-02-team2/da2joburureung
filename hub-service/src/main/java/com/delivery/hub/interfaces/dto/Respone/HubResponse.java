@@ -26,7 +26,7 @@ public record HubResponse(
     public static HubResponse from(Hub hub) {
         return new HubResponse(
                 hub.getHubId(),
-                hub.getHub_name(),
+                hub.getHubName(),
                 hub.getAddress(),
                 hub.getLatitude(),
                 hub.getLongitude(),
@@ -41,7 +41,7 @@ public record HubResponse(
     public static HubResponse detailFrom(Hub hub) {
         return new HubResponse(
                 hub.getHubId(),
-                hub.getHub_name(),
+                hub.getHubName(),
                 hub.getAddress(),
                 hub.getLatitude(),
                 hub.getLongitude(),

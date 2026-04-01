@@ -29,9 +29,9 @@ public class Hub extends BaseEntity{
     @Schema(description = "허브 식별자 (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID hubId;
 
-    @Column(name = "hub_name", nullable = false,unique = true)
+    @Column(name = "hubName", nullable = false,unique = true)
     @Schema(description = "허브 이름", example = "경기 남부 허브")
-    private String hub_name;
+    private String hubName;
 
     @Column(name = "address", nullable = false)
     @Schema(description = "허브 주소", example = "경기도 이천시 ...")
@@ -47,7 +47,7 @@ public class Hub extends BaseEntity{
 
     public static Hub createHub(String hub_name, String address, BigDecimal latitude, BigDecimal longitude) {
         return Hub.builder()
-                .hub_name(hub_name)
+                .hubName(hub_name)
                 .address(address)
                 .latitude(latitude)
                 .longitude(longitude)
@@ -57,7 +57,7 @@ public class Hub extends BaseEntity{
     }
 
     public void updateHub(String hub_name, String address, BigDecimal latitude, BigDecimal longitude,String updatedBy) {
-        this.hub_name = hub_name;
+        this.hubName = hub_name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;

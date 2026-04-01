@@ -12,14 +12,15 @@ spring:
     redis:
       host: localhost
       port: 6380
-    jpa:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
       hibernate:
-        ddl-auto: update
-      show-sql: true
-      properties:
-        hibernate:
-          format_sql: true
-          dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   cache:
     type: redis
@@ -32,3 +33,10 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.springframework.cache: TRACE
+
+kakao:
+  api:
+    key: "496564f3c310718b565e9b52f14c43a0"
+
+server:
+  port: 8086

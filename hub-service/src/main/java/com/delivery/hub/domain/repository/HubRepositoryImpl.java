@@ -54,7 +54,7 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
     }
 
     private BooleanExpression nameContains(String hub_name) {
-        return StringUtils.hasText(hub_name) ? QHub.hub.hub_name.contains(hub_name) : null;
+        return StringUtils.hasText(hub_name) ? QHub.hub.hubName.contains(hub_name) : null;
     }
 
     private BooleanExpression addressContains(String address) {
