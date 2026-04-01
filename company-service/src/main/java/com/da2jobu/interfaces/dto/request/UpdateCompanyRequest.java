@@ -19,7 +19,7 @@ public record UpdateCompanyRequest(
         @Size(max = 500, message = "주소는 500자 이하여야 합니다.")
         String address,
 
-        @NotNull(message = "공급업체/ 수량업체 타입 필수입니다.")
+        @NotNull(message = "공급업체/ 수령업체 타입 필수입니다.")
         CompanyType type
 
 ) {

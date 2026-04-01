@@ -3,13 +3,18 @@ package com.da2jobu.domain.model.vo;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.UUID;
 
 @Embeddable
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CompanyId {
+public class CompanyId implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private UUID companyId;
 
     public static CompanyId of() {

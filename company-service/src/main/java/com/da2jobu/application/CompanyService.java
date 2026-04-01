@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -114,8 +115,8 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public Page<CompanyResult> searchCompanies(SearchCompanyCommand command) {
-        log.debug("업체 검색 요청: name={}, type={}, hubId={}, page={}, size={}", command.name(), command.type(), command.hubId(), command.page(), command.validatedSize());
-        PageRequest pageable = PageRequest.of(command.page(), command.validatedSize());
+        log.debug("업체 검색 요청: name={}, type={}, hubId={}, page={}, size={}", command.name(), command.type(), command.hubId(), command.validatedPage(), command.validatedSize());
+        PageRequest pageable = PageRequest.of(command.validatedPage(), command.validatedSize());
         return companyRepository.search(command.name(), command.type(), command.hubId(), pageable)
                 .map(CompanyResult::from);
     }
@@ -127,7 +128,9 @@ public class CompanyService {
     }
 
     private void validateHubExists(UUID hubId) {
-        hubClient.validateHubExists(hubId);
+        if (!hubClient.validateHubExists(hubId)) {
+            throw new CustomException(ErrorCode.HUB_NOT_FOUND);
+        }
     }
 
 }
