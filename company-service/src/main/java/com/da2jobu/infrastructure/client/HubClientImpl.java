@@ -22,14 +22,12 @@ public class HubClientImpl implements HubClient {
     @Override
     @Retry(name = "hubService")
     @CircuitBreaker(name = "hubService", fallbackMethod = "hubServiceFallback")
-    public void validateHubExists(UUID hubId) {
+    public boolean validateHubExists(UUID hubId) {
         try {
-            /**
-             * todo : 허브 매니저는 본인 담당 허브(hub_id)인지 허브 id가 존재하는지 검증
-             */
             hubFeignClient.getHub(hubId);
+            return true;
         } catch (FeignException.NotFound e) {
-            throw new CustomException(ErrorCode.HUB_NOT_FOUND);
+            return false;
         }
         // 그 외 FeignException은 Retry가 재시도, 소진 시 CB fallback
     }

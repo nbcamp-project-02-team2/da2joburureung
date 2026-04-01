@@ -18,4 +18,8 @@ public record SearchCompanyCommand(
     public int validatedSize() {
         return ALLOWED_SIZES.contains(size) ? size : DEFAULT_SIZE;
     }
+
+    public int validatedPage() {
+        return Math.max(page, 0);  // 최소 0페이지
+    }
 }
