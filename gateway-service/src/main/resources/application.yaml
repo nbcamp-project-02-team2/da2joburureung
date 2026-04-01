@@ -1,0 +1,35 @@
+server:
+  port: ${SERVER_PORT}
+
+spring:
+  application:
+    name: gateway-service
+
+  main:
+    web-application-type: reactive
+
+  cloud:
+    gateway:
+      routes:
+        - id: user-auth-route
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
+        - id: user-route
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+jwt:
+  secret: ${JWT_SECRET}
