@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: company-service
+  profiles:
+    active: local
+
+server:
+  port: 8086
+
+logging:
+  level:
+    com.da2jobu: DEBUG
+    org.hibernate.SQL: DEBUG
