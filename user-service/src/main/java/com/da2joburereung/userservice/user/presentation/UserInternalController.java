@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/internal/users")
-public class InternalUserController {
+@RequestMapping("/api/internal/users")
+public class UserInternalController {
 
     private final UserApplicationService userApplicationService;
 
