@@ -2,14 +2,17 @@ package com.da2joburereung.userservice.user.presentation;
 
 import com.da2joburereung.userservice.global.security.RoleAuthorizer;
 import com.da2joburereung.userservice.user.application.UserApplicationService;
+import com.da2joburereung.userservice.user.domain.UserRole;
+import com.da2joburereung.userservice.user.domain.UserStatus;
+import com.da2joburereung.userservice.user.dto.response.UserPageResponse;
 import com.da2joburereung.userservice.user.dto.response.UserResponse;
 import common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.actuate.logging.LoggersEndpoint;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.*;
 import java.util.UUID;
 
 @Slf4j
@@ -71,5 +74,20 @@ public class UserController {
 
         userApplicationService.deleteUser(userId, requestUserId);
         return CommonResponse.ok("사용자 삭제가 완료되었습니다.");
+    }
+
+    @GetMapping
+    public ResponseEntity<CommonResponse<UserPageResponse>> getUsers(
+            @RequestHeader("X-User-Role") String requestRole,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) UserRole role,
+            @RequestParam(required = false) UserStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+     roleAuthorizer.requireMaster(requestRole);
+
+     UserPageResponse response = userApplicationService.getUsers(keyword, role, status, page, size);
+     return CommonResponse.ok("사용자 목록 조회에 성공했습니다.", response);
     }
 }
