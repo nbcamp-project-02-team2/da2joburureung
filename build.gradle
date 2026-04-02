@@ -7,7 +7,7 @@ plugins {
 bootJar.enabled = false
 
 allprojects {
-    group = 'com.da2job'
+    group = 'com.da2jobu'
     version = '0.0.1-SNAPSHOT'
 
     repositories {
