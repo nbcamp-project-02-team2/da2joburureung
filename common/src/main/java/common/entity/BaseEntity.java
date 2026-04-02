@@ -3,7 +3,11 @@ package common.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -15,6 +19,9 @@ import java.time.LocalDateTime;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public abstract class BaseEntity {
 
     @CreatedDate
@@ -38,6 +45,11 @@ public abstract class BaseEntity {
 
     @Column(name = "deleted_by")
     private String deletedBy;
+
+    protected void update(String updatedBy) {
+        this.updatedBy = updatedBy;
+        this.updatedAt = LocalDateTime.now();
+    }
 
     public void softDelete(String deletedBy) {
         this.deletedAt = LocalDateTime.now();
