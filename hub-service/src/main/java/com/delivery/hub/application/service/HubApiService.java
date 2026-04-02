@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -68,7 +69,10 @@ public class HubApiService {
 
     // 허브 내용 수정
     @Transactional
-    @CacheEvict(cacheNames = "hubPages", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "hubPages", allEntries = true),
+            @CacheEvict(cacheNames = "hubDetails", key = "#hubId")
+    })
     public HubResponse updateHub(UUID hubId, @Valid UpdateHubRequest request) {
 
         Hub hub = hubrepository.findById(hubId)
@@ -100,7 +104,10 @@ public class HubApiService {
 
     // 허브 삭제
     @Transactional
-    @CacheEvict(cacheNames = {"hubPages", "hubDetails"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "hubPages", allEntries = true),
+            @CacheEvict(cacheNames = "hubDetails", key = "#hubId")
+    })
     public void deleteHub(UUID hubId) {
 
         Hub hub = hubrepository.findById(hubId)

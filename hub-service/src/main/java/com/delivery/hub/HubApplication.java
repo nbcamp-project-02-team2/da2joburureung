@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-@ComponentScan(basePackages = {"com.delivery.hub", "common.client","common"})
+@ComponentScan(basePackages = {"com.delivery.hub", "common"})
 public class HubApplication {
 
     public static void main(String[] args) {
