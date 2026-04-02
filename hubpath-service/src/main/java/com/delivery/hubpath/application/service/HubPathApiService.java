@@ -6,12 +6,15 @@ import com.delivery.hubpath.domain.repository.HubPathRepository;
 import com.delivery.hubpath.infrastructure.client.HubClient;
 import com.delivery.hubpath.infrastructure.client.HubResponse;
 import com.delivery.hubpath.infrastructure.client.PageResponse;
+import com.delivery.hubpath.interfaces.dto.request.SearchHubPathRequest;
 import com.delivery.hubpath.interfaces.dto.response.HubPathResponse;
 import common.client.KakaoAddressService;
 import common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,5 +57,18 @@ public class HubPathApiService {
         }
 
         return content.get(0);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<HubPathResponse> searchHubPaths(SearchHubPathRequest request, Pageable pageable) {
+
+        String departName = request.depart_hub_name() != null ? request.depart_hub_name() : "";
+        String arriveName = request.arrive_hub_name() != null ? request.arrive_hub_name() : "";
+
+        Page<HubPath> pageResult = hubPathRepository.findByDepartHubNameContainingAndArriveHubNameContaining(
+                departName, arriveName, pageable
+        );
+
+        return pageResult.map(HubPathResponse::from);
     }
 }
