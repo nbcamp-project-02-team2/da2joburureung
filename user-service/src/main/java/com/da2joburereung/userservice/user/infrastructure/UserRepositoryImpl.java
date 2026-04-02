@@ -2,7 +2,11 @@ package com.da2joburereung.userservice.user.infrastructure;
 
 import com.da2joburereung.userservice.user.domain.User;
 import com.da2joburereung.userservice.user.domain.UserRepository;
+import com.da2joburereung.userservice.user.domain.UserRole;
+import com.da2joburereung.userservice.user.domain.UserStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -42,5 +46,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean existsByUsername(String username) {
         return userJpaRepository.existsByUsername(username);
+    }
+
+    @Override
+    public Page<User> searchActiveUsers(String keyword, UserRole role, UserStatus status, Pageable pageable) {
+        return userJpaRepository.searchUsers(keyword, role, status, pageable);
     }
 }
