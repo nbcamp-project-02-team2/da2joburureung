@@ -109,6 +109,7 @@ public class HubPathApiService {
             @CacheEvict(cacheNames = "hubPathDetail", key = "#hubPathId"),
             @CacheEvict(cacheNames = "hubPathPages", allEntries = true)
     })
+    @Transactional
     public void deleteHubPath(UUID hubPathId) {
         HubPath hubPath = hubPathRepository.findById(hubPathId)
                 .orElseThrow(() -> new EntityNotFoundException("삭제할 경로 정보를 찾을 수 없습니다. ID: " + hubPathId));

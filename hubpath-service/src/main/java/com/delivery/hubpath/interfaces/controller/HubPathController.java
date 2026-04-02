@@ -73,7 +73,7 @@ public class HubPathController {
 
         HubPathResponse response = hubPathApiService.updateHubPath(command);
 
-        return CommonResponse.created("경로가 성공적으로 생성되었습니다.",response);
+        return CommonResponse.ok("경로가 성공적으로 수정되었습니다.",response);
     }
 
     @DeleteMapping("/{hubPathId}")

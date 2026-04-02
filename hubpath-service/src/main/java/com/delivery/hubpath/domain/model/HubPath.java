@@ -87,6 +87,8 @@ public class HubPath extends BaseEntity {
         // 1차적으로 출발허브와 도착허브 간의 거리 확인
         RouteSummary summary = kakaoService.getRouteSummary(origin, destination, null);
 
+        validateRouteSummary(origin, destination, summary);
+
         HubResponse middle = null;
         GeoPoint waypoint = null;
 
@@ -226,5 +228,13 @@ public class HubPath extends BaseEntity {
     private static class DNode implements Comparable<DNode> {
         UUID id; double w;
         @Override public int compareTo(DNode o) { return Double.compare(this.w, o.w); } // 거리가 짧은 순으로 정렬되도록 설정
+    }
+
+    private void validateRouteSummary(GeoPoint origin, GeoPoint destination, RouteSummary summary) {
+        boolean isDifferentLocation = !origin.equals(destination);
+
+        if (isDifferentLocation && (summary.distanceMeter() <= 0 || summary.durationSecond() <= 0)) {
+            throw new IllegalStateException("카카오 경로 호출에 실패했거나 유효하지 않은 경로 응답입니다. (0km/0분)");
+        }
     }
 }
