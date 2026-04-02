@@ -10,7 +10,7 @@ spring:
       type: redis
 
   datasource:
-      url: jdbc:postgresql://db-hub.c5uuwiy2enpx.ap-southeast-2.rds.amazonaws.com:5432/postgres
+      url: jdbc:postgresql://db-hub.c5uuwiy2enpx.ap-southeast-2.rds.amazonaws.com:5084/postgres
       username: master
       password: 'o90o90o90!'
       driver-class-name: org.postgresql.Driver
