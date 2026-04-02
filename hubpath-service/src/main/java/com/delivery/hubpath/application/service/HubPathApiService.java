@@ -1,6 +1,7 @@
 package com.delivery.hubpath.application.service;
 
 import com.delivery.hubpath.application.dto.CreateHubPathCommand;
+import com.delivery.hubpath.application.dto.UpdateHubPathCommand;
 import com.delivery.hubpath.domain.model.HubPath;
 import com.delivery.hubpath.domain.repository.HubPathRepository;
 import com.delivery.hubpath.infrastructure.client.HubClient;
@@ -39,11 +40,9 @@ public class HubPathApiService {
         HubResponse departHub = fetchHubByName(command.departHubName());
         HubResponse arriveHub = fetchHubByName(command.arriveHubName());
 
-        CommonResponse<List<HubResponse>> response = hubClient.getAllHubs();
-        List<HubResponse> allHubs = response.getData();
+        List<HubResponse> allHubs = fetchAllHubs();
 
         HubPath hubPath = HubPath.createPath(departHub, arriveHub, allHubs, kakaoAddressService);
-
         HubPath savedPath = hubPathRepository.save(hubPath);
 
         return HubPathResponse.from(savedPath);
@@ -73,15 +72,51 @@ public class HubPathApiService {
     }
 
     // 허브 간의 이동 경로 수정
+    @Transactional
+    public HubPathResponse updateHubPath(UpdateHubPathCommand command) {
+
+        HubPath hubPath = hubPathRepository.findById(command.hub_path_id())
+                .orElseThrow(() -> new EntityNotFoundException("해당 경로를 찾을 수 없습니다. ID: " + command.hub_path_id()));
+
+        String finalDepartName = (command.departHubName() != null) ? command.departHubName() : hubPath.getDepartHubName();
+        String finalArriveName = (command.arriveHubName() != null) ? command.arriveHubName() : hubPath.getArriveHubName();
+
+        if (finalDepartName.equals(hubPath.getDepartHubName()) && finalArriveName.equals(hubPath.getArriveHubName())) {
+            return HubPathResponse.detailFrom(hubPath);
+        }
+
+        HubResponse departHub = fetchHubByName(finalDepartName);
+        HubResponse arriveHub = fetchHubByName(finalArriveName);
+
+        List<HubResponse> allHubs = fetchAllHubs();
+
+        hubPath.updatePath(departHub, arriveHub, allHubs, kakaoAddressService);
+
+        return HubPathResponse.detailFrom(hubPath);
+    }
+
     private HubResponse fetchHubByName(String hubName) {
         CommonResponse<PageResponse<HubResponse>> response = hubClient.getHubs(hubName, null, 10, 0);
 
-        List<HubResponse> content = response.getData().getContent();
-
-        if (content == null || content.isEmpty()) {
+        if (response == null || response.getData() == null || response.getData().getContent().isEmpty()) {
             throw new IllegalArgumentException("해당 이름의 허브를 찾을 수 없습니다: " + hubName);
         }
 
-        return content.get(0);
+        List<HubResponse> content = response.getData().getContent();
+
+        return content.stream()
+                .filter(hub -> hub.getHub_name().equals(hubName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "유사한 이름의 허브는 검색되었으나, 정확히 일치하는 '" + hubName + "' 허브가 존재하지 않습니다."
+                ));
+    }
+
+    private List<HubResponse> fetchAllHubs() {
+        CommonResponse<List<HubResponse>> response = hubClient.getAllHubs();
+        if (response == null || response.getData() == null) {
+            throw new IllegalStateException("전체 허브 목록을 가져오는 데 실패했습니다.");
+        }
+        return response.getData();
     }
 }

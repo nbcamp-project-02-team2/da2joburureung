@@ -1,13 +1,16 @@
 package com.delivery.hubpath.interfaces.controller;
 
 import com.delivery.hubpath.application.dto.CreateHubPathCommand;
+import com.delivery.hubpath.application.dto.UpdateHubPathCommand;
 import com.delivery.hubpath.application.service.HubPathApiService;
 import com.delivery.hubpath.interfaces.dto.request.CreateHubPathRequest;
 import com.delivery.hubpath.interfaces.dto.request.SearchHubPathRequest;
+import com.delivery.hubpath.interfaces.dto.request.UpdateHubPathRequest;
 import com.delivery.hubpath.interfaces.dto.response.HubPathResponse;
 import common.dto.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +33,7 @@ public class HubPathController {
 
     @PostMapping
     @Operation(summary = "허브 간의 경로 생성",description = "출발 허브이름과 도착 허브이름을 받아 경로를 생성합니다")
-    public ResponseEntity<CommonResponse<HubPathResponse>> createHubPath(@RequestBody CreateHubPathRequest request) {
+    public ResponseEntity<CommonResponse<HubPathResponse>> createHubPath(@Valid @RequestBody CreateHubPathRequest request) {
 
         CreateHubPathCommand command = CreateHubPathCommand.of(request.departHubName(), request.arriveHubName());
 
@@ -60,5 +63,17 @@ public class HubPathController {
         return CommonResponse.ok(hubPathApiService.getHubPathDetail(hubPathId));
     }
 
+    @PatchMapping("/{hubPathId}")
+    @Operation(summary = "허브 간 경로 수정",description = "출발 허브/도착 허브를 수정합니다")
+    public ResponseEntity<CommonResponse<HubPathResponse>> patchHubPath(
+            @PathVariable UUID hubPathId,
+            @Valid @RequestBody UpdateHubPathRequest request) {
+
+        UpdateHubPathCommand command = UpdateHubPathCommand.of(hubPathId,request.departHubName(), request.arriveHubName());
+
+        HubPathResponse response = hubPathApiService.updateHubPath(command);
+
+        return CommonResponse.created("경로가 성공적으로 생성되었습니다.",response);
+    }
 
 }

@@ -11,6 +11,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.GenericGenerator;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Slf4j
@@ -107,7 +108,7 @@ public class HubPath extends BaseEntity {
         this.middleHubName = middle != null ? middle.getHub_name() : null;
 
         // 전체 합산
-        this.distance = BigDecimal.valueOf(summary.distanceMeter() / 1000.0);
+        this.distance = BigDecimal.valueOf(summary.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
         this.duration = summary.durationSecond() / 60;
 
         // 출발 허브 -> 중간 경유지 / 중간 경유지 -> 도착 허브까지의 각각의 거리와 소요 시간
@@ -115,9 +116,9 @@ public class HubPath extends BaseEntity {
             RouteSummary firstLeg = kakaoService.getRouteSummary(origin, waypoint, null);
             RouteSummary secondLeg = kakaoService.getRouteSummary(waypoint, destination, null);
 
-            this.firstDistance = BigDecimal.valueOf(firstLeg.distanceMeter() / 1000.0);
+            this.firstDistance = BigDecimal.valueOf(firstLeg.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
             this.firstDuration = firstLeg.durationSecond() / 60;
-            this.secondDistance = BigDecimal.valueOf(secondLeg.distanceMeter() / 1000.0);
+            this.secondDistance = BigDecimal.valueOf(secondLeg.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
             this.secondDuration = secondLeg.durationSecond() / 60;
         } else {
             this.firstDistance = this.distance;
@@ -173,8 +174,6 @@ public class HubPath extends BaseEntity {
         LinkedList<HubResponse> res = new LinkedList<>();
         UUID currentId = end.getId();
 
-        // 목적지까지의 거리가 여전히 무한대라면 도달할 수 있는 경로가 없음
-        Double endDist = dists.get(currentId);
         if (dists.get(currentId) != null && dists.get(currentId) != Double.MAX_VALUE) {
             while (currentId != null) {
                 HubResponse foundHub = getH(allHubs, currentId);
