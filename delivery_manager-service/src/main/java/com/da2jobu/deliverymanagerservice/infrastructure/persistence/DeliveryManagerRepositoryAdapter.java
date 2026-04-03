@@ -41,12 +41,12 @@ public class DeliveryManagerRepositoryAdapter implements DeliveryManagerReposito
 
     @Override
     public long countActiveByTypeAndNullHub(DeliveryManagerType type) {
-        return jpaDeliveryManagerRepository.countByTypeAndHubId_HubIdIsNullAndDeletedAtIsNull(type);
+        return jpaDeliveryManagerRepository.findByTypeAndHubId_HubIdIsNullAndDeletedAtIsNull(type).size();
     }
 
     @Override
     public long countActiveByTypeAndHub(DeliveryManagerType type, HubId hubId) {
-        return jpaDeliveryManagerRepository.countByTypeAndHubId_HubIdAndDeletedAtIsNull(type, hubId.getHubId());
+        return jpaDeliveryManagerRepository.findByTypeAndHubId_HubIdAndDeletedAtIsNull(type, hubId.getHubId()).size();
     }
 
     @Override

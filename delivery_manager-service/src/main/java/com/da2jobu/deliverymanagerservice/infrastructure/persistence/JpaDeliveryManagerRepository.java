@@ -7,6 +7,7 @@ import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,10 +19,12 @@ public interface JpaDeliveryManagerRepository extends JpaRepository<DeliveryMana
     // 배송담당자로 등록되어있는지 여부
     boolean existsByUserId_UserId(UUID userId);
 
-    // 허브 배송 담당자 수
-    long countByTypeAndHubId_HubIdIsNullAndDeletedAtIsNull(DeliveryManagerType type);
-    // 업체 배송 담당자 수
-    long countByTypeAndHubId_HubIdAndDeletedAtIsNull(DeliveryManagerType type, UUID hubId);
+    // 허브 배송 담당자 수 (락 획득)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<DeliveryManager> findByTypeAndHubId_HubIdIsNullAndDeletedAtIsNull(DeliveryManagerType type);
+    // 업체 배송 담당자 수 (락 획득)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<DeliveryManager> findByTypeAndHubId_HubIdAndDeletedAtIsNull(DeliveryManagerType type, UUID hubId);
 
     // 허브 배송 담당자 최고 순번 조회
     @Lock(LockModeType.PESSIMISTIC_WRITE)

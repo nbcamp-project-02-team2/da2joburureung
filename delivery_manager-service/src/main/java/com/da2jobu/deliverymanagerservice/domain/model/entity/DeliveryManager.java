@@ -17,7 +17,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "delivery_manager",
-        uniqueConstraints = @UniqueConstraint(name = "uq_delivery_manager_user_id", columnNames = "user_id"))
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uq_delivery_manager_user_id", columnNames = "user_id"),
+                @UniqueConstraint(name = "uq_delivery_manager_type_hub_seq", columnNames = {"type", "hub_id", "seq"})
+        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -86,6 +89,9 @@ public class DeliveryManager extends BaseEntity {
      * 허브 변경 여부 확인
      */
     public boolean isHubChanged(UUID newHubId) {
+        if (this.hubId == null) {
+            return newHubId != null;
+        }
         return !this.hubId.isSameAs(newHubId);
     }
 
