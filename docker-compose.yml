@@ -31,6 +31,34 @@ services:
          condition: service_healthy
        redis:
          condition: service_healthy
+    networks:
+      - kafka-network
+
+  delivery-service:
+    build:
+      context: .
+      dockerfile: delivery-service/Dockerfile
+    container_name: da2joburureung-delivery
+    ports:
+      - "${DELIVERY_SERVER_PORT}:${DELIVERY_SERVER_PORT}"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://delivery-postgres:5432/${DELIVERY_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs  # Optional: for persistent logs
+    depends_on:
+      delivery-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - kafka-network
 
   notification-postgres:
     image: pgvector/pgvector:pg17
@@ -45,7 +73,7 @@ services:
       - .env
     volumes:
       - ./notification-service/script:/docker-entrypoint-initdb.d
-      - pgdata:/var/lib/postgresql/data
+      - notification-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${NOTIFICATION_DB}" ]
       interval: 5s
@@ -53,6 +81,31 @@ services:
       retries: 10
       start_period: 30s
     restart: unless-stopped
+    networks:
+      - kafka-network
+
+  delivery-postgres:
+    image: postgres:16
+    container_name: da2joburureung-delivery-postgres
+    ports:
+      - "${DELIVERY_DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${DELIVERY_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - delivery-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${DELIVERY_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - kafka-network
 
   redis:
     image: redis:7-alpine
@@ -67,6 +120,8 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - kafka-network
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -110,7 +165,8 @@ services:
       - kafka-network
 
 volumes:
-  pgdata:
+  notification-data:
+  delivery-data:
   redisdata:
 
 networks:
