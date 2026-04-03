@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/delivery_db
+    url: jdbc:postgresql://localhost:5094/delivery_db
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver
@@ -26,3 +26,9 @@ kakao:
 
 server:
   port: 8094
+
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
