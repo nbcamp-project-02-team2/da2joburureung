@@ -6,7 +6,7 @@ COPY build.gradle settings.gradle gradlew ./
 COPY gradle ./gradle
 
 # common-libs 복사
-COPY common-libs ./common-libs
+COPY common ./common
 
 # notification-service 소스 복사
 COPY notification-service ./notification-service

@@ -19,7 +19,19 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+        - id: product-route
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/**
+        - id: hub-route
+          uri: lb://hub-service
+          predicates:
+            - Path=/api/hubs/**
 
+        - id: company-route
+          uri: lb://company-service
+          predicates:
+            - Path=/api/companies/**
 eureka:
   client:
     service-url:
