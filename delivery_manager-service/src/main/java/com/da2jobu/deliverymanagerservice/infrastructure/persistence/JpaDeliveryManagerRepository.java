@@ -1,0 +1,30 @@
+package com.da2jobu.deliverymanagerservice.infrastructure.persistence;
+
+import com.da2jobu.deliverymanagerservice.domain.model.entity.DeliveryManager;
+import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryManagerId;
+import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryManagerType;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+
+import java.util.Optional;
+import java.util.UUID;
+
+public interface JpaDeliveryManagerRepository extends JpaRepository<DeliveryManager, DeliveryManagerId> {
+
+    // 배송담당자로 등록되어있는지 여부
+    boolean existsByUserId_UserId(UUID userId);
+
+    // 허브 배송 담당자 수
+    long countByTypeAndHubId_HubIdIsNullAndDeletedAtIsNull(DeliveryManagerType type);
+    // 업체 배송 담당자 수
+    long countByTypeAndHubId_HubIdAndDeletedAtIsNull(DeliveryManagerType type, UUID hubId);
+
+    // 허브 배송 담당자 최고 순번 조회
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<DeliveryManager> findTopByTypeAndHubId_HubIdIsNullAndDeletedAtIsNullOrderBySeqDesc(DeliveryManagerType type);
+
+    // 업체 배송 담당자 최고 순번 조회
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<DeliveryManager> findTopByTypeAndHubId_HubIdAndDeletedAtIsNullOrderBySeqDesc(DeliveryManagerType type, UUID hubId);
+}

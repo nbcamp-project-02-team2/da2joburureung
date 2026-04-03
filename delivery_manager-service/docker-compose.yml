@@ -1,0 +1,24 @@
+services:
+  delivery-db:
+    image: postgres:latest
+    container_name: delivery-db
+    restart: always
+    environment:
+      POSTGRES_DB: delivery
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      TZ: Asia/Seoul
+    ports:
+      - "5094:5432"
+    volumes:
+      - delivery_db_data:/var/lib/postgresql/18/data
+    networks:
+      - delivery-network
+
+
+networks:
+  delivery-network:
+    driver: bridge
+
+volumes:
+  delivery_db_data:

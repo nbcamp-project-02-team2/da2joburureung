@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: delivery-manager-service
+  profiles:
+    active: local
+
+server:
+  port: 8096
+
+logging:
+  level:
+    com.da2jobu.deliverymanagerservice: DEBUG
+    org.hibernate.SQL: DEBUG
