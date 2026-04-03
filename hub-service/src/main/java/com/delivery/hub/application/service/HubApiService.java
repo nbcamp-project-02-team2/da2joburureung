@@ -35,8 +35,9 @@ public class HubApiService {
     @CacheEvict(cacheNames = "hubPages", allEntries = true)
     @Transactional
     public HubResponse createHub(CreateHubCommand command) {
-        if (hubrepository.existsByHubName(command.hub_name())) {
-            throw new IllegalArgumentException("이미 존재하는 허브 이름입니다: " + command.hub_name());
+        int count = hubrepository.countActiveHubByName(command.hub_name());
+        if (count > 0) {
+            throw new IllegalArgumentException("현재 운영 중인 허브 이름입니다: " + command.hub_name());
         }
 
         KakaoAddressService.GeoPoint geoPoint = kakaoaddressservice.getGeoPoint(command.address());
@@ -61,7 +62,7 @@ public class HubApiService {
     //특정 허브 상세 내용 조회
     @Cacheable(cacheNames = "hubDetails", key = "#hubId")
     public HubResponse getHub(@Valid UUID hubId) {
-        Hub hub = hubrepository.findById(hubId)
+        Hub hub = hubrepository.findByHubIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브를 찾을 수 없습니다. ID: " + hubId));
 
         return HubResponse.detailFrom(hub);
@@ -77,8 +78,8 @@ public class HubApiService {
 
         Hub hub = hubrepository.findById(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브가 존재하지 않습니다."));
-        if (request.hub_name() != null && !hub.getHub_name().equals(request.hub_name())) {
-            if (hubrepository.existsByHubName(request.hub_name())) {
+        if (request.hub_name() != null && !hub.getHubName().equals(request.hub_name())) {
+            if (hubrepository.countActiveHubByName(request.hub_name()) > 0) {
                 throw new IllegalArgumentException("이미 사용 중인 이름입니다.");
             }
         }
@@ -92,7 +93,7 @@ public class HubApiService {
         }
 
         hub.updateHub(
-                request.hub_name() != null ? request.hub_name() : hub.getHub_name(),
+                request.hub_name() != null ? request.hub_name() : hub.getHubName(),
                 request.address() != null ? request.address() : hub.getAddress(),
                 newLat,
                 newLon,
@@ -105,8 +106,8 @@ public class HubApiService {
     // 허브 삭제
     @Transactional
     @Caching(evict = {
-            @CacheEvict(cacheNames = "hubPages", allEntries = true),
-            @CacheEvict(cacheNames = "hubDetails", key = "#hubId")
+            @CacheEvict(cacheNames = "hubPages", allEntries = true, beforeInvocation = true),
+            @CacheEvict(cacheNames = "hubDetails", key = "#hubId", beforeInvocation = true)
     })
     public void deleteHub(UUID hubId) {
 
