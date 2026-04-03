@@ -1,10 +1,10 @@
 spring:
   application:
-    name: hub-service
+    name: hubpath-service
 
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST:redis}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
     cache:
       type: redis
@@ -38,10 +38,10 @@ logging:
 
 kakao:
   api:
-    key: ${KAKAO_API_KEY}
+    key: ${KAKAO_API_KEY:496564f3c310718b565e9b52f14c43a0}
 
 server:
-  port: ${SERVER_PORT:8084}
+  port: ${SERVER_PORT:8086}
 
 eureka:
   client:

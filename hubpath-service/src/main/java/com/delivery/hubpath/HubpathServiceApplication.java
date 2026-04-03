@@ -1,18 +1,20 @@
-package com.delivery.hub;
+package com.delivery.hubpath;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-@ComponentScan(basePackages = {"com.delivery.hub", "common"})
+@EnableFeignClients
 @EnableDiscoveryClient
-public class HubApplication {
+@ComponentScan(basePackages = {"com.delivery.hubpath", "common"})
+public class HubpathServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(HubApplication.class, args);
+        SpringApplication.run(HubpathServiceApplication.class, args);
     }
 
 }
