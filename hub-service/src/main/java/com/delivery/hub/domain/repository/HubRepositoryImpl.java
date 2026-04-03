@@ -6,7 +6,6 @@ import com.delivery.hub.domain.model.QHub;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
