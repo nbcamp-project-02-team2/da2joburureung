@@ -107,6 +107,50 @@ services:
     networks:
       - kafka-network
 
+  delivery_route_record-service:
+    build:
+      context: .
+      dockerfile: delivery_route_record-service/Dockerfile
+    container_name: da2joburureung-delivery-route-record
+    ports:
+      - "${DELIVERY_ROUTE_RECORD_SERVER_PORT}:${DELIVERY_ROUTE_RECORD_SERVER_PORT}"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://delivery-route-record-postgres:5432/${DELIVERY_ROUTE_RECORD_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      delivery-route-record-postgres:
+        condition: service_healthy
+    networks:
+      - kafka-network
+
+  delivery-route-record-postgres:
+    image: postgres:16
+    container_name: da2joburureung-delivery-route-record-postgres
+    ports:
+      - "${DELIVERY_ROUTE_RECORD_DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${DELIVERY_ROUTE_RECORD_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - delivery-route-record-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${DELIVERY_ROUTE_RECORD_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - kafka-network
+
   redis:
     image: redis:7-alpine
     container_name: da2joburureung-redis
@@ -167,6 +211,7 @@ services:
 volumes:
   notification-data:
   delivery-data:
+  delivery-route-record-data:
   redisdata:
 
 networks:
