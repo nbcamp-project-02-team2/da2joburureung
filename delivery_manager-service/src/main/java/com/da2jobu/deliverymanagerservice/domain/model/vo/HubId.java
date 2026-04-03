@@ -23,4 +23,8 @@ public class HubId {
     private HubId(UUID hubId) {
         this.hubId = hubId;
     }
+
+    public boolean isSameAs(UUID hubId) {
+        return this.hubId.equals(hubId);
+    }
 }

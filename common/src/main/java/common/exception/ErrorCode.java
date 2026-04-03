@@ -68,7 +68,7 @@ public enum ErrorCode {
     DELIVERY_MANAGER_INVALID_ROLE(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_INVALID_ROLE", "배송 담당자 권한을 가진 사용자만 등록할 수 있습니다."),
     DELIVERY_MANAGER_HUB_REQUIRED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_REQUIRED", "업체 배송 담당자는 소속 허브를 지정해야 합니다."),
     DELIVERY_MANAGER_HUB_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_NOT_ALLOWED", "허브 배송 담당자는 소속 허브를 지정할 수 없습니다."),
-    HUB_ACCESS_DENIED(HttpStatus.FORBIDDEN, "HUB_ACCESS_DENIED", "해당 허브에 대한 접근 권한이 없습니다.");
+    DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;
