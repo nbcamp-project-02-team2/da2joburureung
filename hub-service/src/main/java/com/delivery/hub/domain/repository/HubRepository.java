@@ -7,13 +7,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface HubRepository extends JpaRepository<Hub, UUID>, HubRepositoryCustom {
 
-    @Query("SELECT COUNT(h) > 0 FROM Hub h WHERE h.hubName = :hubName")
-    boolean existsByHubName(@Param("hubName") String hubName);
+    @Query(value = "SELECT COUNT(*) FROM p_hub WHERE hub_name = :hubName AND deleted_at IS NULL", nativeQuery = true)
+    int countActiveHubByName(@Param("hubName") String hubName);
 
     List<Hub> findAllByDeletedAtIsNull();
+
+    Optional<Hub> findByHubIdAndDeletedAtIsNull(UUID hubId);
 }
