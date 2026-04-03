@@ -1,0 +1,71 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://company-db:5432/company
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  data:
+    redis:
+      host: redis
+      port: 6739
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      acks: all
+      retries: 3
+      properties:
+        retry.backoff.ms: 1000
+        delivery.timeout.ms: 10000
+    consumer:
+      group-id: company-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+internal:
+  token: ${INTERNAL_TOKEN}
+
+resilience4j:
+  circuitbreaker:
+    circuit-breaker-aspect-order: 1
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        slow-call-duration-threshold: 3s
+        slow-call-rate-threshold: 50
+    instances:
+      hubService:
+        base-config: default
+      orderService:
+        base-config: default
+  retry:
+    retry-aspect-order: 2
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - feign.FeignException
+          - java.io.IOException
+        ignore-exceptions:
+          - feign.FeignException.BadRequest
+          - feign.FeignException.NotFound
+    instances:
+      hubService:
+        base-config: default
+      orderService:
+        base-config: default
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/

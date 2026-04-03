@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: hub-service
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    cache:
+      type: redis
+
+  datasource:
+      url: jdbc:postgresql://db-hub.c5uuwiy2enpx.ap-southeast-2.rds.amazonaws.com:5084/postgres
+      username: master
+      password: 'o90o90o90!'
+      driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+
+  springdoc:
+    swagger-ui:
+      path: /swagger-ui.html
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.cache: TRACE
+    org.hibernate.orm.jdbc.bind: trace
+
+kakao:
+  api:
+    key: "496564f3c310718b565e9b52f14c43a0"
+
+server:
+  port: 8084
