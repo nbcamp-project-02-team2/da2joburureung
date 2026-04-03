@@ -124,6 +124,24 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_HOST: redis
+  hubpath-service:
+    build:
+      context: ./hubpath-service
+    container_name: hubpath-service
+    depends_on:
+      - eureka-server
+      - hub-db
+    ports:
+      - "${HUB_PATH_SERVER_PORT}:8086"
+    environment:
+      SERVER_PORT: 8086
+      SPRING_DATASOURCE_URL: jdbc:postgresql://hub-db:5432/hub
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      KAKAO_API_KEY: ${KAKAO_API_KEY}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_HOST: redis
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
