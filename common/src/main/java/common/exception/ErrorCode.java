@@ -51,7 +51,7 @@ public enum ErrorCode {
     // 각 모듈 별로 담당자가 추가
 
     // ── Delivery ────────────────────────────────────────
-    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "DELEVERY_NOT_FOUND", "존재하지 않는 배송입니다."),
+    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_NOT_FOUND", "존재하지 않는 배송입니다."),
     DELIVERY_ALREADY_DELETED(HttpStatus.CONFLICT, "DELIVERY_ALREADY_DELETED", "이미 삭제된 배송입니다."),
     INVALID_DELIVERY_STATUS(HttpStatus.BAD_REQUEST, "INVALID_DELIVERY_STATUS", "유효하지 않은 배송 상태입니다."),
     INVALID_DELIVERY_SEARCH_CONDITION(HttpStatus.BAD_REQUEST, "INVALID_DELIVERY_SEARCH_CONDITION", "배송 검색 조건이 올바르지 않습니다."),

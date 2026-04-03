@@ -23,4 +23,5 @@ public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
 
     Page<Delivery> findByDestinationHubIdAndDeletedAtIsNull(UUID destinationHubId, Pageable pageable);
 
+    boolean existsByOrderIdAndDeletedAtIsNull(UUID orderId);
 }
