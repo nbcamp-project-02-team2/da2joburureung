@@ -47,7 +47,8 @@ public enum ErrorCode {
     COMPANY_HAS_ACTIVE_ORDERS(HttpStatus.CONFLICT, "COMPANY_HAS_ACTIVE_ORDERS", "진행 중인 주문이 있는 업체는 삭제할 수 없습니다."),
     HUB_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "HUB_SERVICE_ERROR", "허브 서비스 호출 중 오류가 발생했습니다."),
     USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "USER_SERVICE_ERROR", "유저 서비스 호출 중 오류가 발생했습니다."),
-    ORDER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ORDER_SERVICE_ERROR", "주문 서비스 호출 중 오류가 발생했습니다.");
+    ORDER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ORDER_SERVICE_ERROR", "주문 서비스 호출 중 오류가 발생했습니다."),
+    INVALID_ADDRESS(HttpStatus.BAD_REQUEST, "INVALID_ADDRESS", "유효하지 않은 주소입니다. 좌표를 조회할 수 없습니다.");
 
     // 각 모듈 별로 담당자가 추가
 

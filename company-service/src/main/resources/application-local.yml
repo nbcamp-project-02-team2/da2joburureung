@@ -48,6 +48,8 @@ resilience4j:
         base-config: default
       orderService:
         base-config: default
+      userService:
+        base-config: default
   retry:
     retry-aspect-order: 2
     configs:
@@ -64,6 +66,8 @@ resilience4j:
       hubService:
         base-config: default
       orderService:
+        base-config: default
+      userService:
         base-config: default
 
 eureka:

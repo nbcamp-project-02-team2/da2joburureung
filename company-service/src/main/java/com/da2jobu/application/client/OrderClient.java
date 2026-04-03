@@ -1,4 +1,4 @@
-package com.da2jobu.application.service;
+package com.da2jobu.application.client;
 
 import java.util.UUID;
 

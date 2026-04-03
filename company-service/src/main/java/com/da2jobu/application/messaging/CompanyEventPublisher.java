@@ -1,4 +1,4 @@
-package com.da2jobu.application.service;
+package com.da2jobu.application.messaging;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

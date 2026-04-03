@@ -1,6 +1,6 @@
 package com.da2jobu.interfaces.controller;
 
-import com.da2jobu.application.CompanyService;
+import com.da2jobu.application.service.CompanyService;
 import com.da2jobu.application.dto.command.CreateCompanyCommand;
 import com.da2jobu.application.dto.command.SearchCompanyCommand;
 import com.da2jobu.application.dto.command.UpdateCompanyCommand;
@@ -34,11 +34,11 @@ public class CompanyController {
     public ResponseEntity<CommonResponse<CompanyResponse>> createCompany(
             @Valid @RequestBody CreateCompanyRequest request,
             @RequestHeader("X-User-Role") String userRole,
-            @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId
+            @RequestHeader("X-User-Id") String userId
     ) {
         CreateCompanyCommand command = new CreateCompanyCommand(
                 userRole,
-                userHubId,
+                UUID.fromString(userId),
                 request.hubId(),
                 request.name(),
                 request.type(),
@@ -56,14 +56,12 @@ public class CompanyController {
             @PathVariable UUID companyId,
             @Valid @RequestBody UpdateCompanyRequest request,
             @RequestHeader("X-User-Role") String userRole,
-            @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId,
-            @RequestHeader(value = "X-User-Company-Id", required = false) UUID userCompanyId
+            @RequestHeader("X-User-Id") String userId
     ) {
         UpdateCompanyCommand command = new UpdateCompanyCommand(
                 companyId,
                 userRole,
-                userHubId,
-                userCompanyId,
+                UUID.fromString(userId),
                 request.hubId(),
                 request.name(),
                 request.type(),
@@ -107,10 +105,9 @@ public class CompanyController {
     public ResponseEntity<CommonResponse<?>> deleteCompany(
             @PathVariable UUID companyId,
             @RequestHeader("X-User-Role") String userRole,
-            @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId,
             @RequestHeader("X-User-Id") String userId
     ) {
-        companyService.deleteCompany(companyId, userRole, userHubId, userId);
+        companyService.deleteCompany(companyId, userRole, UUID.fromString(userId));
         return CommonResponse.noContent();
     }
 }

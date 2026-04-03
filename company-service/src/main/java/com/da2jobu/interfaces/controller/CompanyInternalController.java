@@ -1,6 +1,6 @@
 package com.da2jobu.interfaces.controller;
 
-import com.da2jobu.application.CompanyService;
+import com.da2jobu.application.service.CompanyService;
 import com.da2jobu.application.dto.result.CompanyResult;
 import com.da2jobu.interfaces.dto.response.CompanyResponse;
 import common.dto.CommonResponse;
