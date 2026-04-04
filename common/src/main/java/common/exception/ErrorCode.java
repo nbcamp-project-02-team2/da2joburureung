@@ -28,6 +28,7 @@ public enum ErrorCode {
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "LOGIN_FAILED", "아이디 또는 비밀번호가 올바르지 않습니다."),
     CANNOT_DELETE_SELF(HttpStatus.FORBIDDEN,"CANNOT_DELETE_SELF","본인 계정은 삭제할 수 없습니다."),
     CANNOT_UPDATE_ROLE_SELF(HttpStatus.FORBIDDEN,"CANNOT_UPDATE_ROLE_SELF","본인 권한은 변경할 수 없습니다."),
+    USER_NOT_APPROVED(HttpStatus.FORBIDDEN, "USER_NOT_APPROVED", "승인되지 않은 사용자입니다."),
 
     // ── Common ────────────────────────────────────────
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "INVALID_INPUT", "입력값이 유효하지 않습니다."),
@@ -67,6 +68,16 @@ public enum ErrorCode {
     DELIVERY_ROUTE_RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_ROUTE_RECORD_NOT_FOUND", "존재하지 않는 배송 경로 기록입니다."),
     DELIVERY_ROUTE_RECORD_ALREADY_DELETED(HttpStatus.CONFLICT, "DELIVERY_ROUTE_RECORD_ALREADY_DELETED", "이미 삭제된 배송 경로 기록입니다."),
     INVALID_DELIVERY_ROUTE_STATUS(HttpStatus.BAD_REQUEST, "INVALID_DELIVERY_ROUTE_STATUS", "유효하지 않은 배송 경로 상태입니다."),
+
+    // ── Order ─────────────────────────────────────────────────────────────────
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "존재하지 않는 주문입니다."),
+    ORDER_CREATE_FORBIDDEN(HttpStatus.FORBIDDEN, "ORDER_CREATE_FORBIDDEN", "주문 생성 권한이 없습니다."),
+    ORDER_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "ORDER_UPDATE_FORBIDDEN", "주문 수정 권한이 없습니다."),
+    ORDER_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "ORDER_DELETE_FORBIDDEN", "주문 삭제 권한이 없습니다."),
+    ORDER_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "ORDER_ALREADY_ACCEPTED", "이미 수락된 주문입니다."),
+    ORDER_ALREADY_CANCELLED(HttpStatus.CONFLICT, "ORDER_ALREADY_CANCELLED", "이미 취소된 주문입니다."),
+    INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "INSUFFICIENT_STOCK", "재고가 부족합니다."),
+    PRODUCT_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "PRODUCT_SERVICE_UNAVAILABLE", "상품 서비스에 일시적으로 접근할 수 없습니다."),
 
     // ── Delivery Manager ─────────────────────────────────────────────────────
     DELIVERY_MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_MANAGER_NOT_FOUND", "존재하지 않는 배송 담당자입니다."),
