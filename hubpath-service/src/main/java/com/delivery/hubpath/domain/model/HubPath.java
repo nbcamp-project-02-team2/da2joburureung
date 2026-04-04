@@ -44,8 +44,8 @@ public class HubPath extends BaseEntity {
     @Column(name = "arrive_hub_name", nullable = false)
     private String arriveHubName;
 
-    @Column(name = "middle_hub_id")
-    private UUID middleHubId;
+    @Column(name = "middle_hub_id", length = 1000)
+    private String middleHubId;
 
     @Column(name = "middle_hub_name")
     private String middleHubName;
@@ -86,51 +86,81 @@ public class HubPath extends BaseEntity {
 
         // 1차적으로 출발허브와 도착허브 간의 거리 확인
         RouteSummary summary = kakaoService.getRouteSummary(origin, destination, null);
-
         validateRouteSummary(origin, destination, summary);
 
-        HubResponse middle = null;
-        GeoPoint waypoint = null;
+        List<String> middleIds = new ArrayList<>();
+        List<String> middleNames = new ArrayList<>();
+        List<GeoPoint> waypoints = new ArrayList<>();
+
+        long totalDistanceMeter = 0;
+        int totalDurationSecond = 0;
 
         // 만약 출발허브와 도착허브 간의 거리가 200km가 넘어가면 실행
         if (summary.distanceMeter() > 200000) {
-            // 다익스트라 알고리즘을 바탕으로 제일 효율적인 중간 허브 계산
             List<HubResponse> path = findDijkstraPath(depart, arrive, allHubs);
 
-            // 반환된 경로 리스트가 [출발, 경유, 도착] 처럼 3개 이상일 경우 (경유지가 존재하는 경우)
-            if (path.size() > 2) {
-                middle = path.get(1);
-                waypoint = new GeoPoint(middle.getLatitude(), middle.getLongitude());
-                summary = kakaoService.getRouteSummary(origin, destination, waypoint);
+            if (path.size() >= 3) {
+                for (int i = 1; i < path.size() - 1; i++) {
+                    HubResponse m = path.get(i);
+                    middleIds.add(m.getId().toString());
+                    middleNames.add(m.getHub_name());
+                    waypoints.add(new GeoPoint(m.getLatitude(), m.getLongitude()));
+                }
+            } else {
+                HubResponse m = findForceMiddleHub(depart, arrive, allHubs);
+                if (m != null) {
+                    middleIds.add(m.getId().toString());
+                    middleNames.add(m.getHub_name());
+                    waypoints.add(new GeoPoint(m.getLatitude(), m.getLongitude()));
+                }
             }
+            // 모든 구간(Leg)의 거리/시간 합산 처리
+            if (!waypoints.isEmpty()) {
+                // 출발지 -> 첫 번째 경유지
+                RouteSummary firstLeg = kakaoService.getRouteSummary(origin, waypoints.get(0), null);
+                this.firstDistance = BigDecimal.valueOf(firstLeg.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
+                this.firstDuration = firstLeg.durationSecond() / 60;
+
+                totalDistanceMeter += firstLeg.distanceMeter();
+                totalDurationSecond += firstLeg.durationSecond();
+
+                // 경유지들 사이의 거리 (경유지가 2개 이상일 때만 동작)
+                for (int i = 0; i < waypoints.size() - 1; i++) {
+                    RouteSummary midLeg = kakaoService.getRouteSummary(waypoints.get(i), waypoints.get(i + 1), null);
+                    totalDistanceMeter += midLeg.distanceMeter();
+                    totalDurationSecond += midLeg.durationSecond();
+                }
+
+                // 마지막 경유지 -> 도착지
+                GeoPoint lastWP = waypoints.get(waypoints.size() - 1);
+                RouteSummary secondLeg = kakaoService.getRouteSummary(lastWP, destination, null);
+                this.secondDistance = BigDecimal.valueOf(secondLeg.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
+                this.secondDuration = secondLeg.durationSecond() / 60;
+
+                totalDistanceMeter += secondLeg.distanceMeter();
+                totalDurationSecond += secondLeg.durationSecond();
+
+                // 전체 합산 데이터 갱신
+                this.distance = BigDecimal.valueOf(totalDistanceMeter).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
+                this.duration = totalDurationSecond / 60;
+            }
+        }
+
+        if (waypoints.isEmpty()) {
+            this.distance = BigDecimal.valueOf(summary.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
+            this.duration = summary.durationSecond() / 60;
+            this.firstDistance = this.distance;
+            this.firstDuration = this.duration;
+            this.secondDistance = BigDecimal.ZERO;
+            this.secondDuration = 0;
         }
 
         this.departHubId = depart.getId();
         this.departHubName = depart.getHub_name();
         this.arriveHubId = arrive.getId();
         this.arriveHubName = arrive.getHub_name();
-        this.middleHubId = middle != null ? middle.getId() : null;
-        this.middleHubName = middle != null ? middle.getHub_name() : null;
-
-        // 전체 합산
-        this.distance = BigDecimal.valueOf(summary.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
-        this.duration = summary.durationSecond() / 60;
-
-        // 출발 허브 -> 중간 경유지 / 중간 경유지 -> 도착 허브까지의 각각의 거리와 소요 시간
-        if (middle != null) {
-            RouteSummary firstLeg = kakaoService.getRouteSummary(origin, waypoint, null);
-            RouteSummary secondLeg = kakaoService.getRouteSummary(waypoint, destination, null);
-
-            this.firstDistance = BigDecimal.valueOf(firstLeg.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
-            this.firstDuration = firstLeg.durationSecond() / 60;
-            this.secondDistance = BigDecimal.valueOf(secondLeg.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP);
-            this.secondDuration = secondLeg.durationSecond() / 60;
-        } else {
-            this.firstDistance = this.distance;
-            this.firstDuration = this.duration;
-            this.secondDistance = BigDecimal.ZERO;
-            this.secondDuration = 0;
-        }
+        this.middleHubId = middleIds.isEmpty() ? null : String.join(", ", middleIds);
+        this.middleHubName = middleNames.isEmpty() ? null : String.join(", ", middleNames);
     }
 
     private List<HubResponse> findDijkstraPath(HubResponse start, HubResponse end, List<HubResponse> allHubs) {
@@ -163,8 +193,7 @@ public class HubPath extends BaseEntity {
 
                 double d = haversine(u, v);
 
-                // 허브 간 거리가 너무 멀면 연결하지 않음
-                if (d > 250) continue;
+                if (d > 180) continue;
 
                 // 기존 기록된 거리보다 현재 노드를 거쳐가는 거리가 더 짧으면 갱신
                 double newDist = dists.get(u.getId()) + d;
@@ -228,6 +257,27 @@ public class HubPath extends BaseEntity {
     private static class DNode implements Comparable<DNode> {
         UUID id; double w;
         @Override public int compareTo(DNode o) { return Double.compare(this.w, o.w); } // 거리가 짧은 순으로 정렬되도록 설정
+    }
+
+    // 다익스트라가 실패하거나 직행을 선택했을 때, 물리적 중간 지점에 가장 가까운 허브를 찾는 보조 메서드
+    private HubResponse findForceMiddleHub(HubResponse start, HubResponse end, List<HubResponse> allHubs) {
+
+        HubResponse closest = null;
+        double minTotalDist = Double.MAX_VALUE;
+
+        for (HubResponse h : allHubs) {
+            if (h.getId().equals(start.getId()) || h.getId().equals(end.getId())) continue;
+
+            double d1 = haversine(start, h);
+            double d2 = haversine(h, end);
+            double total = d1 + d2;
+
+            if (total < minTotalDist) {
+                minTotalDist = total;
+                closest = h;
+            }
+        }
+        return closest;
     }
 
     private void validateRouteSummary(GeoPoint origin, GeoPoint destination, RouteSummary summary) {

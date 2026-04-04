@@ -90,9 +90,9 @@ public class HubPathApiService {
         String finalDepartName = (command.departHubName() != null) ? command.departHubName() : hubPath.getDepartHubName();
         String finalArriveName = (command.arriveHubName() != null) ? command.arriveHubName() : hubPath.getArriveHubName();
 
-        if (finalDepartName.equals(hubPath.getDepartHubName()) && finalArriveName.equals(hubPath.getArriveHubName())) {
-            return HubPathResponse.detailFrom(hubPath);
-        }
+//        if (finalDepartName.equals(hubPath.getDepartHubName()) && finalArriveName.equals(hubPath.getArriveHubName())) {
+//            return HubPathResponse.detailFrom(hubPath);
+//        }
 
         HubResponse departHub = fetchHubByName(finalDepartName);
         HubResponse arriveHub = fetchHubByName(finalArriveName);
