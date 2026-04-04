@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/hub-paths")
@@ -33,7 +35,11 @@ public class HubPathController {
 
     @PostMapping
     @Operation(summary = "허브 간의 경로 생성",description = "출발 허브이름과 도착 허브이름을 받아 경로를 생성합니다")
-    public ResponseEntity<CommonResponse<HubPathResponse>> createHubPath(@Valid @RequestBody CreateHubPathRequest request) {
+    public ResponseEntity<CommonResponse<HubPathResponse>> createHubPath(
+            @Valid @RequestBody CreateHubPathRequest request,
+            @RequestHeader("X-User-Role") String userRole) {
+
+        log.info(userRole);
 
         CreateHubPathCommand command = CreateHubPathCommand.of(request.departHubName(), request.arriveHubName());
 
