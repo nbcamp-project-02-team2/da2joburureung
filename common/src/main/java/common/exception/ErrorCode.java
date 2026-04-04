@@ -28,7 +28,6 @@ public enum ErrorCode {
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "LOGIN_FAILED", "아이디 또는 비밀번호가 올바르지 않습니다."),
     CANNOT_DELETE_SELF(HttpStatus.FORBIDDEN,"CANNOT_DELETE_SELF","본인 계정은 삭제할 수 없습니다."),
     CANNOT_UPDATE_ROLE_SELF(HttpStatus.FORBIDDEN,"CANNOT_UPDATE_ROLE_SELF","본인 권한은 변경할 수 없습니다."),
-    USER_NOT_APPROVED(HttpStatus.FORBIDDEN, "USER_NOT_APPROVED", "승인된 사용자만 로그인할 수 있습니다."),
 
     // ── Common ────────────────────────────────────────
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "INVALID_INPUT", "입력값이 유효하지 않습니다."),
@@ -56,9 +55,27 @@ public enum ErrorCode {
     PRODUCT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "PRODUCT_DELETE_FORBIDDEN", "상품 삭제 권한이 없습니다."),
     PRODUCT_COMPANY_HUB_MISMATCH(HttpStatus.BAD_REQUEST, "PRODUCT_COMPANY_HUB_MISMATCH", "업체가 해당 허브에 속하지 않습니다."),
     COMPANY_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "COMPANY_SERVICE_UNAVAILABLE", "업체 서비스에 일시적으로 접근할 수 없습니다."),
-    USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "USER_SERVICE_UNAVAILABLE", "사용자 서비스에 일시적으로 접근할 수 없습니다.");
+    USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "USER_SERVICE_UNAVAILABLE", "사용자 서비스에 일시적으로 접근할 수 없습니다."),
 
-    // 각 모듈 별로 담당자가 추가
+    // ── Delivery ────────────────────────────────────────
+    DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_NOT_FOUND", "존재하지 않는 배송입니다."),
+    DELIVERY_ALREADY_DELETED(HttpStatus.CONFLICT, "DELIVERY_ALREADY_DELETED", "이미 삭제된 배송입니다."),
+    INVALID_DELIVERY_STATUS(HttpStatus.BAD_REQUEST, "INVALID_DELIVERY_STATUS", "유효하지 않은 배송 상태입니다."),
+    INVALID_DELIVERY_SEARCH_CONDITION(HttpStatus.BAD_REQUEST, "INVALID_DELIVERY_SEARCH_CONDITION", "배송 검색 조건이 올바르지 않습니다."),
+
+    // ── Delivery Route Record────────────────────────────
+    DELIVERY_ROUTE_RECORD_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_ROUTE_RECORD_NOT_FOUND", "존재하지 않는 배송 경로 기록입니다."),
+    DELIVERY_ROUTE_RECORD_ALREADY_DELETED(HttpStatus.CONFLICT, "DELIVERY_ROUTE_RECORD_ALREADY_DELETED", "이미 삭제된 배송 경로 기록입니다."),
+    INVALID_DELIVERY_ROUTE_STATUS(HttpStatus.BAD_REQUEST, "INVALID_DELIVERY_ROUTE_STATUS", "유효하지 않은 배송 경로 상태입니다."),
+
+    // ── Delivery Manager ─────────────────────────────────────────────────────
+    DELIVERY_MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_MANAGER_NOT_FOUND", "존재하지 않는 배송 담당자입니다."),
+    DELIVERY_MANAGER_ALREADY_EXISTS(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ALREADY_EXISTS", "이미 등록된 배송 담당자입니다."),
+    DELIVERY_MANAGER_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "DELIVERY_MANAGER_LIMIT_EXCEEDED", "해당 유형·소속의 배송 담당자가 최대 인원(10명)에 도달했습니다."),
+    DELIVERY_MANAGER_INVALID_ROLE(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_INVALID_ROLE", "배송 담당자 권한을 가진 사용자만 등록할 수 있습니다."),
+    DELIVERY_MANAGER_HUB_REQUIRED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_REQUIRED", "업체 배송 담당자는 소속 허브를 지정해야 합니다."),
+    DELIVERY_MANAGER_HUB_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_NOT_ALLOWED", "허브 배송 담당자는 소속 허브를 지정할 수 없습니다."),
+    DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다.");
 
     private final HttpStatus status;
     private final String code;

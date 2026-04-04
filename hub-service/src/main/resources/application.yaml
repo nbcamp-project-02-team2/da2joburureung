@@ -4,16 +4,16 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6380
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
     cache:
       type: redis
 
   datasource:
-      url: jdbc:postgresql://db-hub.c5uuwiy2enpx.ap-southeast-2.rds.amazonaws.com:5084/postgres
-      username: master
-      password: 'o90o90o90!'
-      driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://hub-db:5432/hub}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -38,7 +38,17 @@ logging:
 
 kakao:
   api:
-    key: "496564f3c310718b565e9b52f14c43a0"
+    key: ${KAKAO_API_KEY}
 
 server:
-  port: 8084
+  port: ${SERVER_PORT:8084}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}

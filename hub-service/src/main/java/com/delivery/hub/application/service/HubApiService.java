@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -118,10 +119,10 @@ public class HubApiService {
         hub.softDelete("master"); // TODO: 나중에 로그인한 유저 ID로 교체
     }
 
-    public HubResponse getHubByName(String hubName) {
-        Hub hub = hubrepository.findByHubNameAndDeletedAtIsNull(hubName)
-                .orElseThrow(() -> new IllegalArgumentException("해당 이름의 허브를 찾을 수 없습니다: " + hubName));
-
-        return HubResponse.detailFrom(hub);
+    public List<HubResponse> findAllActiveHubs() {
+        return hubrepository.findAllByDeletedAtIsNull()
+                .stream()
+                .map(HubResponse::from)
+                .toList();
     }
 }

@@ -1,0 +1,75 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
+}
+
+group = 'com.delivery'
+version = '0.0.1-SNAPSHOT'
+description = 'hubpath-service'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common')
+    compileOnly project(':common')
+    annotationProcessor project(':common')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    runtimeOnly 'org.postgresql:postgresql'
+
+    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.github.codemonstur:embedded-redis:1.4.3'
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:2025.0.0"
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += ["${project(':common').projectDir}/src/main/java"]
+        }
+    }
+}
+
+tasks.named('compileJava') {
+    dependsOn ':common:compileJava'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
