@@ -93,6 +93,7 @@ public class CreateDeliveryFromOrderServiceImpl implements CreateDeliveryFromOrd
                 command.requirements(),
                 totalExpectedDuration,
                 DeliveryStatus.HUB_WAITING,
+                command.desiredDeliveryAt(),
                 null,
                 null
         );
@@ -101,6 +102,7 @@ public class CreateDeliveryFromOrderServiceImpl implements CreateDeliveryFromOrd
         UUID deliveryId = createDeliveryResponse.deliveryId();
 
         // DeliveryRouteRecord 2건 생성
+        // TODO: hubPath와 연결해서 수정
         DeliveryRouteRecord route0 = DeliveryRouteRecord.builder()
                 .deliveryId(deliveryId)
                 .sequence(0)

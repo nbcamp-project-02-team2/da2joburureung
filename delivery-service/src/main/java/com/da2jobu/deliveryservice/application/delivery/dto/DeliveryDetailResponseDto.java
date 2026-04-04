@@ -18,6 +18,7 @@ public record DeliveryDetailResponseDto(
         UUID companyDeliveryManagerId,
         String requestNote,
         Integer expectedDurationTotalMin,
+        LocalDateTime desiredDeliveryAt,
         LocalDateTime startedAt,
         LocalDateTime completedAt
 ) {
@@ -34,6 +35,7 @@ public record DeliveryDetailResponseDto(
                 delivery.getCompanyDeliveryManagerId(),
                 delivery.getRequestNote(),
                 delivery.getExpectedDurationTotalMin(),
+                delivery.getDesiredDeliveryAt(),
                 delivery.getStartedAt(),
                 delivery.getCompletedAt()
         );
