@@ -65,6 +65,11 @@ project(':hubpath-service') {
         implementation project(':common')
     }
 }
+project(':product-service') {
+    dependencies {
+        implementation project(':common')
+    }
+}
 project(':common') {
     bootJar.enabled = false
     jar.enabled = true

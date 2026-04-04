@@ -61,6 +61,25 @@ services:
     volumes:
       - product-db-data:/var/lib/postgresql/data
 
+  product-service:
+    build:
+      context: ./product-service
+    container_name: product-service
+    depends_on:
+      - eureka-server
+      - product-db
+      - redis
+    expose:
+      - "8090"
+    environment:
+      SERVER_PORT: 8090
+      SPRING_DATASOURCE_URL: jdbc:postgresql://product-db:5432/${PRODUCT_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
   redis:
     image: redis:7
     container_name: redis
