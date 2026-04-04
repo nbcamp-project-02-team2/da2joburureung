@@ -38,14 +38,18 @@ public class HubPathApiService {
     // 허브 간의 경로 저장
     @CacheEvict(cacheNames = "hubPages", allEntries = true)
     @Transactional
-    public HubPathResponse createHubPath(CreateHubPathCommand command) {
+    public HubPathResponse createHubPath(CreateHubPathCommand command, String userRole, String username) {
+        validateMasterRole(userRole);
 
         HubResponse departHub = fetchHubByName(command.departHubName());
         HubResponse arriveHub = fetchHubByName(command.arriveHubName());
 
         List<HubResponse> allHubs = fetchAllHubs();
 
+        log.info("서비스 :"+username);
+
         HubPath hubPath = HubPath.createPath(departHub, arriveHub, allHubs, kakaoAddressService);
+        hubPath.setCreatedBy(username);
         HubPath savedPath = hubPathRepository.save(hubPath);
 
         return HubPathResponse.from(savedPath);
@@ -82,7 +86,8 @@ public class HubPathApiService {
             @CacheEvict(cacheNames = "hubPathPages", allEntries = true)
     })
     @Transactional
-    public HubPathResponse updateHubPath(UpdateHubPathCommand command) {
+    public HubPathResponse updateHubPath(UpdateHubPathCommand command, String userRole, String username) {
+        validateMasterRole(userRole);
 
         HubPath hubPath = hubPathRepository.findById(command.hub_path_id())
                 .orElseThrow(() -> new EntityNotFoundException("해당 경로를 찾을 수 없습니다. ID: " + command.hub_path_id()));
@@ -100,6 +105,7 @@ public class HubPathApiService {
         List<HubResponse> allHubs = fetchAllHubs();
 
         hubPath.updatePath(departHub, arriveHub, allHubs, kakaoAddressService);
+        hubPath.setUpdatedBy(username);
 
         return HubPathResponse.detailFrom(hubPath);
     }
@@ -110,14 +116,22 @@ public class HubPathApiService {
             @CacheEvict(cacheNames = "hubPathPages", allEntries = true)
     })
     @Transactional
-    public void deleteHubPath(UUID hubPathId) {
+    public void deleteHubPath(UUID hubPathId, String userRole, String username) {
+        validateMasterRole(userRole);
+
         HubPath hubPath = hubPathRepository.findById(hubPathId)
                 .orElseThrow(() -> new EntityNotFoundException("삭제할 경로 정보를 찾을 수 없습니다. ID: " + hubPathId));
         if (hubPath.isDeleted()) {
             throw new IllegalStateException("이미 삭제된 경로입니다.");
         }
 
-        hubPath.softDelete("master"); // TODO: 나중에 로그인한 유저 ID로 교체
+        hubPath.softDelete(username);
+    }
+
+    private void validateMasterRole(String userRole) {
+        if (!"MASTER".equals(userRole)) {
+            throw new RuntimeException("MASTER 권한만 접근 가능합니다.");
+        }
     }
 
     private HubResponse fetchHubByName(String hubName) {

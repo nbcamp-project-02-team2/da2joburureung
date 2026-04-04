@@ -8,6 +8,7 @@ import common.entity.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLRestriction;
@@ -22,7 +23,7 @@ import java.util.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @SQLRestriction("deleted_at IS NULL")
 public class HubPath extends BaseEntity {
 
@@ -286,5 +287,19 @@ public class HubPath extends BaseEntity {
         if (isDifferentLocation && (summary.distanceMeter() <= 0 || summary.durationSecond() <= 0)) {
             throw new IllegalStateException("카카오 경로 호출에 실패했거나 유효하지 않은 경로 응답입니다. (0km/0분)");
         }
+    }
+
+    public void setCreatedBy(String username) {
+        try {
+            var field = BaseEntity.class.getDeclaredField("createdBy");
+            field.setAccessible(true);
+            field.set(this, username);
+        } catch (Exception e) {
+            log.error("Failed to set createdBy", e);
+        }
+    }
+
+    public void setUpdatedBy(String username) {
+          this.update(username);
     }
 }
