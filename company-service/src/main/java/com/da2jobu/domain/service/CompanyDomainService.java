@@ -28,6 +28,7 @@ public class CompanyDomainService {
             throw new CustomException(ErrorCode.COMPANY_UPDATE_FORBIDDEN);
         }
     }
+
     /**
      * 허브 관리자용
      * - 담당 허브 업체만 등록 가능

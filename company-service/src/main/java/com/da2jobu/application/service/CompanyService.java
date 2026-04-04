@@ -1,6 +1,9 @@
 package com.da2jobu.application.service;
 
-import com.da2jobu.application.client.*;
+import com.da2jobu.application.client.HubClient;
+import com.da2jobu.application.client.LocationClient;
+import com.da2jobu.application.client.OrderClient;
+import com.da2jobu.application.client.UserClient;
 import com.da2jobu.application.dto.command.CreateCompanyCommand;
 import com.da2jobu.application.dto.command.SearchCompanyCommand;
 import com.da2jobu.application.dto.command.UpdateCompanyCommand;
@@ -47,7 +50,7 @@ public class CompanyService {
         log.info("업체 생성 요청: name={}, hubId={}, role={}", command.name(), command.hubId(), command.userRole());
         UserClient.UserInfo userInfo = validateUserExists(command.userId());
         if ("HUB_MANAGER".equals(command.userRole())) {
-            companyDomainService.validateHubCreateAccess(command.hubId(),userInfo.hubId());
+            companyDomainService.validateHubCreateAccess(command.hubId(), userInfo.hubId());
         }
         validateHubExists(command.hubId());
 

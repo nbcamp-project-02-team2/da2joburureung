@@ -1,12 +1,10 @@
 package com.da2jobu.interfaces.controller;
 
-import com.da2jobu.application.service.CompanyService;
 import com.da2jobu.application.dto.result.CompanyResult;
+import com.da2jobu.application.service.CompanyService;
 import com.da2jobu.interfaces.dto.response.CompanyResponse;
-import common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

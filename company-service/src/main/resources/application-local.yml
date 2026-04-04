@@ -28,10 +28,6 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-
-internal:
-  token: local-internal-secret
-
 kakao:
   api:
     key: 496564f3c310718b565e9b52f14c43a0
