@@ -21,6 +21,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -89,5 +90,12 @@ public class HubController {
         hubApiService.deleteHub(hub_id);
 
         return CommonResponse.noContent();
+    }
+
+    @GetMapping("/all") // 최종 경로: GET /api/hubs/all
+    @Operation(summary = "알고리즘용 전체 허브 조회", description = "삭제되지 않은 모든 허브를 리스트로 반환합니다.")
+    public ResponseEntity<CommonResponse<List<HubResponse>>> getAllHubsForAlgo() {
+        List<HubResponse> allHubs = hubApiService.findAllActiveHubs();
+        return CommonResponse.ok(allHubs);
     }
 }
