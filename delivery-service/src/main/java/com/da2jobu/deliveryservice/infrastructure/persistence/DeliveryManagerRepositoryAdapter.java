@@ -1,12 +1,12 @@
-package com.da2jobu.deliverymanagerservice.infrastructure.persistence;
+package com.da2jobu.deliveryservice.infrastructure.persistence;
 
-import com.da2jobu.deliverymanagerservice.domain.model.entity.DeliveryManager;
-import com.da2jobu.deliverymanagerservice.domain.model.entity.QDeliveryManager;
-import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryManagerId;
-import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryManagerType;
-import com.da2jobu.deliverymanagerservice.domain.model.vo.HubId;
-import com.da2jobu.deliverymanagerservice.domain.model.vo.UserId;
-import com.da2jobu.deliverymanagerservice.domain.repository.DeliveryManagerRepository;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryManager;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.QDeliveryManager;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerType;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.HubId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.UserId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryManagerRepository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +66,7 @@ public class DeliveryManagerRepositoryAdapter implements DeliveryManagerReposito
     }
 
     @Override
-    public Page<DeliveryManager> search(DeliveryManagerType type, UUID hubId, UUID userId,String userRole , Pageable pageable) {
+    public Page<DeliveryManager> search(DeliveryManagerType type, UUID hubId, UUID userId, String userRole, Pageable pageable) {
         QDeliveryManager qDeliveryManager = QDeliveryManager.deliveryManager;
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(qDeliveryManager.deletedAt.isNull());

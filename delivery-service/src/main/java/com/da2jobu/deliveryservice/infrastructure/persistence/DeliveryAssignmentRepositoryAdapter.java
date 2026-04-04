@@ -1,8 +1,8 @@
-package com.da2jobu.deliverymanagerservice.infrastructure.persistence;
+package com.da2jobu.deliveryservice.infrastructure.persistence;
 
-import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryAssignmentStatus;
-import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryManagerId;
-import com.da2jobu.deliverymanagerservice.domain.repository.DeliveryAssignmentRepository;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryAssignmentStatus;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryAssignmentRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;

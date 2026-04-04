@@ -1,11 +1,11 @@
-package com.da2jobu.deliverymanagerservice.infrastructure.config;
+package com.da2jobu.deliveryservice.infrastructure.config;
 
-import com.da2jobu.deliverymanagerservice.domain.repository.DeliveryAssignmentRepository;
-import com.da2jobu.deliverymanagerservice.domain.repository.DeliveryManagerRepository;
-import com.da2jobu.deliverymanagerservice.infrastructure.persistence.DeliveryAssignmentRepositoryAdapter;
-import com.da2jobu.deliverymanagerservice.infrastructure.persistence.DeliveryManagerRepositoryAdapter;
-import com.da2jobu.deliverymanagerservice.infrastructure.persistence.JpaDeliveryAssignmentRepository;
-import com.da2jobu.deliverymanagerservice.infrastructure.persistence.JpaDeliveryManagerRepository;
+import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryAssignmentRepository;
+import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryManagerRepository;
+import com.da2jobu.deliveryservice.infrastructure.persistence.DeliveryAssignmentRepositoryAdapter;
+import com.da2jobu.deliveryservice.infrastructure.persistence.DeliveryManagerRepositoryAdapter;
+import com.da2jobu.deliveryservice.infrastructure.persistence.JpaDeliveryAssignmentRepository;
+import com.da2jobu.deliveryservice.infrastructure.persistence.JpaDeliveryManagerRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

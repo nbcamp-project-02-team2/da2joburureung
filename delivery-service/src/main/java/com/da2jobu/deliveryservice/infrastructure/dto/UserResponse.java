@@ -1,4 +1,4 @@
-package com.da2jobu.deliverymanagerservice.infrastructure.client.dto;
+package com.da2jobu.deliveryservice.infrastructure.dto;
 
 import java.util.UUID;
 

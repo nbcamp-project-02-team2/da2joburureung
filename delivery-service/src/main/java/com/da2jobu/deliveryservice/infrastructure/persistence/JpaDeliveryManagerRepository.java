@@ -1,8 +1,8 @@
-package com.da2jobu.deliverymanagerservice.infrastructure.persistence;
+package com.da2jobu.deliveryservice.infrastructure.persistence;
 
-import com.da2jobu.deliverymanagerservice.domain.model.entity.DeliveryManager;
-import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryManagerId;
-import com.da2jobu.deliverymanagerservice.domain.model.vo.DeliveryManagerType;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryManager;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerType;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

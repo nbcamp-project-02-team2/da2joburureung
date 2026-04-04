@@ -1,7 +1,7 @@
-package com.da2jobu.deliverymanagerservice.infrastructure.config;
+package com.da2jobu.deliveryservice.infrastructure.config;
 
-import com.da2jobu.deliverymanagerservice.domain.repository.DeliveryManagerRepository;
-import com.da2jobu.deliverymanagerservice.domain.service.DeliveryManagerDomainService;
+import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryManagerRepository;
+import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryManagerDomainService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
