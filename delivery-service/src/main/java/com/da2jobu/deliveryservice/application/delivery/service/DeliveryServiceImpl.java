@@ -44,6 +44,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .companyDeliveryManagerId(command.companyDeliveryManagerId())
                 .requestNote(command.requestNote())
                 .expectedDurationTotalMin(command.expectedDurationTotalMin())
+                .desiredDeliveryAt(command.desiredDeliveryAt())
                 .startedAt(command.startedAt())
                 .completedAt(command.completedAt())
                 .build();

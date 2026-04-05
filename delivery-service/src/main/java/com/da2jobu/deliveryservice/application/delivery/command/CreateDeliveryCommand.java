@@ -16,6 +16,7 @@ public record CreateDeliveryCommand(
         String requestNote,
         Integer expectedDurationTotalMin,
         DeliveryStatus status,
+        LocalDateTime desiredDeliveryAt,
         LocalDateTime startedAt,
         LocalDateTime completedAt
 ) {

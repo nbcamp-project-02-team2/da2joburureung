@@ -11,13 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
+
 @RequiredArgsConstructor
 public class CompanyRepositoryAdapter implements CompanyRepository {
 
@@ -68,5 +68,20 @@ public class CompanyRepositoryAdapter implements CompanyRepository {
         }
 
         return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public List<Company> findAllByIdsAndDeletedAtIsNull(List<UUID> companyIds) {
+        if (companyIds == null || companyIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        QCompany qCompany = QCompany.company;
+        return queryFactory
+                .selectFrom(qCompany)
+                .where(
+                        qCompany.companyId.companyId.in(companyIds),
+                        qCompany.deletedAt.isNull()
+                )
+                .fetch();
     }
 }

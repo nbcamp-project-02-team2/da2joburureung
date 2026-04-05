@@ -1,6 +1,6 @@
 package com.da2jobu.infrastructure.client;
 
-import com.da2jobu.application.service.HubClient;
+import com.da2jobu.application.client.HubClient;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import feign.FeignException;

@@ -28,6 +28,7 @@ public enum ErrorCode {
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "LOGIN_FAILED", "아이디 또는 비밀번호가 올바르지 않습니다."),
     CANNOT_DELETE_SELF(HttpStatus.FORBIDDEN,"CANNOT_DELETE_SELF","본인 계정은 삭제할 수 없습니다."),
     CANNOT_UPDATE_ROLE_SELF(HttpStatus.FORBIDDEN,"CANNOT_UPDATE_ROLE_SELF","본인 권한은 변경할 수 없습니다."),
+    USER_NOT_APPROVED(HttpStatus.BAD_REQUEST, "USER_NOT_APPROVED", "승인되지 않은 사용자입니다."),
 
     // ── Common ────────────────────────────────────────
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "INVALID_INPUT", "입력값이 유효하지 않습니다."),
@@ -41,9 +42,9 @@ public enum ErrorCode {
     COMPANY_CREATE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_CREATE_FORBIDDEN", "업체 생성 권한이 없습니다."),
     COMPANY_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_UPDATE_FORBIDDEN", "업체 수정 권한이 없습니다."),
     COMPANY_HUB_MISMATCH(HttpStatus.FORBIDDEN, "COMPANY_HUB_MISMATCH", "담당 허브의 업체만 접근할 수 있습니다."),
-    HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "HUB_NOT_FOUND", "존재하지 않는 허브입니다."),
     COMPANY_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_DELETE_FORBIDDEN", "업체 삭제 권한이 없습니다."),
     COMPANY_HAS_ACTIVE_ORDERS(HttpStatus.CONFLICT, "COMPANY_HAS_ACTIVE_ORDERS", "진행 중인 주문이 있는 업체는 삭제할 수 없습니다."),
+    INVALID_ADDRESS(HttpStatus.BAD_REQUEST, "INVALID_ADDRESS", "유효하지 않은 주소입니다. 좌표를 조회할 수 없습니다."),
     HUB_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "HUB_SERVICE_ERROR", "허브 서비스 호출 중 오류가 발생했습니다."),
     USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "USER_SERVICE_ERROR", "유저 서비스 호출 중 오류가 발생했습니다."),
     ORDER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ORDER_SERVICE_ERROR", "주문 서비스 호출 중 오류가 발생했습니다."),
@@ -56,6 +57,9 @@ public enum ErrorCode {
     PRODUCT_COMPANY_HUB_MISMATCH(HttpStatus.BAD_REQUEST, "PRODUCT_COMPANY_HUB_MISMATCH", "업체가 해당 허브에 속하지 않습니다."),
     COMPANY_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "COMPANY_SERVICE_UNAVAILABLE", "업체 서비스에 일시적으로 접근할 수 없습니다."),
     USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "USER_SERVICE_UNAVAILABLE", "사용자 서비스에 일시적으로 접근할 수 없습니다."),
+
+    // ── hub ───────────────────────────────────────
+    HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "HUB_NOT_FOUND", "존재하지 않는 허브입니다."),
 
     // ── Delivery ────────────────────────────────────────
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_NOT_FOUND", "존재하지 않는 배송입니다."),
@@ -75,7 +79,11 @@ public enum ErrorCode {
     DELIVERY_MANAGER_INVALID_ROLE(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_INVALID_ROLE", "배송 담당자 권한을 가진 사용자만 등록할 수 있습니다."),
     DELIVERY_MANAGER_HUB_REQUIRED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_REQUIRED", "업체 배송 담당자는 소속 허브를 지정해야 합니다."),
     DELIVERY_MANAGER_HUB_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_NOT_ALLOWED", "허브 배송 담당자는 소속 허브를 지정할 수 없습니다."),
-    DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다.");
+    DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다."),
+    DELIVERY_ASSIGNMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_ASSIGNMENT_NOT_FOUND", "존재하지 않는 배송 배정입니다."),
+    NO_AVAILABLE_COMPANY_DELIVERY_MANAGER(HttpStatus.CONFLICT, "NO_AVAILABLE_COMPANY_DELIVERY_MANAGER", "배정 가능한 업체 배송 담당자가 없습니다."),
+    ROUTE_OPTIMIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ROUTE_OPTIMIZATION_FAILED", "경로 최적화에 실패했습니다. 제약 완화 후에도 해를 찾지 못했습니다."),
+    DELIVERY_MANAGER_HUB_MISMATCH(HttpStatus.FORBIDDEN, "DELIVERY_MANAGER_HUB_MISMATCH", "담당 허브의 배송 담당자만 관리할 수 있습니다.");
 
     private final HttpStatus status;
     private final String code;

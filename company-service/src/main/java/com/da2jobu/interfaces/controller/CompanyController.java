@@ -1,6 +1,6 @@
 package com.da2jobu.interfaces.controller;
 
-import com.da2jobu.application.CompanyService;
+import com.da2jobu.application.service.CompanyService;
 import com.da2jobu.application.dto.command.CreateCompanyCommand;
 import com.da2jobu.application.dto.command.SearchCompanyCommand;
 import com.da2jobu.application.dto.command.UpdateCompanyCommand;
@@ -9,6 +9,7 @@ import com.da2jobu.domain.model.vo.CompanyType;
 import com.da2jobu.interfaces.dto.request.CreateCompanyRequest;
 import com.da2jobu.interfaces.dto.request.UpdateCompanyRequest;
 import com.da2jobu.interfaces.dto.response.CompanyResponse;
+import com.da2jobu.interfaces.annotation.RequireRoles;
 import common.dto.CommonResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,14 +32,15 @@ public class CompanyController {
      * 업체 생성
      */
     @PostMapping
+    @RequireRoles({"MASTER", "HUB_MANAGER"})
     public ResponseEntity<CommonResponse<CompanyResponse>> createCompany(
             @Valid @RequestBody CreateCompanyRequest request,
             @RequestHeader("X-User-Role") String userRole,
-            @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId
+            @RequestHeader("X-User-Id") UUID userId
     ) {
         CreateCompanyCommand command = new CreateCompanyCommand(
                 userRole,
-                userHubId,
+                userId,
                 request.hubId(),
                 request.name(),
                 request.type(),
@@ -52,18 +54,17 @@ public class CompanyController {
      * 업체 수정
      */
     @PutMapping("/{companyId}")
+    @RequireRoles({"MASTER", "HUB_MANAGER", "COMPANY_MANAGER"})
     public ResponseEntity<CommonResponse<CompanyResponse>> updateCompany(
             @PathVariable UUID companyId,
             @Valid @RequestBody UpdateCompanyRequest request,
             @RequestHeader("X-User-Role") String userRole,
-            @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId,
-            @RequestHeader(value = "X-User-Company-Id", required = false) UUID userCompanyId
+            @RequestHeader("X-User-Id") UUID userId
     ) {
         UpdateCompanyCommand command = new UpdateCompanyCommand(
                 companyId,
                 userRole,
-                userHubId,
-                userCompanyId,
+                userId,
                 request.hubId(),
                 request.name(),
                 request.type(),
@@ -104,13 +105,13 @@ public class CompanyController {
      * 업체 삭제
      */
     @DeleteMapping("/{companyId}")
+    @RequireRoles({"MASTER", "HUB_MANAGER"})
     public ResponseEntity<CommonResponse<?>> deleteCompany(
             @PathVariable UUID companyId,
             @RequestHeader("X-User-Role") String userRole,
-            @RequestHeader(value = "X-User-Hub-Id", required = false) UUID userHubId,
-            @RequestHeader("X-User-Id") String userId
+            @RequestHeader("X-User-Id") UUID userId
     ) {
-        companyService.deleteCompany(companyId, userRole, userHubId, userId);
+        companyService.deleteCompany(companyId, userRole, userId);
         return CommonResponse.noContent();
     }
 }

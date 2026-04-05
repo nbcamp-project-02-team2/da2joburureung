@@ -53,7 +53,7 @@ public class DeliveryRouteRecord extends BaseEntity {
     @Column(name = "status", nullable = false, length = 20)
     private DeliveryRouteStatus status;
 
-    @Column(name = "delivery_manager_id", nullable = false)
+    @Column(name = "delivery_manager_id")
     private UUID deliveryManagerId;
 
     @Column(name = "real_distance_km", precision = 10, scale = 2)
@@ -103,6 +103,10 @@ public class DeliveryRouteRecord extends BaseEntity {
     public void updateMetrics(BigDecimal realDistanceKm, Integer realDurationMin) {
         this.realDistanceKm = realDistanceKm;
         this.realDurationMin = realDurationMin;
+    }
+
+    public void updateManagerId(UUID deliveryManagerId) {
+        this.deliveryManagerId = deliveryManagerId;
     }
 
     public void updateRemainDurationMin(Integer remainDurationMin) {
