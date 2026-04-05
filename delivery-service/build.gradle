@@ -41,6 +41,8 @@ dependencies {
 
     // ── Swagger ──────────────────────────────────────────
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.16'
+    // ── OR-Tools VRPTW ────────────────────────────────────
+    implementation 'com.google.ortools:ortools-java:9.12.4544'
 
     implementation 'org.springframework.kafka:spring-kafka'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'

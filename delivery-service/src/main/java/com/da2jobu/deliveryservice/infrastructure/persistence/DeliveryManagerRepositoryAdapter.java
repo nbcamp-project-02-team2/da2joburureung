@@ -1,13 +1,12 @@
-package com.da2jobu.deliveryservice.infrastructure.deliveryManager.persistence;
+package com.da2jobu.deliveryservice.infrastructure.persistence;
 
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryManager;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.QDeliveryAssignment;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.QDeliveryManager;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerType;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.HubId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.UserId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.*;
 import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryManagerRepository;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -96,5 +95,49 @@ public class DeliveryManagerRepositoryAdapter implements DeliveryManagerReposito
                 .fetchOne();
 
         return new PageImpl<>(content, pageable, total == null ? 0L : total);
+    }
+
+    @Override
+    public List<DeliveryManager> findHubDeliveryManagersWithNoAssignment() {
+        QDeliveryManager qDeliveryManager = QDeliveryManager.deliveryManager;
+        QDeliveryAssignment qDeliveryAssignment = QDeliveryAssignment.deliveryAssignment;
+
+        return queryFactory
+                .selectFrom(qDeliveryManager)
+                .where(
+                        qDeliveryManager.type.eq(DeliveryManagerType.HUB_DELIVERY),
+                        qDeliveryManager.deletedAt.isNull(),
+                        JPAExpressions.selectOne()
+                                .from(qDeliveryAssignment)
+                                .where(qDeliveryAssignment.deliveryManagerId.deliveryManagerId
+                                        .eq(qDeliveryManager.deliveryManagerId.deliveryManagerId))
+                                .notExists()
+                )
+                .orderBy(qDeliveryManager.seq.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<DeliveryManager> findAvailableCompanyManagersByHub(HubId hubId) {
+        QDeliveryManager manager = QDeliveryManager.deliveryManager;
+        QDeliveryAssignment assignment = QDeliveryAssignment.deliveryAssignment;
+
+        return queryFactory
+                .selectFrom(manager)
+                .where(
+                        manager.type.eq(DeliveryManagerType.COMPANY_DELIVERY),
+                        manager.hubId.hubId.eq(hubId.getHubId()),
+                        manager.deletedAt.isNull(),
+                        JPAExpressions
+                                .selectOne()
+                                .from(assignment)
+                                .where(
+                                        assignment.deliveryManagerId.eq(manager.deliveryManagerId),
+                                        assignment.status.in(DeliveryAssignmentStatus.ASSIGNED, DeliveryAssignmentStatus.PROGRESS)
+                                )
+                                .notExists()
+                )
+                .orderBy(manager.seq.asc())
+                .fetch();
     }
 }

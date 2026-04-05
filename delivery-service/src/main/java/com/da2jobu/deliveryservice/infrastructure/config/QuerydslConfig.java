@@ -1,4 +1,4 @@
-package com.da2jobu.deliveryservice.infrastructure.deliveryManager.config;
+package com.da2jobu.deliveryservice.infrastructure.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

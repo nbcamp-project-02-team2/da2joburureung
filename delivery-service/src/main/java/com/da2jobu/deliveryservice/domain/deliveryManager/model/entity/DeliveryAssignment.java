@@ -1,11 +1,6 @@
 package com.da2jobu.deliveryservice.domain.deliveryManager.model.entity;
 
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryAssignmentId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryAssignmentStatus;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryRouteRecordId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.HubId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.*;
 import common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -60,6 +55,10 @@ public class DeliveryAssignment extends BaseEntity {
         assignment.hubId = hubId;
         assignment.status = DeliveryAssignmentStatus.ASSIGNED;
         return assignment;
+    }
+
+    public void complete() {
+        this.status = DeliveryAssignmentStatus.COMPLETED;
     }
 
 }

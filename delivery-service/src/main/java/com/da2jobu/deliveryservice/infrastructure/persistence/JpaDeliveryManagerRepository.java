@@ -1,4 +1,4 @@
-package com.da2jobu.deliveryservice.infrastructure.deliveryManager.persistence;
+package com.da2jobu.deliveryservice.infrastructure.persistence;
 
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryManager;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerId;

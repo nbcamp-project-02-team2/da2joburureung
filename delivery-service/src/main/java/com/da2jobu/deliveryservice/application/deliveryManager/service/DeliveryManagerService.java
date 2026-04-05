@@ -12,8 +12,12 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.UserId;
 import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryAssignmentRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryManagerRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryManagerDomainService;
+import com.da2jobu.deliveryservice.infrastructure.client.HubServiceClient;
+import com.da2jobu.deliveryservice.infrastructure.client.UserServiceClient;
+import com.da2jobu.deliveryservice.infrastructure.dto.UserResponse;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,11 +35,17 @@ public class DeliveryManagerService {
     private final DeliveryManagerRepository deliveryManagerRepository;
     private final DeliveryManagerDomainService deliveryManagerDomainService;
     private final DeliveryAssignmentRepository deliveryAssignmentRepository;
+    private final UserServiceClient userServiceClient;
+    private final HubServiceClient hubServiceClient;
 
 
     @Transactional
     public DeliveryManagerResult createDeliveryManager(CreateDeliveryManagerCommand command) {
         deliveryManagerDomainService.validateWritePermission(command.requesterRole());
+
+        validateUserIsDeliveryManager(command.userId(), command.requesterRole());
+        validateHubExists(command.hubId());
+
         UserId userId = UserId.of(command.userId());
         HubId hubId = HubId.of(command.hubId());
         deliveryManagerDomainService.validateNotDuplicate(userId);
@@ -64,6 +74,7 @@ public class DeliveryManagerService {
     @Transactional
     public DeliveryManagerResult updateDeliveryManagers(UpdateDeliveryManagerCommand command) {
         deliveryManagerDomainService.validateWritePermission(command.requesterRole());
+        validateHubExists(command.hubId());
         DeliveryManager deliveryManager = findDeliveryManagerOrThrow(command.deliveryManagerId());
         HubId hubId = HubId.of(command.hubId());
         DeliveryManagerType type = command.type();
@@ -110,5 +121,31 @@ public class DeliveryManagerService {
     private DeliveryManager findDeliveryManagerOrThrow(UUID deliveryManagerId) {
         return deliveryManagerRepository.findById(DeliveryManagerId.of(deliveryManagerId))
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_MANAGER_NOT_FOUND));
+    }
+
+    private void validateUserIsDeliveryManager(UUID userId, String requesterRole) {
+        try {
+            UserResponse user = userServiceClient.getUser(userId, requesterRole).getData();
+            if (user == null) {
+                throw new CustomException(ErrorCode.USER_NOT_FOUND);
+            }
+            if (!"DELIVERY_MANAGER".equals(user.role())) {
+                throw new CustomException(ErrorCode.DELIVERY_MANAGER_INVALID_ROLE);
+            }
+        } catch (FeignException.NotFound e) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        } catch (FeignException e) {
+            throw new CustomException(ErrorCode.USER_SERVICE_ERROR);
+        }
+    }
+
+    private void validateHubExists(UUID hubId) {
+        try {
+            hubServiceClient.getHub(hubId);
+        } catch (FeignException.NotFound e) {
+            throw new CustomException(ErrorCode.HUB_NOT_FOUND);
+        } catch (FeignException e) {
+            throw new CustomException(ErrorCode.HUB_SERVICE_ERROR);
+        }
     }
 }
