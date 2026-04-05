@@ -53,8 +53,8 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
         return new PageImpl<>(dtoList, pageable, total != null ? total : 0L);
     }
 
-    private BooleanExpression nameContains(String hub_name) {
-        return StringUtils.hasText(hub_name) ? QHub.hub.hub_name.contains(hub_name) : null;
+    private BooleanExpression nameContains(String hubName) {
+        return StringUtils.hasText(hubName) ? QHub.hub.hubName.contains(hubName) : null;
     }
 
     private BooleanExpression addressContains(String address) {

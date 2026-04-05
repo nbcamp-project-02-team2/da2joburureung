@@ -49,7 +49,14 @@ public enum ErrorCode {
     USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "USER_SERVICE_ERROR", "유저 서비스 호출 중 오류가 발생했습니다."),
     ORDER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ORDER_SERVICE_ERROR", "주문 서비스 호출 중 오류가 발생했습니다."),
 
-    // 각 모듈 별로 담당자가 추가
+    // ── Product ───────────────────────────────────────
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "존재하지 않는 상품입니다."),
+    PRODUCT_CREATE_FORBIDDEN(HttpStatus.FORBIDDEN, "PRODUCT_CREATE_FORBIDDEN", "상품 생성 권한이 없습니다."),
+    PRODUCT_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "PRODUCT_UPDATE_FORBIDDEN", "상품 수정 권한이 없습니다."),
+    PRODUCT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "PRODUCT_DELETE_FORBIDDEN", "상품 삭제 권한이 없습니다."),
+    PRODUCT_COMPANY_HUB_MISMATCH(HttpStatus.BAD_REQUEST, "PRODUCT_COMPANY_HUB_MISMATCH", "업체가 해당 허브에 속하지 않습니다."),
+    COMPANY_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "COMPANY_SERVICE_UNAVAILABLE", "업체 서비스에 일시적으로 접근할 수 없습니다."),
+    USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "USER_SERVICE_UNAVAILABLE", "사용자 서비스에 일시적으로 접근할 수 없습니다."),
 
     // ── Delivery ────────────────────────────────────────
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_NOT_FOUND", "존재하지 않는 배송입니다."),

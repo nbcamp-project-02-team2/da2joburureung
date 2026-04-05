@@ -11,7 +11,7 @@ import redis.embedded.RedisServer;
 @Configuration
 public class EmbeddedRedisConfig {
 
-    @Value("${spring.data.redis.port:6379}")
+    @Value("${SPRING_DATA_REDIS_PORT}")
     private int redisPort;
 
     private RedisServer redisServer;
