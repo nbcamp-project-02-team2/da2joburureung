@@ -105,6 +105,10 @@ public class DeliveryRouteRecord extends BaseEntity {
         this.realDurationMin = realDurationMin;
     }
 
+    public void updateManagerId(UUID deliveryManagerId) {
+        this.deliveryManagerId = deliveryManagerId;
+    }
+
     public void updateRemainDurationMin(Integer remainDurationMin) {
         this.remainDurationMin = remainDurationMin;
     }

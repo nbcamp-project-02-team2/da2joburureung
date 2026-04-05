@@ -3,8 +3,11 @@ package com.da2jobu.deliveryservice.application.delivery.service;
 import com.da2jobu.deliveryservice.application.delivery.command.CreateDeliveryCommand;
 import com.da2jobu.deliveryservice.application.delivery.command.CreateDeliveryFromOrderCommand;
 import com.da2jobu.deliveryservice.application.delivery.dto.CreateDeliveryResponseDto;
+import com.da2jobu.deliveryservice.application.deliveryManager.service.HubDeliveryAssignmentService;
 import com.da2jobu.deliveryservice.domain.delivery.repository.DeliveryRepository;
 import com.da2jobu.deliveryservice.domain.delivery.vo.DeliveryStatus;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryRouteRecordId;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.entity.DeliveryRouteRecord;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.repository.DeliveryRouteRecordRepository;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.vo.DeliveryRouteStatus;
@@ -29,6 +32,7 @@ import java.util.UUID;
 public class CreateDeliveryFromOrderServiceImpl implements CreateDeliveryFromOrderService {
 
     private final DeliveryService deliveryService;
+    private final HubDeliveryAssignmentService hubDeliveryAssignmentService;
 
     private final DeliveryRouteRecordRepository deliveryRouteRecordRepository;
     private final DeliveryRepository deliveryRepository;
@@ -134,6 +138,13 @@ public class CreateDeliveryFromOrderServiceImpl implements CreateDeliveryFromOrd
                 .build();
 
         deliveryRouteRecordRepository.saveAll(List.of(route0, route1));
+
+        //허브 배송 담당자 배정
+        hubDeliveryAssignmentService.assignHubDelivery(
+                DeliveryId.of(deliveryId),
+                DeliveryRouteRecordId.of(route0.getDeliveryRouteRecordId()),
+                originHubId
+        );
 
         log.info("주문 기반 배송 생성 완료 - orderId={}, deliveryId={}", command.orderId(), deliveryId);
     }

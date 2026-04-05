@@ -100,6 +100,10 @@ public class Delivery extends BaseEntity {
         this.completedAt = completedAt;
     }
 
+    public void updateManagerId(UUID companyDeliveryManagerId) {
+        this.companyDeliveryManagerId = companyDeliveryManagerId;
+    }
+
     public void softDelete(String deletedBy) {
         super.softDelete(deletedBy);
     }

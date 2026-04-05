@@ -22,8 +22,9 @@ public class RepositoryConfig {
 
     @Bean
     public DeliveryAssignmentRepository deliveryAssignmentRepository(
-            JpaDeliveryAssignmentRepository jpaDeliveryAssignmentRepository
+            JpaDeliveryAssignmentRepository jpaDeliveryAssignmentRepository,
+            JPAQueryFactory jpaQueryFactory
     ) {
-        return new DeliveryAssignmentRepositoryAdapter(jpaDeliveryAssignmentRepository);
+        return new DeliveryAssignmentRepositoryAdapter(jpaDeliveryAssignmentRepository,jpaQueryFactory);
     }
 }
