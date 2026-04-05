@@ -16,8 +16,8 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryMan
 import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryAssignmentDomainService;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.entity.DeliveryRouteRecord;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.repository.DeliveryRouteRecordRepository;
-import com.da2jobu.deliveryservice.infrastructure.client.CompanyServiceClient;
-import com.da2jobu.deliveryservice.infrastructure.dto.CompanyInfoDto;
+import com.da2jobu.deliveryservice.infrastructure.delivery.client.CompanyServiceClient;
+import com.da2jobu.deliveryservice.infrastructure.delivery.dto.CompanyInfoDto;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

@@ -1,16 +1,16 @@
 spring:
   application:
-    name: product-service
+    name: order-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5090/postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5092/order}
     username: ${SPRING_DATASOURCE_USERNAME:master}
     password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: ${DDL_AUTO:validate}
+      ddl-auto: ${DDL_AUTO:update}
     show-sql: false
     properties:
       hibernate:
@@ -26,16 +26,25 @@ spring:
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
     consumer:
-      group-id: product-service
+      group-id: order-service
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
-        spring.json.type.mapping: "com.da2jobu.orderservice.infrastructure.event.producer.OrderCancelledEvent:com.da2jobu.productservice.infrastructure.event.consumer.OrderCancelledEvent"
+        spring.json.type.mapping: "com.da2jobu.deliveryservice.application.delivery.event.DeliveryCreatedEvent:com.da2jobu.orderservice.infrastructure.event.consumer.DeliveryCreatedEvent"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  cloud:
+    openfeign:
+      httpclient:
+        hc5:
+          enabled: true
 
 server:
-  port: ${SERVER_PORT:8090}
+  port: ${SERVER_PORT:8092}
 
 eureka:
   client:
@@ -53,6 +62,11 @@ feign:
 resilience4j:
   circuitbreaker:
     instances:
+      product-service:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
       company-service:
         sliding-window-size: 10
         failure-rate-threshold: 50
