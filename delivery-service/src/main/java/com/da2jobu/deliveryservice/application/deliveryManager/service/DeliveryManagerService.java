@@ -17,7 +17,6 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryManage
 import com.da2jobu.deliveryservice.infrastructure.client.HubServiceClient;
 import com.da2jobu.deliveryservice.infrastructure.client.UserServiceClient;
 import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoByIdDto;
-import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoDto;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import feign.FeignException;
@@ -135,7 +134,7 @@ public class DeliveryManagerService {
             if (user == null) {
                 throw new CustomException(ErrorCode.USER_NOT_FOUND);
             }
-            if (!"DELIVERY_MANAGER".equals(user.role())) {
+            if (!"DELIVERY_MANAGER".equals(user.userRole())) {
                 throw new CustomException(ErrorCode.DELIVERY_MANAGER_INVALID_ROLE);
             }
         } catch (FeignException.NotFound e) {
