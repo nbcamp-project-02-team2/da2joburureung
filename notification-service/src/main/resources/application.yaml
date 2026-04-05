@@ -17,3 +17,10 @@ spring:
         default_schema: ${POSTGRES_DEFAULT_SCHEMA:public}
         format_sql: true
         jdbc.time_zone: Asia/Seoul
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true

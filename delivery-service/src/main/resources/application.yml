@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: delivery-service
+
   datasource:
     url: jdbc:postgresql://localhost:5094/delivery_db
     username: postgres
@@ -30,5 +33,7 @@ server:
 
 eureka:
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
