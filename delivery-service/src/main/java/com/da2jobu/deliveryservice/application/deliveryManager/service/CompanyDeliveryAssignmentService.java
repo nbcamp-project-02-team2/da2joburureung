@@ -1,5 +1,7 @@
 package com.da2jobu.deliveryservice.application.deliveryManager.service;
 
+import com.da2jobu.deliveryservice.application.delivery.dto.TodayCompanyDeliveryRouteResponseDto;
+import com.da2jobu.deliveryservice.application.delivery.service.GetTodayCompanyDeliveryRoutesService;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.CompanyDeliveryPoint;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VehicleRoute;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VrptwInput;
@@ -37,6 +39,7 @@ public class CompanyDeliveryAssignmentService {
 
     private final DeliveryManagerRepository deliveryManagerRepository;
     private final RouteOptimizationService routeOptimizationService;
+    private final GetTodayCompanyDeliveryRoutesService getTodayCompanyDeliveryRoutesService;
     private final DeliveryAssignmentRepository deliveryAssignmentRepository;
     private final DeliveryAssignmentDomainService deliveryAssignmentDomainService;
     private final CompanyServiceClient companyServiceClient;
@@ -45,10 +48,8 @@ public class CompanyDeliveryAssignmentService {
 
 
     public void assignDailyCompanyDeliveries(UUID hubId) {
-        /**
-         * todo : 당일 배송 예정 건 일괄 조회 : todayDeliveries 임시
-         */
-        List<DeliveryRouteRecord> todayDeliveries = new ArrayList<>();
+
+        List<TodayCompanyDeliveryRouteResponseDto> todayDeliveries = getTodayCompanyDeliveryRoutesService.getTodayCompanyDeliveryRoutes(hubId);
         // 오늘 배송 건이 없으면
         if (todayDeliveries.isEmpty()) {
             return;
@@ -127,10 +128,10 @@ public class CompanyDeliveryAssignmentService {
                 routes.size());
     }
 
-    private List<CompanyDeliveryPoint> getCompanyDeliveryRoute(List<DeliveryRouteRecord> todayDeliveries) {
+    private List<CompanyDeliveryPoint> getCompanyDeliveryRoute(List<TodayCompanyDeliveryRouteResponseDto> todayDeliveries) {
         // 당일 배송 업체 ID List
         List<UUID> companyIds = todayDeliveries.stream()
-                .map(DeliveryRouteRecord::getDestinationId)
+                .map(TodayCompanyDeliveryRouteResponseDto::destinationId)
                 .distinct().toList();
 
         Map<UUID, CompanyInfoDto> companyMap = companyServiceClient.getCompanies(companyIds).stream()
@@ -138,17 +139,14 @@ public class CompanyDeliveryAssignmentService {
 
         return todayDeliveries.stream()
                 .map(r -> {
-                    CompanyInfoDto company = companyMap.get(r.getDestinationId());
+                    CompanyInfoDto company = companyMap.get(r.destinationId());
                     return CompanyDeliveryPoint.of(
-                            r.getDeliveryId(),
-                            r.getDeliveryRouteRecordId(),
-                            r.getDestinationId(),
-                            r.getExpectedDistanceKm(),
-                            r.getExpectedDurationMin(),
-                            /**
-                             * 수령 희망일 : 임시 LocalDateTime.now()
-                             */
-                            LocalDateTime.now(),
+                            r.deliveryId(),
+                            r.deliveryRouteRecordId(),
+                            r.destinationId(),
+                            r.expectedDistanceKm(),
+                            r.expectedDurationMin(),
+                            r.desiredDeliveryAt(),
                             company.latitude(),
                             company.longitude()
                     );

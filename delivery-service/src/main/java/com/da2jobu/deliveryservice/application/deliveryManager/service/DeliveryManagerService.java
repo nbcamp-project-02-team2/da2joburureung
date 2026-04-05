@@ -133,7 +133,7 @@ public class DeliveryManagerService {
 
     private void validateUserIsDeliveryManager(UUID userId) {
         try {
-            UserInfoByIdDto user = userServiceClient.getUserByUserId(userId);
+            UserInfoByIdDto user = userServiceClient.getUserByUserId(userId).getData();
             if (user == null) {
                 throw new CustomException(ErrorCode.USER_NOT_FOUND);
             }
@@ -161,7 +161,7 @@ public class DeliveryManagerService {
         if ("MASTER".equals(requesterRole) || DeliveryManager.isHubDeliveryManager(type, targetHubId)) {
             return;
         }
-        UserInfoByIdDto requester = userServiceClient.getUserByUserId(requesterId);
+        UserInfoByIdDto requester = userServiceClient.getUserByUserId(requesterId).getData();
         if (requester == null || requester.hubId() == null) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
