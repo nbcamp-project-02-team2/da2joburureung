@@ -105,87 +105,33 @@ services:
         condition: service_healthy
     networks:
       - kafka-network
-  postgres:
-    image: pgvector/pgvector:pg17
-    container_name: da2joburureung-postgres
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      USER_DB: ${USER_DB}
-      NOTIFICATION_DB: ${NOTIFICATION_DB}
-      DELIVERY_DB: ${DELIVERY_DB}
-      COMPANY_DB: ${COMPANY_DB}
-      HUB_DB: ${HUB_DB}
-      PRODUCT_DB: ${PRODUCT_DB}
-    env_file:
-      - .env
-    volumes:
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    restart: unless-stopped
-    networks:
-      - kafka-network
 
-  eureka-server:
+  company-service:
     build:
-      context: ./eureka-server
-    container_name: da2joburureung-eureka-server
+      context: .
+      dockerfile: company-service/Dockerfile
+    container_name: da2joburureung-company
     ports:
-      - "${EUREKA_SERVER_PORT}:8761"
+      - "${COMPANY_SERVER_PORT}:8088"
     environment:
-      SERVER_PORT: 8761
-    networks:
-      - kafka-network
-
-  gateway-service:
-    build:
-      context: ./gateway-service
-    container_name: da2joburureung-gateway
-    ports:
-      - "${GATEWAY_SERVER_PORT}:8080"
-    environment:
-      SERVER_PORT: 8080
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      JWT_SECRET: ${JWT_SECRET}
-    env_file:
-      - .env
-    depends_on:
-      eureka-server:
-        condition: service_started
-      user-service:
-        condition: service_started
-    networks:
-      - kafka-network
-
-  user-service:
-    build:
-      context: ./user-service
-    container_name: da2joburureung-user
-    ports:
-      - "${USER_SERVER_PORT}:8082"
-    environment:
-      SERVER_PORT: 8082
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${USER_DB}
+      SERVER_PORT: 8088
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${COMPANY_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_URL: redis://redis:6379
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
     env_file:
       - .env
     depends_on:
       eureka-server:
         condition: service_started
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       kafka:
         condition: service_healthy
@@ -209,12 +155,12 @@ services:
     volumes:
       - ./logs:/app/logs  # Optional: for persistent logs
     depends_on:
-       postgres:
-         condition: service_healthy
-       redis:
-         condition: service_healthy
-       eureka-server:
-         condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
     networks:
       - kafka-network
 

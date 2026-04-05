@@ -13,5 +13,5 @@ import java.util.UUID;
 public interface UserFeignClient {
 
     @GetMapping("/api/internal/users/by-userId/{userId}")
-    UserResponse getUserByUserId(@PathVariable UUID userId);
+    CommonResponse<UserResponse> getUserByUserId(@PathVariable UUID userId);
 }
