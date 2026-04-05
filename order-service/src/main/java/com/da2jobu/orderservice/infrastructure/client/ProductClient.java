@@ -15,11 +15,11 @@ public interface ProductClient {
     @GetMapping("/api/products/{productId}")
     CommonResponse<ProductInfoResponse> getProduct(@PathVariable("productId") UUID productId);
 
-    @PatchMapping("/api/products/{productId}/stock")
+    @PatchMapping("/api/internal/products/{productId}/stock")
     CommonResponse<Void> reduceStock(@PathVariable("productId") UUID productId,
                                      @RequestParam("quantity") int quantity);
 
-    @PatchMapping("/api/products/{productId}/stock/restore")
+    @PatchMapping("/api/internal/products/{productId}/stock/restore")
     CommonResponse<Void> restoreStock(@PathVariable("productId") UUID productId,
                                       @RequestParam("quantity") int quantity);
 }

@@ -76,7 +76,9 @@ public enum ErrorCode {
     ORDER_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "ORDER_DELETE_FORBIDDEN", "주문 삭제 권한이 없습니다."),
     ORDER_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "ORDER_ALREADY_ACCEPTED", "이미 수락된 주문입니다."),
     ORDER_ALREADY_CANCELLED(HttpStatus.CONFLICT, "ORDER_ALREADY_CANCELLED", "이미 취소된 주문입니다."),
+    ORDER_INVALID_STATUS_TRANSITION(HttpStatus.CONFLICT, "ORDER_INVALID_STATUS_TRANSITION", "현재 상태에서 해당 상태로 전환할 수 없습니다."),
     INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "INSUFFICIENT_STOCK", "재고가 부족합니다."),
+    INVALID_STOCK_QUANTITY(HttpStatus.BAD_REQUEST, "INVALID_STOCK_QUANTITY", "유효하지 않은 재고 수량입니다."),
     PRODUCT_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "PRODUCT_SERVICE_UNAVAILABLE", "상품 서비스에 일시적으로 접근할 수 없습니다."),
 
     // ── Delivery Manager ─────────────────────────────────────────────────────

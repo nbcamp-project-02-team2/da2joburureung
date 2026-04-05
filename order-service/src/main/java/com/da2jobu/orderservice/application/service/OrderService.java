@@ -21,6 +21,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.UUID;
 
@@ -77,20 +79,26 @@ public class OrderService {
                 .build();
 
         orderRepository.save(order);
-
-        // 재고 차감
-        productClient.reduceStock(request.getProductId(), request.getQuantity());
-
-        // OrderAcceptedEvent 발행 → delivery-service가 수신
         order.accept();
-        orderEventProducer.publishOrderAccepted(new OrderAcceptedEvent(
+
+        // DB 커밋 후에 외부 시스템(Feign, Kafka) 호출 — 롤백 시 side effect 방지
+        UUID productId = request.getProductId();
+        int quantity = request.getQuantity();
+        OrderAcceptedEvent event = new OrderAcceptedEvent(
                 order.getId(),
                 order.getSupplierId(),
                 order.getReceiverId(),
                 order.getRequirements(),
                 username,
                 order.getDesiredDeliveryDate()
-        ));
+        );
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                productClient.reduceStock(productId, quantity);
+                orderEventProducer.publishOrderAccepted(event);
+            }
+        });
 
         return OrderResponse.from(order);
     }
@@ -145,12 +153,18 @@ public class OrderService {
 
         order.cancel();
 
-        // OrderCancelledEvent 발행 → product-service가 재고 복구
-        orderEventProducer.publishOrderCancelled(new OrderCancelledEvent(
+        // DB 커밋 후에 Kafka 발행 — 롤백 시 이벤트 발행 방지
+        OrderCancelledEvent cancelledEvent = new OrderCancelledEvent(
                 order.getId(),
                 order.getProductId(),
                 order.getQuantity()
-        ));
+        );
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                orderEventProducer.publishOrderCancelled(cancelledEvent);
+            }
+        });
 
         return OrderResponse.from(order);
     }

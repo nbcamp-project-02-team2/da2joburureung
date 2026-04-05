@@ -1,6 +1,8 @@
 package com.da2jobu.orderservice.domain.model;
 
 import common.entity.BaseEntity;
+import common.exception.CustomException;
+import common.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -67,14 +69,23 @@ public class Order extends BaseEntity {
     private OrderStatus status;
 
     public void accept() {
+        if (!OrderStatus.PENDING.equals(this.status)) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS_TRANSITION);
+        }
         this.status = OrderStatus.ACCEPTED;
     }
 
     public void cancel() {
+        if (!OrderStatus.PENDING.equals(this.status) && !OrderStatus.ACCEPTED.equals(this.status)) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS_TRANSITION);
+        }
         this.status = OrderStatus.CANCELLED;
     }
 
     public void complete() {
+        if (!OrderStatus.ACCEPTED.equals(this.status)) {
+            throw new CustomException(ErrorCode.ORDER_INVALID_STATUS_TRANSITION);
+        }
         this.status = OrderStatus.COMPLETED;
     }
 
