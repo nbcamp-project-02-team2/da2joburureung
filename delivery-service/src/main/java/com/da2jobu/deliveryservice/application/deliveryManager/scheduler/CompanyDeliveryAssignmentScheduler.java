@@ -1,7 +1,7 @@
 package com.da2jobu.deliveryservice.application.deliveryManager.scheduler;
 
 import com.da2jobu.deliveryservice.application.deliveryManager.service.CompanyDeliveryAssignmentService;
-import com.da2jobu.deliveryservice.infrastructure.client.HubServiceClient;
+import com.da2jobu.deliveryservice.infrastructure.delivery.client.HubServiceClient;
 import com.da2jobu.deliveryservice.infrastructure.dto.HubListResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
