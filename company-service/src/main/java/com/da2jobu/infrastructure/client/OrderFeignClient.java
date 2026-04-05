@@ -9,6 +9,6 @@ import java.util.UUID;
 @FeignClient(name = "order-service")
 public interface OrderFeignClient {
 
-    @GetMapping("/internal/active-count")
+    @GetMapping("/api/orders/internal/active-count")
     boolean hasActiveOrders(@RequestParam("companyId") UUID companyId);
 }
