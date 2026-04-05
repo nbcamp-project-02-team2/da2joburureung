@@ -8,7 +8,6 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -49,8 +48,6 @@ public class Hub extends BaseEntity {
                 .address(address)
                 .latitude(latitude)
                 .longitude(longitude)
-                .createdBy(createdBy)
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 

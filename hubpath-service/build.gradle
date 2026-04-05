@@ -23,6 +23,9 @@ dependencies {
     compileOnly project(':common')
     annotationProcessor project(':common')
 
+    implementation project(':hub-service')
+    testImplementation 'com.h2database:h2'
+
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'

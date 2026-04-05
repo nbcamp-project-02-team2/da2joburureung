@@ -87,7 +87,7 @@ public class HubApiService {
             throw new IllegalArgumentException("MASTER 권한만 허브를 수정할 수 있습니다.");
         }
 
-        Hub hub = hubrepository.findById(command.hubId())
+        Hub hub = hubrepository.findByHubIdAndDeletedAtIsNull(command.hubId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브가 존재하지 않습니다."));
 
         if (command.hub_name() != null && !hub.getHubName().equals(command.hub_name())) {
@@ -118,8 +118,8 @@ public class HubApiService {
     // 허브 삭제
     @Transactional
     @Caching(evict = {
-            @CacheEvict(cacheNames = "hubPages", allEntries = true, beforeInvocation = true),
-            @CacheEvict(cacheNames = "hubDetails", key = "#hubId", beforeInvocation = true)
+            @CacheEvict(cacheNames = "hubPages", allEntries = true),
+            @CacheEvict(cacheNames = "hubDetails", key = "#hubId")
     })
     public void deleteHub(UUID hubId, String userRole, String username) {
         if (!"MASTER".equals(userRole)) {
