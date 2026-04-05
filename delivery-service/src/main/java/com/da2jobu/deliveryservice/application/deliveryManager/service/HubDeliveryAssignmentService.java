@@ -1,12 +1,14 @@
 package com.da2jobu.deliveryservice.application.deliveryManager.service;
 
 
-import com.da2jobu.deliveryservice.application.deliveryManager.dto.result.HubDeliveryAssignmentResult;
 import com.da2jobu.deliveryservice.domain.delivery.entity.Delivery;
 import com.da2jobu.deliveryservice.domain.delivery.repository.DeliveryRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryAssignment;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryManager;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.*;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryAssignmentId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryRouteRecordId;
+import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.HubId;
 import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryAssignmentRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryManagerRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryAssignmentDomainService;

@@ -4,7 +4,6 @@ import com.da2jobu.deliveryservice.application.deliveryManager.dto.CompanyDelive
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VehicleRoute;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VrptwInput;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VrptwResult;
-import com.da2jobu.deliveryservice.application.deliveryManager.dto.result.CompanyDeliveryAssignmentResult;
 import com.da2jobu.deliveryservice.domain.delivery.entity.Delivery;
 import com.da2jobu.deliveryservice.domain.delivery.repository.DeliveryRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryAssignment;

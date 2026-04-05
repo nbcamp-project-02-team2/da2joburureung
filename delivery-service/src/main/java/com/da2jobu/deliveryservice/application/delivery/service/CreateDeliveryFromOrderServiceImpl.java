@@ -3,7 +3,6 @@ package com.da2jobu.deliveryservice.application.delivery.service;
 import com.da2jobu.deliveryservice.application.delivery.command.CreateDeliveryCommand;
 import com.da2jobu.deliveryservice.application.delivery.command.CreateDeliveryFromOrderCommand;
 import com.da2jobu.deliveryservice.application.delivery.dto.CreateDeliveryResponseDto;
-import com.da2jobu.deliveryservice.application.deliveryManager.dto.result.HubDeliveryAssignmentResult;
 import com.da2jobu.deliveryservice.application.deliveryManager.service.HubDeliveryAssignmentService;
 import com.da2jobu.deliveryservice.domain.delivery.repository.DeliveryRepository;
 import com.da2jobu.deliveryservice.domain.delivery.vo.DeliveryStatus;
