@@ -107,6 +107,7 @@ class CreateDeliveryFromOrderServiceImplTest {
                 DeliveryStatus.HUB_WAITING
         );
 
+        when(deliveryRepository.existsByOrderIdAndDeletedAtIsNull(orderId)).thenReturn(false);
         when(userServiceClient.getUserByUsername("receiver_manager")).thenReturn(userInfoDto);
         when(companyServiceClient.getCompany(supplierId)).thenReturn(supplierCompany);
         when(companyServiceClient.getCompany(receiverId)).thenReturn(receiverCompany);
@@ -120,6 +121,7 @@ class CreateDeliveryFromOrderServiceImplTest {
         verify(companyServiceClient, times(1)).getCompany(supplierId);
         verify(companyServiceClient, times(1)).getCompany(receiverId);
         verify(deliveryService, times(1)).createDelivery(any());
+        verify(deliveryEventProducer, times(1)).publishDeliveryCreated(any());
 
         ArgumentCaptor<List<DeliveryRouteRecord>> routeRecordCaptor = ArgumentCaptor.forClass(List.class);
         verify(deliveryRouteRecordRepository, times(1)).saveAll(routeRecordCaptor.capture());
@@ -179,5 +181,133 @@ class CreateDeliveryFromOrderServiceImplTest {
 
         verify(deliveryService, never()).createDelivery(any());
         verify(deliveryRouteRecordRepository, never()).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("이미 배송이 존재하면 중복 생성하지 않고 종료")
+    void execute_skip_when_delivery_already_exists() {
+        // given
+        UUID orderId = UUID.randomUUID();
+
+        CreateDeliveryFromOrderCommand command = new CreateDeliveryFromOrderCommand(
+                orderId,
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "요청사항",
+                "receiver_manager",
+                LocalDateTime.of(2026, 4, 5, 15, 0)
+        );
+
+        when(deliveryRepository.existsByOrderIdAndDeletedAtIsNull(orderId)).thenReturn(true);
+
+        // when
+        createDeliveryFromOrderService.execute(command);
+
+        // then
+        verify(deliveryRepository, times(1)).existsByOrderIdAndDeletedAtIsNull(orderId);
+        verify(userServiceClient, never()).getUserByUsername(anyString());
+        verify(companyServiceClient, never()).getCompany(any());
+        verify(deliveryService, never()).createDelivery(any());
+        verify(deliveryRouteRecordRepository, never()).saveAll(any());
+        verify(deliveryEventProducer, never()).publishDeliveryCreated(any());
+    }
+
+    @Test
+    @DisplayName("배송 생성 완료 후 DeliveryCreatedEvent를 발행한다")
+    void execute_publish_delivery_created_event() {
+        // given
+        UUID orderId = UUID.randomUUID();
+        UUID supplierId = UUID.randomUUID();
+        UUID receiverId = UUID.randomUUID();
+        UUID supplierHubId = UUID.randomUUID();
+        UUID receiverHubId = UUID.randomUUID();
+        UUID deliveryId = UUID.randomUUID();
+        LocalDateTime desiredDeliveryAt = LocalDateTime.of(2026, 4, 5, 15, 0);
+
+        CreateDeliveryFromOrderCommand command = new CreateDeliveryFromOrderCommand(
+                orderId,
+                supplierId,
+                receiverId,
+                "문 앞에 놔주세요",
+                "receiver_manager",
+                desiredDeliveryAt
+        );
+
+        when(deliveryRepository.existsByOrderIdAndDeletedAtIsNull(orderId)).thenReturn(false);
+        when(userServiceClient.getUserByUsername("receiver_manager"))
+                .thenReturn(new UserInfoDto(UUID.randomUUID(), "receiver_manager", "김담당", "U12345678"));
+        when(companyServiceClient.getCompany(supplierId))
+                .thenReturn(new CompanyInfoDto(supplierId, supplierHubId, "공급업체 주소", BigDecimal.ONE, BigDecimal.ONE));
+        when(companyServiceClient.getCompany(receiverId))
+                .thenReturn(new CompanyInfoDto(receiverId, receiverHubId, "수령업체 주소", BigDecimal.TEN, BigDecimal.TEN));
+        when(deliveryService.createDelivery(any()))
+                .thenReturn(new CreateDeliveryResponseDto(deliveryId, orderId, DeliveryStatus.HUB_WAITING));
+
+        // when
+        createDeliveryFromOrderService.execute(command);
+
+        // then
+        ArgumentCaptor<com.da2jobu.deliveryservice.application.delivery.event.DeliveryCreatedEvent> captor =
+                ArgumentCaptor.forClass(com.da2jobu.deliveryservice.application.delivery.event.DeliveryCreatedEvent.class);
+
+        verify(deliveryEventProducer, times(1)).publishDeliveryCreated(captor.capture());
+
+        var event = captor.getValue();
+        assertThat(event.orderId()).isEqualTo(orderId);
+        assertThat(event.deliveryId()).isEqualTo(deliveryId);
+    }
+
+    @Test
+    @DisplayName("Delivery 생성 시 필요한 값들을 올바르게 전달한다")
+    void execute_pass_correct_create_delivery_command() {
+        // given
+        UUID orderId = UUID.randomUUID();
+        UUID supplierId = UUID.randomUUID();
+        UUID receiverId = UUID.randomUUID();
+        UUID supplierHubId = UUID.randomUUID();
+        UUID receiverHubId = UUID.randomUUID();
+        UUID deliveryId = UUID.randomUUID();
+        LocalDateTime desiredDeliveryAt = LocalDateTime.of(2026, 4, 5, 15, 0);
+
+        CreateDeliveryFromOrderCommand command = new CreateDeliveryFromOrderCommand(
+                orderId,
+                supplierId,
+                receiverId,
+                "문 앞에 놔주세요",
+                "receiver_manager",
+                desiredDeliveryAt
+        );
+
+        when(deliveryRepository.existsByOrderIdAndDeletedAtIsNull(orderId)).thenReturn(false);
+        when(userServiceClient.getUserByUsername("receiver_manager"))
+                .thenReturn(new UserInfoDto(UUID.randomUUID(), "receiver_manager", "김담당", "U12345678"));
+        when(companyServiceClient.getCompany(supplierId))
+                .thenReturn(new CompanyInfoDto(supplierId, supplierHubId, "공급업체 주소", BigDecimal.ONE, BigDecimal.ONE));
+        when(companyServiceClient.getCompany(receiverId))
+                .thenReturn(new CompanyInfoDto(receiverId, receiverHubId, "수령업체 주소", BigDecimal.TEN, BigDecimal.TEN));
+        when(deliveryService.createDelivery(any()))
+                .thenReturn(new CreateDeliveryResponseDto(deliveryId, orderId, DeliveryStatus.HUB_WAITING));
+
+        // when
+        createDeliveryFromOrderService.execute(command);
+
+        // then
+        ArgumentCaptor<com.da2jobu.deliveryservice.application.delivery.command.CreateDeliveryCommand> captor =
+                ArgumentCaptor.forClass(com.da2jobu.deliveryservice.application.delivery.command.CreateDeliveryCommand.class);
+
+        verify(deliveryService).createDelivery(captor.capture());
+
+        var createCommand = captor.getValue();
+
+        assertThat(createCommand.orderId()).isEqualTo(orderId);
+        assertThat(createCommand.originHubId()).isEqualTo(supplierHubId);
+        assertThat(createCommand.destinationHubId()).isEqualTo(receiverHubId);
+        assertThat(createCommand.deliveryAddress()).isEqualTo("수령업체 주소");
+        assertThat(createCommand.receiverName()).isEqualTo("김담당");
+        assertThat(createCommand.receiverSlackId()).isEqualTo("U12345678");
+        assertThat(createCommand.requestNote()).isEqualTo("문 앞에 놔주세요");
+        assertThat(createCommand.expectedDurationTotalMin()).isEqualTo(90);
+        assertThat(createCommand.status()).isEqualTo(DeliveryStatus.HUB_WAITING);
+        assertThat(createCommand.desiredDeliveryAt()).isEqualTo(desiredDeliveryAt);
     }
 }

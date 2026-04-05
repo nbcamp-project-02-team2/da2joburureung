@@ -38,7 +38,7 @@ public class DeliveryRouteRecordServiceImpl implements DeliveryRouteRecordServic
                         .destinationType(route.destinationType())
                         .expectedDistanceKm(route.expectedDistanceKm())
                         .expectedDurationMin(route.expectedDurationMin())
-                        .status(DeliveryRouteStatus.WAITING)
+                        .status(DeliveryRouteStatus.HUB_WAITING)
                         .deliveryManagerId(route.deliveryManagerId())
                         .realDistanceKm(null)
                         .realDurationMin(null)
