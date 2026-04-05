@@ -16,6 +16,7 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryMan
 import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryManagerDomainService;
 import com.da2jobu.deliveryservice.infrastructure.client.HubServiceClient;
 import com.da2jobu.deliveryservice.infrastructure.client.UserServiceClient;
+import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoByIdDto;
 import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoDto;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
@@ -130,7 +131,7 @@ public class DeliveryManagerService {
 
     private void validateUserIsDeliveryManager(UUID userId) {
         try {
-            UserInfoDto user = userServiceClient.getUserByUserId(userId);
+            UserInfoByIdDto user = userServiceClient.getUserByUserId(userId);
             if (user == null) {
                 throw new CustomException(ErrorCode.USER_NOT_FOUND);
             }
