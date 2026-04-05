@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record CreateDeliveryRequest(
@@ -26,14 +27,16 @@ public record CreateDeliveryRequest(
         @NotBlank(message = "수령인 Slack ID는 필수입니다.")
         String receiverSlackId,
 
-        @NotNull(message = "업체 배송 담당자 ID는 필수입니다.")
         UUID companyDeliveryManagerId,
 
         String requestNote,
 
         @NotNull(message = "예상 총 소요 시간은 필수입니다.")
         @Min(value = 1, message = "예상 총 소요 시간은 1분 이상이어야 합니다.")
-        Integer expectedDurationTotalMin
+        Integer expectedDurationTotalMin,
+
+        @NotNull(message = "희망 배송 시각은 필수입니다.")
+        LocalDateTime desiredDeliveryAt
 ) {
     public CreateDeliveryCommand toCommand() {
         return new CreateDeliveryCommand(
@@ -47,6 +50,7 @@ public record CreateDeliveryRequest(
                 requestNote,
                 expectedDurationTotalMin,
                 null,
+                desiredDeliveryAt,
                 null,
                 null
         );

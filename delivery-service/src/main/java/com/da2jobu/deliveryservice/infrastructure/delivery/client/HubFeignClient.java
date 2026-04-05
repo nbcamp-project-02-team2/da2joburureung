@@ -1,8 +1,12 @@
-package com.da2jobu.deliveryservice.infrastructure.client;
+package com.da2jobu.deliveryservice.infrastructure.delivery.client;
 
+<<<<<<<< HEAD:delivery-service/src/main/java/com/da2jobu/deliveryservice/infrastructure/delivery/client/HubFeignClient.java
+import com.da2jobu.deliveryservice.infrastructure.delivery.dto.HubResponse;
+========
 import com.da2jobu.deliveryservice.infrastructure.dto.HubListResponse;
 import com.da2jobu.deliveryservice.infrastructure.dto.HubResponse;
 import com.da2jobu.deliveryservice.infrastructure.dto.PageResponse;
+>>>>>>>> 494036464ad67a239263f7e92f80d88e46b0537e:delivery-service/src/main/java/com/da2jobu/deliveryservice/infrastructure/delivery/client/HubServiceClient.java
 import common.dto.CommonResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

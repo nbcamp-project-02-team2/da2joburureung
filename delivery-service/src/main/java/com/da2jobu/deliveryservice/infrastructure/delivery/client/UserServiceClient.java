@@ -1,7 +1,8 @@
 package com.da2jobu.deliveryservice.infrastructure.client;
 
-import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoByIdDto;
+import com.da2jobu.deliveryservice.infrastructure.dto.UserResponse;
 import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoDto;
+import common.dto.CommonResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
