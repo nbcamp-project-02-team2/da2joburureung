@@ -8,12 +8,11 @@ import com.da2jobu.deliveryservice.application.deliveryManager.dto.result.Compan
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryAssignment;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryManager;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryManagerId;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryRouteRecordId;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.HubId;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.ManagerIdleDuration;
 import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryAssignmentRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryManagerRepository;
+import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryAssignmentDomainService;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.entity.DeliveryRouteRecord;
 import com.da2jobu.deliveryservice.infrastructure.client.CompanyServiceClient;
 import com.da2jobu.deliveryservice.infrastructure.dto.CompanyInfoDto;
@@ -23,7 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,15 +34,15 @@ import java.util.stream.Collectors;
 public class CompanyDeliveryAssignmentService {
 
     private final DeliveryManagerRepository deliveryManagerRepository;
-    private final VrptwSolverService vrptwSolverService;
+    private final RouteOptimizationService routeOptimizationService;
     private final DeliveryAssignmentRepository deliveryAssignmentRepository;
+    private final DeliveryAssignmentDomainService deliveryAssignmentDomainService;
     private final CompanyServiceClient companyServiceClient;
 
 
     public CompanyDeliveryAssignmentResult assignDailyCompanyDeliveries(UUID hubId) {
-
         /**
-         * todo : 당일 배송 예정 건 일괄 조회
+         * todo : 당일 배송 예정 건 일괄 조회 : todayDeliveries 임시
          */
         List<DeliveryRouteRecord> todayDeliveries = new ArrayList<>();
         // 오늘 배송 건이 없으면
@@ -66,7 +64,7 @@ public class CompanyDeliveryAssignmentService {
         // OR-Tools VRPTW 솔버 (클러스터링 + 경로 + 시간 윈도우 통합)
         LocalDateTime batchStartTime = LocalDate.now().atTime(6, 0);
         VrptwInput input = VrptwInput.of(companyDeliveryRoute, availableManagers.size(), batchStartTime);
-        VrptwResult result = vrptwSolverService.solve(input);
+        VrptwResult result = routeOptimizationService.solve(input);
 
 
         if (!result.feasible()) {
@@ -78,7 +76,7 @@ public class CompanyDeliveryAssignmentService {
                             p.latitude(), p.longitude()))
                     .toList();
             input = VrptwInput.of(relaxedPoints, availableManagers.size(), batchStartTime);
-            result = vrptwSolverService.solve(input);
+            result = routeOptimizationService.solve(input);
         }
 
         // 매니저 배정 (대기시간 긴 매니저 → 이동거리 긴 경로 우선 배정)
@@ -86,7 +84,7 @@ public class CompanyDeliveryAssignmentService {
                 .sorted(Comparator.comparingDouble(VehicleRoute::distanceKm).reversed())
                 .toList();
 
-        List<DeliveryManager> sortedManagers = sortManagersByIdleDuration(availableManagers);
+        List<DeliveryManager> sortedManagers = deliveryAssignmentDomainService.rankManagersByPriority(availableManagers);
 
         int assignedCount = 0;
         for (int i = 0; i < routes.size(); i++) {
@@ -142,31 +140,4 @@ public class CompanyDeliveryAssignmentService {
                 }).toList();
     }
 
-    /**
-     * 업체 매니저
-     * 대기시간(idle duration) 내림차순, seq 오름차순
-     */
-    private List<DeliveryManager> sortManagersByIdleDuration(List<DeliveryManager> managers) {
-        List<DeliveryManagerId> managerIds = managers.stream()
-                .map(DeliveryManager::getDeliveryManagerId).toList();
-
-        Map<DeliveryManagerId, Duration> idleDurationMap = deliveryAssignmentRepository
-                .findIdleDurationsByManagerIds(managerIds).stream()
-                .collect(Collectors.toMap(
-                        ManagerIdleDuration::managerId, ManagerIdleDuration::idleDuration));
-
-        // 배정 이력이 없는 매니저는 createdAt 기준 대기시간 계산
-        for (DeliveryManager manager : managers) {
-            idleDurationMap.computeIfAbsent(manager.getDeliveryManagerId(),
-                    id -> Duration.between(manager.getCreatedAt(), LocalDateTime.now()));
-        }
-
-        return managers.stream()
-                .sorted(Comparator
-                        .<DeliveryManager, Duration>comparing(
-                                m -> idleDurationMap.get(m.getDeliveryManagerId()))
-                        .reversed()
-                        .thenComparing(DeliveryManager::getSeq))
-                .toList();
-    }
 }

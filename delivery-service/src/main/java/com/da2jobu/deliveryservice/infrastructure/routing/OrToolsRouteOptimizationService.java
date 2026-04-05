@@ -1,9 +1,10 @@
-package com.da2jobu.deliveryservice.application.deliveryManager.service;
+package com.da2jobu.deliveryservice.infrastructure.routing;
 
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.CompanyDeliveryPoint;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VehicleRoute;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VrptwInput;
 import com.da2jobu.deliveryservice.application.deliveryManager.dto.VrptwResult;
+import com.da2jobu.deliveryservice.application.deliveryManager.service.RouteOptimizationService;
 import com.google.ortools.Loader;
 import com.google.ortools.constraintsolver.*;
 import com.google.protobuf.Duration;
@@ -19,12 +20,13 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class VrptwSolverService {
+public class OrToolsRouteOptimizationService implements RouteOptimizationService {
 
     static {
         Loader.loadNativeLibraries();
     }
 
+    @Override
     public VrptwResult solve(VrptwInput input) {
         List<CompanyDeliveryPoint> points = input.deliveryPoints();
 

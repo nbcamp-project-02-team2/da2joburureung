@@ -57,4 +57,7 @@ public class DeliveryAssignment extends BaseEntity {
         return assignment;
     }
 
+    public void complete() {
+        this.status = DeliveryAssignmentStatus.COMPLETED;
+    }
 }

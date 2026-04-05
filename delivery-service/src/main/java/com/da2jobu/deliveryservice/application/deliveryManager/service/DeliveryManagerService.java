@@ -16,7 +16,7 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryMan
 import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryManagerDomainService;
 import com.da2jobu.deliveryservice.infrastructure.client.HubServiceClient;
 import com.da2jobu.deliveryservice.infrastructure.client.UserServiceClient;
-import com.da2jobu.deliveryservice.infrastructure.dto.UserResponse;
+import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoDto;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import feign.FeignException;
@@ -43,9 +43,7 @@ public class DeliveryManagerService {
 
     @Transactional
     public DeliveryManagerResult createDeliveryManager(CreateDeliveryManagerCommand command) {
-        deliveryManagerDomainService.validateWritePermission(command.requesterRole());
-
-        validateUserIsDeliveryManager(command.userId(), command.requesterRole());
+        validateUserIsDeliveryManager(command.userId());
         validateHubExists(command.hubId());
 
         UserId userId = UserId.of(command.userId());
@@ -67,7 +65,6 @@ public class DeliveryManagerService {
 
     @Transactional(readOnly = true)
     public DeliveryManagerResult getDeliveryManager(UUID deliveryManagerId, UUID requesterId, String requesterRole) {
-        deliveryManagerDomainService.validateReadPermission(requesterRole);
         DeliveryManager deliveryManager = findDeliveryManagerOrThrow(deliveryManagerId);
         deliveryManagerDomainService.validateReadIdentification(deliveryManager, requesterId, requesterRole);
         return DeliveryManagerResult.from(deliveryManager);
@@ -75,7 +72,6 @@ public class DeliveryManagerService {
 
     @Transactional
     public DeliveryManagerResult updateDeliveryManagers(UpdateDeliveryManagerCommand command) {
-        deliveryManagerDomainService.validateWritePermission(command.requesterRole());
         validateHubExists(command.hubId());
         DeliveryManager deliveryManager = findDeliveryManagerOrThrow(command.deliveryManagerId());
         HubId hubId = HubId.of(command.hubId());
@@ -97,9 +93,7 @@ public class DeliveryManagerService {
     }
 
     @Transactional
-    public void deleteDeliveryManager(UUID deliveryManagerId, UUID requesterId, String requesterRole) {
-        deliveryManagerDomainService.validateWritePermission(requesterRole);
-
+    public void deleteDeliveryManager(UUID deliveryManagerId, UUID requesterId) {
         DeliveryManager deliveryManager = findDeliveryManagerOrThrow(deliveryManagerId);
         //배송 중, 배정 완료인 매니저는 삭제 불가
         if (deliveryAssignmentRepository.hasActiveDelivery(DeliveryManagerId.of(deliveryManagerId))) {
@@ -111,8 +105,6 @@ public class DeliveryManagerService {
 
     @Transactional(readOnly = true)
     public Page<DeliveryManagerResult> searchDeliveryManagers(SearchDeliveryManagerCommand command) {
-        deliveryManagerDomainService.validateReadPermission(command.requesterRole());
-
         PageRequest pageable = PageRequest.of(command.validatedPage(), command.validatedSize());
 
         return deliveryManagerRepository.search(command.type(), command.hubId(), command.requesterId(), command.requesterRole(), pageable)
@@ -121,8 +113,6 @@ public class DeliveryManagerService {
 
     @Transactional(readOnly = true)
     public Page<DeliveryAssignmentResult> searchDeliveryAssignments(SearchDeliveryAssignmentCommand command) {
-        deliveryManagerDomainService.validateReadPermission(command.requesterRole());
-
         DeliveryManager deliveryManager = findDeliveryManagerOrThrow(command.deliveryManagerId());
         deliveryManagerDomainService.validateReadIdentification(deliveryManager, command.requesterId(), command.requesterRole());
 
@@ -138,9 +128,9 @@ public class DeliveryManagerService {
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_MANAGER_NOT_FOUND));
     }
 
-    private void validateUserIsDeliveryManager(UUID userId, String requesterRole) {
+    private void validateUserIsDeliveryManager(UUID userId) {
         try {
-            UserResponse user = userServiceClient.getUser(userId, requesterRole).getData();
+            UserInfoDto user = userServiceClient.getUserByUserId(userId);
             if (user == null) {
                 throw new CustomException(ErrorCode.USER_NOT_FOUND);
             }

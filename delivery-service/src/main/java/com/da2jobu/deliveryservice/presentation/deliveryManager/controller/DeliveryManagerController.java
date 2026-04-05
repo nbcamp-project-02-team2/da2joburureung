@@ -12,6 +12,7 @@ import com.da2jobu.deliveryservice.presentation.deliveryManager.dto.request.Crea
 import com.da2jobu.deliveryservice.presentation.deliveryManager.dto.request.UpdateDeliveryManagerRequest;
 import com.da2jobu.deliveryservice.presentation.deliveryManager.dto.response.DeliveryAssignmentResponse;
 import com.da2jobu.deliveryservice.presentation.deliveryManager.dto.response.DeliveryManagerResponse;
+import com.da2jobu.deliveryservice.presentation.interceptor.RequireRoles;
 import common.dto.CommonResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ public class DeliveryManagerController {
     private final DeliveryManagerService deliveryManagerService;
 
     @PostMapping
+    @RequireRoles({"MASTER", "HUB_MANAGER"})
     public ResponseEntity<CommonResponse<DeliveryManagerResponse>> createDeliveryManager(
             @Valid @RequestBody CreateDeliveryManagerRequest request,
             @RequestHeader("X-User-Id") UUID requesterId,
@@ -50,6 +52,7 @@ public class DeliveryManagerController {
     }
 
     @GetMapping("/{deliveryManagerId}")
+    @RequireRoles({"MASTER", "HUB_MANAGER", "DELIVERY_MANAGER"})
     public ResponseEntity<CommonResponse<DeliveryManagerResponse>> getDeliveryManager(
             @PathVariable UUID deliveryManagerId,
             @RequestHeader("X-User-Id") UUID requesterId,
@@ -60,6 +63,7 @@ public class DeliveryManagerController {
     }
 
     @PatchMapping("/{deliveryManagerId}")
+    @RequireRoles({"MASTER", "HUB_MANAGER"})
     public ResponseEntity<CommonResponse<DeliveryManagerResponse>> updateDeliveryManager(
             @PathVariable UUID deliveryManagerId,
             @RequestBody UpdateDeliveryManagerRequest request,
@@ -74,16 +78,17 @@ public class DeliveryManagerController {
     }
 
     @DeleteMapping("/{deliveryManagerId}")
+    @RequireRoles({"MASTER", "HUB_MANAGER"})
     public ResponseEntity<CommonResponse<?>> deleteDeliveryManager(
             @PathVariable UUID deliveryManagerId,
-            @RequestHeader("X-User-Id") UUID requesterId,
-            @RequestHeader("X-User-Role") String requesterRole
+            @RequestHeader("X-User-Id") UUID requesterId
     ) {
-        deliveryManagerService.deleteDeliveryManager(deliveryManagerId, requesterId, requesterRole);
+        deliveryManagerService.deleteDeliveryManager(deliveryManagerId, requesterId);
         return CommonResponse.noContent();
     }
 
     @GetMapping
+    @RequireRoles({"MASTER", "HUB_MANAGER", "DELIVERY_MANAGER"})
     public ResponseEntity<CommonResponse<Page<DeliveryManagerResponse>>> searchDeliveryManagers(
             @RequestParam(required = false) DeliveryManagerType type,
             @RequestParam(required = false) UUID hubId,
@@ -101,6 +106,7 @@ public class DeliveryManagerController {
     }
 
     @GetMapping("/{deliveryManagerId}/assignments")
+    @RequireRoles({"MASTER", "HUB_MANAGER", "DELIVERY_MANAGER"})
     public ResponseEntity<CommonResponse<Page<DeliveryAssignmentResponse>>> searchDeliveryAssignments(
             @PathVariable UUID deliveryManagerId,
             @RequestParam(required = false) DeliveryAssignmentStatus status,
