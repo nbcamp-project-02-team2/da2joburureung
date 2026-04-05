@@ -1,13 +1,14 @@
-package com.da2jobu.application;
+package com.da2jobu.application.service;
 
+import com.da2jobu.application.client.HubClient;
+import com.da2jobu.application.client.LocationClient;
+import com.da2jobu.application.client.OrderClient;
+import com.da2jobu.application.client.UserClient;
 import com.da2jobu.application.dto.command.CreateCompanyCommand;
 import com.da2jobu.application.dto.command.SearchCompanyCommand;
 import com.da2jobu.application.dto.command.UpdateCompanyCommand;
 import com.da2jobu.application.dto.result.CompanyResult;
-import com.da2jobu.application.service.CompanyEventPublisher;
-import com.da2jobu.application.service.HubClient;
-import com.da2jobu.application.service.LocationClient;
-import com.da2jobu.application.service.OrderClient;
+import com.da2jobu.application.messaging.CompanyEventPublisher;
 import com.da2jobu.domain.model.entity.Company;
 import com.da2jobu.domain.model.vo.CompanyId;
 import com.da2jobu.domain.model.vo.HubId;
@@ -21,12 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -37,6 +38,7 @@ public class CompanyService {
     private final LocationClient locationClient;
     private final HubClient hubClient;
     private final OrderClient orderClient;
+    private final UserClient userClient;
     private final CompanyEventPublisher companyEventPublisher;
     // ========== Domain ==========
     private final CompanyRepository companyRepository;
@@ -46,9 +48,10 @@ public class CompanyService {
     @Transactional
     public CompanyResult createCompany(CreateCompanyCommand command) {
         log.info("업체 생성 요청: name={}, hubId={}, role={}", command.name(), command.hubId(), command.userRole());
-        //업체 생성 권한 검증
-        companyDomainService.validateCreateAccess(command.userRole(), command.userHubId(), command.hubId());
-        //허브 존재 여부 검증
+        UserClient.UserInfo userInfo = validateUserExists(command.userId());
+        if ("HUB_MANAGER".equals(command.userRole())) {
+            companyDomainService.validateHubCreateAccess(command.hubId(), userInfo.hubId());
+        }
         validateHubExists(command.hubId());
 
         Location location = locationClient.resolveLocation(command.address());
@@ -76,13 +79,15 @@ public class CompanyService {
     public CompanyResult update(UpdateCompanyCommand command) {
         log.info("업체 수정 요청: companyId={}, role={}", command.companyId(), command.userRole());
         Company company = findCompanyOrThrow(command.companyId());
-        //접근 권한 및 필드 수정 권한 검증
-        companyDomainService.validateUpdateAccess(company, command.userRole(), command.userHubId(), command.userCompanyId());
-        //변경된 허브 id 존재 여부 검증
+        UserClient.UserInfo userInfo = validateUserExists(command.userId());
+        if ("HUB_MANAGER".equals(command.userRole())) {
+            companyDomainService.validateHubAccess(company, userInfo.hubId());
+        } else if ("COMPANY_MANAGER".equals(command.userRole())) {
+            companyDomainService.validateCompanyAccess(company, userInfo.companyId());
+        }
         if (company.isHubChanged(command.hubId())) {
             validateHubExists(command.hubId());
         }
-        //주소 변동 시 카카오 api 새로 호출 후 추출
         Location location = company.isAddressChanged(command.address())
                 ? locationClient.resolveLocation(command.address())
                 : company.getLocation();
@@ -99,17 +104,19 @@ public class CompanyService {
 
     @Transactional
     @CacheEvict(value = "company", key = "#companyId")
-    public void deleteCompany(UUID companyId, String userRole, UUID userHubId, String deletedBy) {
-        log.info("업체 삭제 요청: companyId={}, role={}, deletedBy={}", companyId, userRole, deletedBy);
+    public void deleteCompany(UUID companyId, String userRole, UUID userId) {
+        log.info("업체 삭제 요청: companyId={}, role={}, deletedBy={}", companyId, userRole, userId);
         Company company = findCompanyOrThrow(companyId);
-        companyDomainService.validateDeleteAccess(company, userRole, userHubId);
-        //배송중일땐 삭제 불가
+        UserClient.UserInfo userInfo = validateUserExists(userId);
+        if ("HUB_MANAGER".equals(userRole)) {
+            companyDomainService.validateHubAccess(company, userInfo.hubId());
+        }
         if (orderClient.hasActiveOrders(companyId)) {
             log.warn("업체 삭제 거부, 진행 중인 주문 존재: companyId={}", companyId);
             throw new CustomException(ErrorCode.COMPANY_HAS_ACTIVE_ORDERS);
         }
-        company.softDelete(deletedBy);
-        companyEventPublisher.publishCompanyDeleted(companyId, deletedBy, company.getDeletedAt());
+        company.softDelete(userId.toString());
+        companyEventPublisher.publishCompanyDeleted(companyId, userId.toString(), company.getDeletedAt());
         log.info("업체 삭제 완료: companyId={}", companyId);
     }
 
@@ -121,6 +128,13 @@ public class CompanyService {
                 .map(CompanyResult::from);
     }
 
+    @Transactional(readOnly = true)
+    public List<CompanyResult> getCompaniesByIds(List<UUID> companyIds) {
+        return companyRepository.findAllByIdsAndDeletedAtIsNull(companyIds)
+                .stream()
+                .map(CompanyResult::from)
+                .toList();
+    }
 
     private Company findCompanyOrThrow(UUID companyId) {
         return companyRepository.findByIdAndDeletedAtIsNull(companyId)
@@ -131,6 +145,14 @@ public class CompanyService {
         if (!hubClient.validateHubExists(hubId)) {
             throw new CustomException(ErrorCode.HUB_NOT_FOUND);
         }
+    }
+
+    private UserClient.UserInfo validateUserExists(UUID userId) {
+        UserClient.UserInfo userInfo = userClient.getUserInfo(userId);
+        if (userInfo == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+        return userInfo;
     }
 
 }

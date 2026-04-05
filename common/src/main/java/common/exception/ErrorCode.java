@@ -42,9 +42,9 @@ public enum ErrorCode {
     COMPANY_CREATE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_CREATE_FORBIDDEN", "업체 생성 권한이 없습니다."),
     COMPANY_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_UPDATE_FORBIDDEN", "업체 수정 권한이 없습니다."),
     COMPANY_HUB_MISMATCH(HttpStatus.FORBIDDEN, "COMPANY_HUB_MISMATCH", "담당 허브의 업체만 접근할 수 있습니다."),
-    HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "HUB_NOT_FOUND", "존재하지 않는 허브입니다."),
     COMPANY_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "COMPANY_DELETE_FORBIDDEN", "업체 삭제 권한이 없습니다."),
     COMPANY_HAS_ACTIVE_ORDERS(HttpStatus.CONFLICT, "COMPANY_HAS_ACTIVE_ORDERS", "진행 중인 주문이 있는 업체는 삭제할 수 없습니다."),
+    INVALID_ADDRESS(HttpStatus.BAD_REQUEST, "INVALID_ADDRESS", "유효하지 않은 주소입니다. 좌표를 조회할 수 없습니다."),
     HUB_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "HUB_SERVICE_ERROR", "허브 서비스 호출 중 오류가 발생했습니다."),
     USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "USER_SERVICE_ERROR", "유저 서비스 호출 중 오류가 발생했습니다."),
     ORDER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "ORDER_SERVICE_ERROR", "주문 서비스 호출 중 오류가 발생했습니다."),
@@ -57,6 +57,9 @@ public enum ErrorCode {
     PRODUCT_COMPANY_HUB_MISMATCH(HttpStatus.BAD_REQUEST, "PRODUCT_COMPANY_HUB_MISMATCH", "업체가 해당 허브에 속하지 않습니다."),
     COMPANY_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "COMPANY_SERVICE_UNAVAILABLE", "업체 서비스에 일시적으로 접근할 수 없습니다."),
     USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "USER_SERVICE_UNAVAILABLE", "사용자 서비스에 일시적으로 접근할 수 없습니다."),
+
+    // ── hub ───────────────────────────────────────
+    HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "HUB_NOT_FOUND", "존재하지 않는 허브입니다."),
 
     // ── Delivery ────────────────────────────────────────
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_NOT_FOUND", "존재하지 않는 배송입니다."),

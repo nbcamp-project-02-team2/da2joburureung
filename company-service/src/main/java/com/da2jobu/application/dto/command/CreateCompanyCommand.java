@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public record CreateCompanyCommand(
         String userRole,
-        UUID userHubId,
+        UUID userId,
         UUID hubId,
         String name,
         CompanyType type,

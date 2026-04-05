@@ -10,63 +10,32 @@ import java.util.UUID;
 public class CompanyDomainService {
 
     /**
-     * 업체 생성 접근 권한 검증
-     * - MASTER: 모든 허브에 생성 가능
-     * - HUB_MANAGER: 담당 허브에만 생성 가능
+     * 허브 관리자용
+     * - 담당 허브 업체만 접근 가능
      */
-    public void validateCreateAccess(String role, UUID userHubId, UUID requestedHubId) {
-        if ("MASTER".equals(role)) return;
-        if ("HUB_MANAGER".equals(role)) {
-            if (userHubId == null || !userHubId.equals(requestedHubId)) {
-                throw new CustomException(ErrorCode.COMPANY_HUB_MISMATCH);
-            }
-            return;
-        }
-        throw new CustomException(ErrorCode.COMPANY_CREATE_FORBIDDEN);
-    }
-
-    /**
-     * 업체 수정 접근 권한 검증
-     * - MASTER: 모든 업체 수정 가능
-     * - HUB_MANAGER: 담당 허브 소속 업체만 수정 가능
-     */
-    public void validateUpdateAccess(Company company, String role, UUID userHubId, UUID userCompanyId) {
-        if ("MASTER".equals(role)) return;
-        if ("HUB_MANAGER".equals(role)) {
-            validateHubAccess(company, userHubId);
-            return;
-        }
-        if ("COMPANY_MANAGER".equals(role)) {
-            if (userCompanyId == null || !company.getCompanyId().isSameAs(userCompanyId)) {
-                throw new CustomException(ErrorCode.COMPANY_UPDATE_FORBIDDEN);
-            }
-            return;
-        }
-        throw new CustomException(ErrorCode.COMPANY_UPDATE_FORBIDDEN);
-    }
-
-    /**
-     * 업체 삭제 접근 권한 검증
-     * - MASTER: 모든 업체 삭제 가능
-     * - HUB_MANAGER: 담당 허브 소속 업체만 삭제 가능
-     */
-    public void validateDeleteAccess(Company company, String role, UUID userHubId) {
-        if ("MASTER".equals(role)) return;
-        if ("HUB_MANAGER".equals(role)) {
-            validateHubAccess(company, userHubId);
-            return;
-        }
-        throw new CustomException(ErrorCode.COMPANY_DELETE_FORBIDDEN);
-    }
-
-    /**
-     * 업체 소속 권한 검증
-     * - HUB_MANAGER: 담당 허브 소속 업체 여부
-     */
-    private void validateHubAccess(Company company, UUID userHubId) {
-        if (!company.belongsToHub(HubId.of(userHubId))) {
+    public void validateHubAccess(Company company, UUID userHubId) {
+        if (userHubId == null || !company.belongsToHub(HubId.of(userHubId))) {
             throw new CustomException(ErrorCode.COMPANY_HUB_MISMATCH);
         }
     }
 
+    /**
+     * 업체 담당자용
+     * - 본인 업체만 접근 가능
+     */
+    public void validateCompanyAccess(Company company, UUID userCompanyId) {
+        if (userCompanyId == null || !company.getCompanyId().isSameAs(userCompanyId)) {
+            throw new CustomException(ErrorCode.COMPANY_UPDATE_FORBIDDEN);
+        }
+    }
+
+    /**
+     * 허브 관리자용
+     * - 담당 허브 업체만 등록 가능
+     */
+    public void validateHubCreateAccess(UUID requestHubId, UUID userHubId) {
+        if (userHubId == null || !userHubId.equals(requestHubId)) {
+            throw new CustomException(ErrorCode.COMPANY_HUB_MISMATCH);
+        }
+    }
 }

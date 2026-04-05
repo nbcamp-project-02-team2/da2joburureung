@@ -7,8 +7,7 @@ import java.util.UUID;
 public record UpdateCompanyCommand(
         UUID companyId,
         String userRole,
-        UUID userHubId,
-        UUID userCompanyId,
+        UUID userId,
         UUID hubId,
         String name,
         CompanyType type,

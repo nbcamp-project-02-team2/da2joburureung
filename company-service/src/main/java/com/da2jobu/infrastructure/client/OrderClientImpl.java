@@ -1,6 +1,6 @@
 package com.da2jobu.infrastructure.client;
 
-import com.da2jobu.application.service.OrderClient;
+import com.da2jobu.application.client.OrderClient;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
