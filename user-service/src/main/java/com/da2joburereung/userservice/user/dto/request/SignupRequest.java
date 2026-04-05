@@ -23,6 +23,9 @@ public record SignupRequest(
         String name,
 
         @NotBlank
+        String email,
+
+        @NotBlank
         String slackId,
 
         @NotNull
