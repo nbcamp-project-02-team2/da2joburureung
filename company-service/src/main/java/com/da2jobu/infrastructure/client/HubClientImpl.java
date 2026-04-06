@@ -24,7 +24,7 @@ public class HubClientImpl implements HubClient {
     @CircuitBreaker(name = "hubService", fallbackMethod = "hubServiceFallback")
     public boolean validateHubExists(UUID hubId) {
         try {
-            hubFeignClient.getHub(hubId);
+            hubFeignClient.getHubs(hubId,10,0);
             return true;
         } catch (FeignException.NotFound e) {
             return false;
