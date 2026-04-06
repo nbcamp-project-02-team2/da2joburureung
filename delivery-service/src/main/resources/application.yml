@@ -1,8 +1,11 @@
 spring:
+  application:
+    name: delivery-service
+
   datasource:
-    url: jdbc:postgresql://localhost:5094/delivery_db
-    username: postgres
-    password: 1234
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/delivery_db}
+    username: ${SPRING_DATASOURCE_USERNAME:da2jobu}
+    password: ${SPRING_DATASOURCE_PASSWORD:p@ssw0rd}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -30,5 +33,7 @@ server:
 
 eureka:
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
