@@ -25,7 +25,7 @@ public class UserClientImpl implements UserClient {
     @CircuitBreaker(name = "userService", fallbackMethod = "userServiceFallback")
     public UserInfo getUserInfo(UUID userId) {
         try {
-            UserResponse response = userFeignClient.getUserByUserId(userId);
+            UserResponse response = userFeignClient.getUserByUserId(userId).getData();
             return new UserInfo(response.hubId(), response.companyId());
         } catch (FeignException.NotFound e) {
             return null;

@@ -74,6 +74,10 @@ clean.doLast {
     file(querydslDir).deleteDir()
 }
 
+jar {
+    enabled = false
+}
+
 tasks.named('test') {
     useJUnitPlatform()
 }
