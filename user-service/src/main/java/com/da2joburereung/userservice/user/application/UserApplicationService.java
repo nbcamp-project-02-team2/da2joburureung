@@ -4,6 +4,7 @@ import com.da2joburereung.userservice.user.domain.User;
 import com.da2joburereung.userservice.user.domain.UserRepository;
 import com.da2joburereung.userservice.user.domain.UserRole;
 import com.da2joburereung.userservice.user.domain.UserStatus;
+import com.da2joburereung.userservice.user.dto.response.InternalUserByIdResponseDto;
 import com.da2joburereung.userservice.user.dto.response.InternalUserResponse;
 import com.da2joburereung.userservice.user.dto.response.UserPageResponse;
 import com.da2joburereung.userservice.user.dto.response.UserResponse;
@@ -79,5 +80,17 @@ public class UserApplicationService {
         User user = userRepository.findActiveByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         return InternalUserResponse.from(user);
+    }
+
+    public InternalUserByIdResponseDto getUserByUserId(UUID userId) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return new InternalUserByIdResponseDto(
+                user.getUserId(),
+                user.getRole(),
+                user.getHubId(),
+                user.getCompanyId()
+        );
     }
 }
