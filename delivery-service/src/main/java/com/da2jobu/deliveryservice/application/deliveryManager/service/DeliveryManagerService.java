@@ -16,7 +16,7 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.repository.DeliveryMan
 import com.da2jobu.deliveryservice.domain.deliveryManager.service.DeliveryManagerDomainService;
 import com.da2jobu.deliveryservice.infrastructure.delivery.client.HubServiceClient;
 import com.da2jobu.deliveryservice.infrastructure.delivery.client.UserServiceClient;
-import com.da2jobu.deliveryservice.infrastructure.dto.UserInfoByIdDto;
+import com.da2jobu.deliveryservice.infrastructure.delivery.dto.UserInfoByIdDto;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import feign.FeignException;

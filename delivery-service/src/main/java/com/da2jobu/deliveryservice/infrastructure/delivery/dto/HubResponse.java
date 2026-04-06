@@ -8,8 +8,10 @@ import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record HubResponse(
-        @JsonProperty("hub_id") UUID hubId,
-        BigDecimal latitude,
-        BigDecimal longitude
+        @JsonProperty("hubId") UUID hubId,
+        @JsonProperty("name") String name,
+        @JsonProperty("address") String address,
+        @JsonProperty("latitude") BigDecimal latitude,
+        @JsonProperty("longitude") BigDecimal longitude
 ) {
 }

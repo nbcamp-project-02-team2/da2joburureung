@@ -6,6 +6,7 @@ public record UserInfoDto(
         UUID userId,
         String username,
         String name,
+        String email,
         String slackId,
         String role
 ) {
