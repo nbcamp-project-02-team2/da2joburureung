@@ -2,6 +2,12 @@ spring:
   application:
     name: hubpath-service
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key-spec: ${JWT_SECRET}
+
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
