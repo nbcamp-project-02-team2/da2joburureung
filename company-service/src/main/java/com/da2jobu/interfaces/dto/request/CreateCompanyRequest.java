@@ -16,7 +16,7 @@ public record CreateCompanyRequest(
         @Size(max = 255, message = "업체명은 255자 이하여야 합니다.")
         String name,
 
-        @Schema(description = "업체 타입", example = "SUPPLIER")
+        @Schema(description = "업체 타입", example = "PRODUCER")
         @NotNull(message = "업체 타입은 필수입니다.")
         CompanyType type,
 

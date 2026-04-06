@@ -1,5 +1,6 @@
 package com.da2jobu.domain.model.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -12,7 +13,10 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Schema(description = "허브 ID VO")
 public class HubId {
+
+    @Schema(description = "허브 ID", example = "22222222-2222-2222-2222-222222222222")
     private UUID hubId;
 
     public static HubId of(UUID hubId) {

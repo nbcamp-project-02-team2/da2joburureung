@@ -18,7 +18,7 @@ public record CompanyResponse(
         @Schema(description = "업체명", example = "서울상사")
         String name,
 
-        @Schema(description = "업체 타입", example = "SUPPLIER")
+        @Schema(description = "업체 타입", example = "PRODUCER")
         CompanyType type,
 
         @Schema(description = "업체 주소", example = "서울특별시 강남구 테헤란로 123")

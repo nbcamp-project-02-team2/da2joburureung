@@ -91,7 +91,7 @@ public class CompanyController {
     public ResponseEntity<CommonResponse<Page<CompanyResponse>>> searchCompanies(
             @Parameter(description = "업체명 검색어", example = "서울")
             @RequestParam(required = false) String name,
-            @Parameter(description = "업체 타입", example = "SUPPLIER")
+            @Parameter(description = "업체 타입", example = "PRODUCER")
             @RequestParam(required = false) CompanyType type,
             @Parameter(description = "허브 ID", example = "11111111-1111-1111-1111-111111111111")
             @RequestParam(required = false) UUID hubId,
