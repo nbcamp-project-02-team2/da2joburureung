@@ -1,4 +1,4 @@
-package com.da2jobu.deliveryservice.infrastructure.dto;
+package com.da2jobu.deliveryservice.infrastructure.delivery.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
