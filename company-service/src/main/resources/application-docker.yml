@@ -1,8 +1,11 @@
+server:
+  port: 8088
+
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/${COMPANY_DB:company_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:da2jobu}
+    password: ${SPRING_DATASOURCE_PASSWORD:p@ssw0rd}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -73,3 +76,5 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+    register-with-eureka: true
+    fetch-registry: true

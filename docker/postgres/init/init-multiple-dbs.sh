@@ -10,6 +10,7 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname postgres <<-EOSQL
     CREATE DATABASE "${COMPANY_DB}";
     CREATE DATABASE "${HUB_DB}";
     CREATE DATABASE "${PRODUCT_DB}";
+    CREATE DATABASE "${ORDER_DB}";
 EOSQL
 
 echo ">>> multiple databases created"

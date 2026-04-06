@@ -69,7 +69,16 @@ public class OrToolsRouteOptimizationService implements RouteOptimizationService
                 "Time"
         );
 
-        // 5. 시간 윈도우 제약 설정
+        // 5. 배송 건수 균등 분배 제약 (한 담당자에게 몰리는 것 방지)
+        // ceil(배송수 / 담당자수) 를 1인당 최대 배송 건수로 설정
+        int maxDeliveriesPerVehicle = (int) Math.ceil((double) points.size() / vehicleCount);
+        int countCallback = routing.registerUnaryTransitCallback(fromIndex -> {
+            int fromNode = manager.indexToNode(fromIndex);
+            return fromNode == depot ? 0 : 1;
+        });
+        routing.addDimension(countCallback, 0, maxDeliveriesPerVehicle, true, "Count");
+
+        // 6. 시간 윈도우 제약 설정
         RoutingDimension timeDimension = routing.getMutableDimension("Time");
         for (int i = 0; i < points.size(); i++) {
             long index = manager.nodeToIndex(i + 1);
@@ -77,7 +86,13 @@ public class OrToolsRouteOptimizationService implements RouteOptimizationService
                     points.get(i).requestedDeliveryTime(),
                     input.batchStartTime()
             );
-            timeDimension.cumulVar(index).setRange(window[0], window[1]);
+            try {
+                timeDimension.cumulVar(index).setRange(window[0], window[1]);
+            } catch (Exception e) {
+                log.warn("시간 윈도우 설정 실패 - node={}, window=[{}, {}], max={}, error={}",
+                        i + 1, window[0], window[1], input.maxRouteTimeMinutes(), e.getMessage());
+                return new VrptwResult(List.of(), 0.0, false);
+            }
         }
 
         // 6. 풀기

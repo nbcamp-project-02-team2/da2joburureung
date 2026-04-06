@@ -157,6 +157,28 @@ public class ProductService {
                 .map(ProductPriceHistoryResponse::from);
     }
 
+    /**
+     * 7. 재고 차감 (order-service 내부 호출용).
+     * - 비관적 락으로 동시 차감 시 race condition 방지
+     */
+    @Transactional
+    public void reduceStock(UUID productId, int quantity) {
+        Product product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.reduceStock(quantity);
+    }
+
+    /**
+     * 8. 재고 복구 (주문 취소 시 Kafka 이벤트 또는 order-service 내부 호출용).
+     * - 비관적 락으로 동시 복구 시 race condition 방지
+     */
+    @Transactional
+    public void restoreStock(UUID productId, int quantity) {
+        Product product = productRepository.findByIdWithLock(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        product.restoreStock(quantity);
+    }
+
     // ── Private: 엔티티 조회 ──
 
     private Product findProductById(UUID productId) {

@@ -40,6 +40,7 @@ public class HubDeliveryAssignmentService {
      * 대기시간, 순번 기준 라운드로빈 방식
      * 배송 시작 지점까지 이동하는 것에 대한 시공간적 제약은 무시 (발제문 참고)
      */
+    @Transactional
     public void assignHubDelivery(DeliveryId deliveryId, DeliveryRouteRecordId deliveryRouteRecordId, UUID startHubId) {
         List<DeliveryManager> availableHubDeliveryManagers = deliveryManagerRepository.findHubDeliveryManagersWithNoAssignment();
         if (availableHubDeliveryManagers.isEmpty()) {

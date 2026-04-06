@@ -15,10 +15,22 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/auth/**
-        - id: user-route
+        - id: user-route-root
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users
+        - id: user-route-sub
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+        - id: user-internal-route-root
+          uri: lb://user-service
+          predicates:
+            - Path=/api/internal/users/**
+        - id: user-internal-route-sub
+          uri: lb://user-service
+          predicates:
+            - Path=/api/internal/users/**
         - id: product-route
           uri: lb://product-service
           predicates:
@@ -31,11 +43,14 @@ spring:
           uri: lb://hubpath-service
           predicates:
             - Path=/api/hub-paths/**
-
         - id: company-route
           uri: lb://company-service
           predicates:
             - Path=/api/companies/**
+        - id: order-route
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
 eureka:
   client:
     service-url:

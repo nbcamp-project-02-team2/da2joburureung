@@ -2,10 +2,11 @@ spring:
   application:
     name: notification-service
   datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/${NOTIFICATION_DB:notification_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:da2jobu}
+    password: ${SPRING_DATASOURCE_PASSWORD:p@ssw0rd}
     driver-class-name: org.postgresql.Driver
-    url: ${NOTIFICATION_DB_URL:jdbc:postgresql://notification-postgres:5100/notification}
-    username: ${POSTGRES_USER:notification_admin}
-    password: ${POSTGRES_PASSWORD:p@ssw0rd}
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,3 +18,10 @@ spring:
         default_schema: ${POSTGRES_DEFAULT_SCHEMA:public}
         format_sql: true
         jdbc.time_zone: Asia/Seoul
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
