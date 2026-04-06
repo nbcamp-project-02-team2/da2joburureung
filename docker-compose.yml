@@ -33,10 +33,10 @@ services:
     env_file:
       - .env
     volumes:
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+      - ./docker/postgres/init/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -234,7 +234,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./logs:/app/logs  # Optional: for persistent logs
+      - ./logs:/app/logs
     depends_on:
       postgres:
         condition: service_healthy
@@ -263,6 +263,7 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       KAKAO_API_KEY: ${KAKAO_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
     env_file:
       - .env
     depends_on:
@@ -291,6 +292,7 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       KAKAO_API_KEY: ${KAKAO_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
     env_file:
       - .env
     depends_on:
