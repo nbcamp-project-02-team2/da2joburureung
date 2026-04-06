@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,7 +19,6 @@ public class OutboxEventScheduler {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Scheduled(fixedDelay = 10000)
-    @Transactional
     public void publishPendingEvents() {
         List<OutboxEvent> pendingEvents =
                 outboxEventRepository.findByStatusOrderByCreatedAtAsc(OutboxStatus.PENDING);
@@ -36,10 +34,12 @@ public class OutboxEventScheduler {
                 kafkaTemplate.send(event.getTopic(), event.getAggregateId().toString(), event.getPayload())
                         .get();
                 event.markPublished();
+                outboxEventRepository.save(event);
                 log.info("아웃박스 이벤트 발행 완료: id={}, topic={}, retryCount={}",
                         event.getEventId(), event.getTopic(), event.getRetryCount());
             } catch (Exception e) {
                 event.incrementRetry(MAX_RETRY);
+                outboxEventRepository.save(event);
                 if (event.getStatus() == OutboxStatus.FAILED) {
                     log.error("아웃박스 이벤트 최대 재시도 초과, FAILED 처리: id={}, retryCount={}",
                             event.getEventId(), event.getRetryCount());
