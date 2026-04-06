@@ -22,7 +22,6 @@ import com.da2jobu.deliveryservice.infrastructure.delivery.client.CompanyService
 import com.da2jobu.deliveryservice.infrastructure.delivery.dto.CompanyInfoDto;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,17 +34,33 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class CompanyDeliveryAssignmentService {
+public class CompanyDeliveryAssignmentService extends DeliveryAssignmentService {
 
     private final DeliveryManagerRepository deliveryManagerRepository;
     private final RouteOptimizationService routeOptimizationService;
     private final GetTodayCompanyDeliveryRoutesService getTodayCompanyDeliveryRoutesService;
-    private final DeliveryAssignmentRepository deliveryAssignmentRepository;
     private final DeliveryAssignmentDomainService deliveryAssignmentDomainService;
     private final CompanyServiceClient companyServiceClient;
     private final DeliveryRepository deliveryRepository;
     private final DeliveryRouteRecordRepository deliveryRouteRecordRepository;
+
+    public CompanyDeliveryAssignmentService(DeliveryAssignmentRepository deliveryAssignmentRepository,
+                                            DeliveryManagerRepository deliveryManagerRepository,
+                                            RouteOptimizationService routeOptimizationService,
+                                            GetTodayCompanyDeliveryRoutesService getTodayCompanyDeliveryRoutesService,
+                                            DeliveryAssignmentDomainService deliveryAssignmentDomainService,
+                                            CompanyServiceClient companyServiceClient,
+                                            DeliveryRepository deliveryRepository,
+                                            DeliveryRouteRecordRepository deliveryRouteRecordRepository) {
+        super(deliveryAssignmentRepository);
+        this.deliveryManagerRepository = deliveryManagerRepository;
+        this.routeOptimizationService = routeOptimizationService;
+        this.getTodayCompanyDeliveryRoutesService = getTodayCompanyDeliveryRoutesService;
+        this.deliveryAssignmentDomainService = deliveryAssignmentDomainService;
+        this.companyServiceClient = companyServiceClient;
+        this.deliveryRepository = deliveryRepository;
+        this.deliveryRouteRecordRepository = deliveryRouteRecordRepository;
+    }
 
 
     @Transactional

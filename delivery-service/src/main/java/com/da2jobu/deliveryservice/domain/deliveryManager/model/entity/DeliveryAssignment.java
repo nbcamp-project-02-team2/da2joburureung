@@ -2,6 +2,8 @@ package com.da2jobu.deliveryservice.domain.deliveryManager.model.entity;
 
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.*;
 import common.entity.BaseEntity;
+import common.exception.CustomException;
+import common.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -58,6 +60,9 @@ public class DeliveryAssignment extends BaseEntity {
     }
 
     public void complete() {
+        if (this.status != DeliveryAssignmentStatus.ASSIGNED) {
+            throw new CustomException(ErrorCode.INVALID_DELIVERY_STATUS);
+        }
         this.status = DeliveryAssignmentStatus.COMPLETED;
     }
 }
