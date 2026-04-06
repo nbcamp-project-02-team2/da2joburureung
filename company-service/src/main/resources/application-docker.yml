@@ -2,8 +2,6 @@ server:
   port: 8088
 
 spring:
-  application:
-    name: company-service
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/${COMPANY_DB:company_db}}
     username: ${SPRING_DATASOURCE_USERNAME:da2jobu}
@@ -33,8 +31,6 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-internal:
-  token: ${INTERNAL_TOKEN}
 
 resilience4j:
   circuitbreaker:

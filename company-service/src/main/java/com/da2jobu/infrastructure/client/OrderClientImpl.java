@@ -23,7 +23,7 @@ public class OrderClientImpl implements OrderClient {
     @CircuitBreaker(name = "orderService", fallbackMethod = "orderServiceFallback")
     public boolean hasActiveOrders(UUID companyId) {
         // FeignException은 Retry가 재시도, 소진 시 CB fallback
-        return orderFeignClient.hasActiveOrders(companyId);
+        return orderFeignClient.countActiveOrders(companyId).getData() > 0;
     }
 
     private boolean orderServiceFallback(UUID companyId, Throwable t) {

@@ -29,7 +29,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/hubs")
+@RequestMapping("/api/internal/hubs")
 @Tag(name = "Hub API", description = "허브 관리 API")
 public class HubController {
 

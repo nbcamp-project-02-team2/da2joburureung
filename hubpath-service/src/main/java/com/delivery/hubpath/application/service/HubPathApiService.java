@@ -4,6 +4,7 @@ import com.delivery.hubpath.application.dto.CreateHubPathCommand;
 import com.delivery.hubpath.application.dto.UpdateHubPathCommand;
 import com.delivery.hubpath.domain.model.HubPath;
 import com.delivery.hubpath.domain.repository.HubPathRepository;
+import com.delivery.hubpath.domain.service.HubPathService;
 import com.delivery.hubpath.infrastructure.client.HubClient;
 import com.delivery.hubpath.infrastructure.client.HubResponse;
 import com.delivery.hubpath.infrastructure.client.PageResponse;
@@ -21,11 +22,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -35,6 +37,7 @@ public class HubPathApiService {
     private final HubClient hubClient;
     private final HubPathRepository hubPathRepository;
     private final KakaoAddressService kakaoAddressService;
+    private final HubPathService hubPathService;
 
     // 허브 간의 경로 저장
     @CacheEvict(cacheNames = "hubPages", allEntries = true)
@@ -44,12 +47,9 @@ public class HubPathApiService {
 
         HubResponse departHub = fetchHubById(command.departHubId());
         HubResponse arriveHub = fetchHubById(command.arriveHubId());
-
         List<HubResponse> allHubs = fetchAllHubs();
 
-        HubPath hubPath = HubPath.createPath(departHub, arriveHub, allHubs, kakaoAddressService);
-        hubPath.setCreatedBy(username);
-        HubPath savedPath = hubPathRepository.save(hubPath);
+        HubPath savedPath = hubPathService.createAndSavePath(departHub, arriveHub, allHubs);
 
         return HubPathResponse.from(savedPath);
     }
@@ -72,11 +72,20 @@ public class HubPathApiService {
 
     // 특정 허브 이동간 디테일 정보 검색
     @Transactional(readOnly = true)
-    public HubPathResponse getHubPathDetail(UUID hubPathId) {
-        HubPath hubPath = hubPathRepository.findById(hubPathId)
-                .orElseThrow(() -> new EntityNotFoundException("경로 정보를 찾을 수 없습니다. ID: " + hubPathId));
+    public HubPathResponse getHubPathDetail(UUID hubPathId, String departHubName, String arriveHubName) {
+        if (hubPathId != null) {
+            return hubPathRepository.findById(hubPathId)
+                    .map(HubPathResponse::detailFrom)
+                    .orElseThrow(() -> new EntityNotFoundException("경로를 찾을 수 없습니다."));
+        }
 
-        return HubPathResponse.detailFrom(hubPath);
+        if (departHubName == null || arriveHubName == null) {
+            throw new IllegalArgumentException("hubPathId가 없는 경우 departHubName과 arriveHubName은 필수입니다.");
+        }
+
+        return hubPathRepository.findTop1ByDepartHubNameContainingAndArriveHubNameContainingOrderByCreatedAtDesc(departHubName, arriveHubName)
+                .map(HubPathResponse::detailFrom)
+                .orElseThrow(() -> new EntityNotFoundException("해당 조건의 최신 경로가 없습니다."));
     }
 
     // 허브 간의 이동 경로 수정
@@ -94,16 +103,26 @@ public class HubPathApiService {
         UUID finalDepartId = (command.departHubId() != null) ? command.departHubId() : hubPath.getDepartHubId();
         UUID finalArriveId = (command.arriveHubId() != null) ? command.arriveHubId() : hubPath.getArriveHubId();
 
-//        if (finalDepartName.equals(hubPath.getDepartHubName()) && finalArriveName.equals(hubPath.getArriveHubName())) {
-//            return HubPathResponse.detailFrom(hubPath);
-//        }
-
         HubResponse departHub = fetchHubById(finalDepartId);
         HubResponse arriveHub = fetchHubById(finalArriveId);
-
         List<HubResponse> allHubs = fetchAllHubs();
 
-        hubPath.updatePath(departHub, arriveHub, allHubs, kakaoAddressService);
+        HubPath newCalculatedPath = hubPathService.createAndSavePath(departHub, arriveHub, allHubs);
+
+        hubPath.updateRouteInfo(
+                newCalculatedPath.getDepartHubId(),
+                newCalculatedPath.getDepartHubName(),
+                newCalculatedPath.getArriveHubId(),
+                newCalculatedPath.getArriveHubName()
+        );
+
+        hubPath.updateTotalInfo(newCalculatedPath.getTotalDistance(), newCalculatedPath.getTotalDuration());
+
+        hubPath.getPathSteps().clear();
+        newCalculatedPath.getPathSteps().forEach(hubPath::addStep);
+
+        hubPathRepository.delete(newCalculatedPath);
+
         hubPath.setUpdatedBy(username);
 
         return HubPathResponse.detailFrom(hubPath);
@@ -129,32 +148,27 @@ public class HubPathApiService {
 
     private void validateMasterRole(String userRole) {
         if (!"MASTER".equals(userRole)) {
-            throw new RuntimeException("MASTER 권한만 접근 가능합니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "MASTER 권한만 접근 가능합니다.");
         }
     }
 
     private HubResponse fetchHubById(UUID hubId) {
         CommonResponse<PageResponse<HubResponse>> response = hubClient.getHubs(hubId, 1, 0);
-
         if (response == null || response.getData() == null) {
-            throw new IllegalArgumentException("해당 ID의 허브를 찾을 수 없습니다: " + hubId);
+            throw new EntityNotFoundException("허브 정보를 불러올 수 없습니다. ID: " + hubId);
         }
 
-        Object data = response.getData();
         PageResponse<HubResponse> pageData;
-
-        if (data instanceof java.util.Map) {
-            ObjectMapper objectMapper = new ObjectMapper()
+        if (response.getData() instanceof java.util.Map) {
+            pageData = new ObjectMapper()
                     .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
-                    .registerModule(new com.fasterxml.jackson.datatype.jdk8.Jdk8Module());
-
-            pageData = objectMapper.convertValue(data, new com.fasterxml.jackson.core.type.TypeReference<PageResponse<HubResponse>>() {});
+                    .convertValue(response.getData(), new com.fasterxml.jackson.core.type.TypeReference<>() {});
         } else {
-            pageData = (PageResponse<HubResponse>) data;
+            pageData = (PageResponse<HubResponse>) response.getData();
         }
 
-        if (pageData.getContent() == null || pageData.getContent().isEmpty()) {
-            throw new IllegalArgumentException("해당 ID의 허브를 찾을 수 없습니다: " + hubId);
+        if (pageData == null || pageData.getContent() == null || pageData.getContent().isEmpty()) {
+            throw new EntityNotFoundException("해당 ID의 허브가 존재하지 않습니다: " + hubId);
         }
 
         return pageData.getContent().get(0);
@@ -162,10 +176,7 @@ public class HubPathApiService {
 
     private List<HubResponse> fetchAllHubs() {
         CommonResponse<List<HubResponse>> response = hubClient.getAllHubs();
-        if (response == null || response.getData() == null) {
-            throw new IllegalStateException("전체 허브 목록을 가져오는 데 실패했습니다.");
-        }
+        if (response == null || response.getData() == null) throw new IllegalStateException("허브 목록 조회 실패");
         return response.getData();
     }
-
 }

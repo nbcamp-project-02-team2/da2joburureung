@@ -5,7 +5,6 @@ import com.da2jobu.deliveryservice.domain.delivery.entity.Delivery;
 import com.da2jobu.deliveryservice.domain.delivery.repository.DeliveryRepository;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryAssignment;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.entity.DeliveryManager;
-import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryAssignmentId;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryId;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.DeliveryRouteRecordId;
 import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.HubId;
@@ -16,7 +15,6 @@ import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.entity.DeliveryRou
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.repository.DeliveryRouteRecordRepository;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,14 +24,24 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class HubDeliveryAssignmentService {
+public class HubDeliveryAssignmentService extends DeliveryAssignmentService {
 
     private final DeliveryManagerRepository deliveryManagerRepository;
-    private final DeliveryAssignmentRepository deliveryAssignmentRepository;
     private final DeliveryAssignmentDomainService deliveryAssignmentDomainService;
     private final DeliveryRepository deliveryRepository;
     private final DeliveryRouteRecordRepository deliveryRouteRecordRepository;
+
+    public HubDeliveryAssignmentService(DeliveryAssignmentRepository deliveryAssignmentRepository,
+                                        DeliveryManagerRepository deliveryManagerRepository,
+                                        DeliveryAssignmentDomainService deliveryAssignmentDomainService,
+                                        DeliveryRepository deliveryRepository,
+                                        DeliveryRouteRecordRepository deliveryRouteRecordRepository) {
+        super(deliveryAssignmentRepository);
+        this.deliveryManagerRepository = deliveryManagerRepository;
+        this.deliveryAssignmentDomainService = deliveryAssignmentDomainService;
+        this.deliveryRepository = deliveryRepository;
+        this.deliveryRouteRecordRepository = deliveryRouteRecordRepository;
+    }
 
     /**
      * 허브 배송 담당자
@@ -69,16 +77,4 @@ public class HubDeliveryAssignmentService {
         routeRecord.updateManagerId(managerId);
     }
 
-    //배송 완료시 배정 상태 변경
-    @Transactional
-    public void completeHubDelivery(UUID deliveryAssignmentId) {
-        DeliveryAssignment assignment = deliveryAssignmentRepository
-                .findById(DeliveryAssignmentId.of(deliveryAssignmentId))
-                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_ASSIGNMENT_NOT_FOUND));
-
-        assignment.complete();
-
-        log.info("배송 완료 - assignmentId={}, managerId={}",
-                deliveryAssignmentId, assignment.getDeliveryManagerId().getDeliveryManagerId());
-    }
 }

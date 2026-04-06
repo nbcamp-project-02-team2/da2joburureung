@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@FeignClient(name = "hub-service")
+@FeignClient(name = "HUB-SERVICE")
 public interface HubServiceClient {
 
     @GetMapping("/api/hubs/{hubId}")

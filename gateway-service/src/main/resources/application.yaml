@@ -38,11 +38,11 @@ spring:
         - id: hub-route
           uri: lb://hub-service
           predicates:
-            - Path=/api/hubs/**
+              - Path=/api/internal/hubs/**
         - id: hubpath-route
           uri: lb://hubpath-service
           predicates:
-            - Path=/api/hub-paths/**
+              - Path=/api/internal/hub-paths/**
         - id: company-route
           uri: lb://company-service
           predicates:
