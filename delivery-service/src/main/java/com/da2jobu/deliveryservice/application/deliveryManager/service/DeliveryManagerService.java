@@ -43,12 +43,14 @@ public class DeliveryManagerService {
 
     @Transactional
     public DeliveryManagerResult createDeliveryManager(CreateDeliveryManagerCommand command) {
-        validateUserIsDeliveryManager(command.userId());
+        UserInfoByIdDto targetUser = fetchUserOrThrow(command.userId());
+        validateIsDeliveryManagerRole(targetUser);
         validateHubExists(command.hubId());
-        validateHubAccess(command.requesterId(), command.requesterRole(), command.type(), HubId.of(command.hubId()));
+
+        HubId hubId = HubId.of(command.hubId());
+        validateHubAccess(command.requesterId(), command.requesterRole(), command.type(), hubId);
 
         UserId userId = UserId.of(command.userId());
-        HubId hubId = HubId.of(command.hubId());
         deliveryManagerDomainService.validateNotDuplicate(userId);
         deliveryManagerDomainService.validateCapacityLimit(command.type(), hubId);
 
@@ -131,19 +133,23 @@ public class DeliveryManagerService {
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_MANAGER_NOT_FOUND));
     }
 
-    private void validateUserIsDeliveryManager(UUID userId) {
+    private UserInfoByIdDto fetchUserOrThrow(UUID userId) {
         try {
-            UserInfoByIdDto user = userServiceClient.getUserByUserId(userId);
+            UserInfoByIdDto user = userServiceClient.getUserByUserId(userId).getData();
             if (user == null) {
                 throw new CustomException(ErrorCode.USER_NOT_FOUND);
             }
-            if (!"DELIVERY_MANAGER".equals(user.userRole())) {
-                throw new CustomException(ErrorCode.DELIVERY_MANAGER_INVALID_ROLE);
-            }
+            return user;
         } catch (FeignException.NotFound e) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         } catch (FeignException e) {
             throw new CustomException(ErrorCode.USER_SERVICE_ERROR);
+        }
+    }
+
+    private void validateIsDeliveryManagerRole(UserInfoByIdDto user) {
+        if (!"DELIVERY_MANAGER".equals(user.userRole())) {
+            throw new CustomException(ErrorCode.DELIVERY_MANAGER_INVALID_ROLE);
         }
     }
 
@@ -161,8 +167,8 @@ public class DeliveryManagerService {
         if ("MASTER".equals(requesterRole) || DeliveryManager.isHubDeliveryManager(type, targetHubId)) {
             return;
         }
-        UserInfoByIdDto requester = userServiceClient.getUserByUserId(requesterId);
-        if (requester == null || requester.hubId() == null) {
+        UserInfoByIdDto requester = fetchUserOrThrow(requesterId);
+        if (requester.hubId() == null) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
         if (!requester.hubId().equals(targetHubId.getHubId())) {
