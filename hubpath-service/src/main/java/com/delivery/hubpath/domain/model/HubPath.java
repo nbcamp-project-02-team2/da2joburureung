@@ -33,7 +33,7 @@ public class HubPath extends common.entity.BaseEntity {
     private BigDecimal totalDistance;
     private Integer totalDuration;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "hub_path_id")
     @OrderBy("stepOrder ASC")
     @Builder.Default
@@ -46,16 +46,6 @@ public class HubPath extends common.entity.BaseEntity {
     public void updateTotalInfo(BigDecimal totalDistance, Integer totalDuration) {
         this.totalDistance = totalDistance;
         this.totalDuration = totalDuration;
-    }
-
-    public void setCreatedBy(String username) {
-        try {
-            java.lang.reflect.Field field = common.entity.BaseEntity.class.getDeclaredField("createdBy");
-            field.setAccessible(true);
-            field.set(this, username);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void setUpdatedBy(String username) {

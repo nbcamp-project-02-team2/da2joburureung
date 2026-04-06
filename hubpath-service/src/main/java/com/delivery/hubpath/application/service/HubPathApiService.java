@@ -48,7 +48,6 @@ public class HubPathApiService {
         List<HubResponse> allHubs = fetchAllHubs();
 
         HubPath savedPath = hubPathService.createAndSavePath(departHub, arriveHub, allHubs);
-        savedPath.setCreatedBy(username);
 
         return HubPathResponse.from(savedPath);
     }
@@ -76,6 +75,10 @@ public class HubPathApiService {
             return hubPathRepository.findById(hubPathId)
                     .map(HubPathResponse::detailFrom)
                     .orElseThrow(() -> new EntityNotFoundException("경로를 찾을 수 없습니다."));
+        }
+
+        if (departHubName == null || arriveHubName == null) {
+            throw new IllegalArgumentException("hubPathId가 없는 경우 departHubName과 arriveHubName은 필수입니다.");
         }
 
         return hubPathRepository.findTop1ByDepartHubNameContainingAndArriveHubNameContainingOrderByCreatedAtDesc(departHubName, arriveHubName)
@@ -107,6 +110,8 @@ public class HubPathApiService {
         hubPath.updateTotalInfo(newCalculatedPath.getTotalDistance(), newCalculatedPath.getTotalDuration());
         hubPath.getPathSteps().clear();
         newCalculatedPath.getPathSteps().forEach(hubPath::addStep);
+
+        hubPathRepository.delete(newCalculatedPath);
 
         hubPath.setUpdatedBy(username);
 

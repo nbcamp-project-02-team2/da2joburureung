@@ -76,7 +76,7 @@ public class HubPathService {
                     .endHubId(endNode.getId())
                     .endHubName(endNode.getHub_name())
                     .distance(BigDecimal.valueOf(legSummary.distanceMeter()).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP))
-                    .duration(legSummary.durationSecond() / 60)
+                    .duration((int) Math.round(legSummary.durationSecond() / 60.0))
                     .build();
 
             hubPath.addStep(step);
@@ -86,7 +86,7 @@ public class HubPathService {
 
         hubPath.updateTotalInfo(
                 BigDecimal.valueOf(totalDistanceMeter).divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP),
-                totalDurationSecond / 60
+                (int) Math.round(totalDurationSecond / 60.0)
         );
 
         return hubPathRepository.save(hubPath);
