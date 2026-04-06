@@ -14,6 +14,7 @@ public record UserInfoDto(
 
         @Schema(description = "이름", example = "홍길동")
         String name,
+        String email,
 
         @Schema(description = "슬랙 ID", example = "U12345678")
         String slackId,

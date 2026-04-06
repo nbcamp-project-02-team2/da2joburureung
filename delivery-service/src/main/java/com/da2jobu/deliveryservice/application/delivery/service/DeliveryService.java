@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface DeliveryService {
     CreateDeliveryResponseDto createDelivery(CreateDeliveryCommand command);
 
-    DeliveryDetailResponseDto getDelivery(UUID deliveryId);
+    DeliveryDetailResponseDto getDelivery(UUID deliveryId, UUID requesterId, String requesterRole);
 
     DeliveryListResponseDto getDeliveries(
             UUID orderId,
@@ -20,10 +20,13 @@ public interface DeliveryService {
             UUID originHubId,
             UUID destinationHubId,
             int page,
-            int size
+            int size,
+            UUID requesterId,
+            String requesterRole
     );
 
-    DeliveryDetailResponseDto updateDeliveryStatus(UUID deliveryId, UpdateDeliveryStatusCommand command);
+    DeliveryDetailResponseDto updateDeliveryStatus(UUID deliveryId, UpdateDeliveryStatusCommand command,
+                                                   UUID requesterId, String requesterRole);
 
-    void deleteDelivery(UUID deliveryId, String deletedBy);
+    void deleteDelivery(UUID deliveryId, String deletedBy, UUID requesterId, String requesterRole);
 }

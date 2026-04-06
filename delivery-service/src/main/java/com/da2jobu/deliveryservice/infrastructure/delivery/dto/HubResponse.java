@@ -14,10 +14,16 @@ public record HubResponse(
         @JsonProperty("hub_id")
         UUID hubId,
 
+        @JsonProperty("name") String name,
+
+        @JsonProperty("address") String address,
+
         @Schema(description = "위도", example = "37.566500")
+        @JsonProperty("latitude")
         BigDecimal latitude,
 
         @Schema(description = "경도", example = "126.978000")
+        @JsonProperty("longitude")
         BigDecimal longitude
 ) {
 }

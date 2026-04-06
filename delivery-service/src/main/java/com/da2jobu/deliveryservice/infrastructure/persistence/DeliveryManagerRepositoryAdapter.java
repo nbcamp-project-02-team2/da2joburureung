@@ -40,6 +40,11 @@ public class DeliveryManagerRepositoryAdapter implements DeliveryManagerReposito
     }
 
     @Override
+    public Optional<DeliveryManager> findByUserId(UserId userId) {
+        return jpaDeliveryManagerRepository.findByUserId_UserIdAndDeletedAtIsNull(userId.getUserId());
+    }
+
+    @Override
     public long countActiveByTypeAndNullHub(DeliveryManagerType type) {
         return jpaDeliveryManagerRepository.findByTypeAndHubId_HubIdIsNullAndDeletedAtIsNull(type).size();
     }

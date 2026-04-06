@@ -19,6 +19,9 @@ public interface DeliveryRouteRecordRepository extends JpaRepository<DeliveryRou
 
     List<DeliveryRouteRecord> findAllByDeliveryIdAndDeletedAtIsNullOrderBySequenceAsc(UUID deliveryId);
 
+    // DELIVERY_MANAGER: 특정 배달에서 본인이 담당하는 경로가 있는지 확인
+    boolean existsByDeliveryIdAndDeliveryManagerIdAndDeletedAtIsNull(UUID deliveryId, UUID deliveryManagerId);
+
     @Query("""
         select new com.da2jobu.deliveryservice.application.delivery.dto.TodayCompanyDeliveryRouteResponseDto(
             r.deliveryRouteRecordId,

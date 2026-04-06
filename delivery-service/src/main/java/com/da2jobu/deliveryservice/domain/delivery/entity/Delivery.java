@@ -54,6 +54,12 @@ public class Delivery extends BaseEntity {
     @Schema(description = "수령인 슬랙 ID", example = "U12345678")
     private String receiverSlackId;
 
+    @Column(name = "supplier_company_id")
+    private UUID supplierCompanyId;
+
+    @Column(name = "receiver_company_id")
+    private UUID receiverCompanyId;
+
     @Column(name = "company_delivery_manager_id")
     @Schema(description = "업체 배송 담당자 ID", example = "55555555-5555-5555-5555-555555555555", nullable = true)
     private UUID companyDeliveryManagerId;
@@ -87,6 +93,8 @@ public class Delivery extends BaseEntity {
             String deliveryAddress,
             String receiverName,
             String receiverSlackId,
+            UUID supplierCompanyId,
+            UUID receiverCompanyId,
             UUID companyDeliveryManagerId,
             String requestNote,
             Integer expectedDurationTotalMin,
@@ -101,6 +109,8 @@ public class Delivery extends BaseEntity {
         this.deliveryAddress = deliveryAddress;
         this.receiverName = receiverName;
         this.receiverSlackId = receiverSlackId;
+        this.supplierCompanyId = supplierCompanyId;
+        this.receiverCompanyId = receiverCompanyId;
         this.companyDeliveryManagerId = companyDeliveryManagerId;
         this.requestNote = requestNote;
         this.expectedDurationTotalMin = expectedDurationTotalMin;

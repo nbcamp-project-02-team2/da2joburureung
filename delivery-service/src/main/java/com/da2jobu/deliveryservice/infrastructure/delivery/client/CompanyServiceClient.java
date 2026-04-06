@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @FeignClient(name = "company-service")
-public interface CompanyServiceClient {
+public interface  CompanyServiceClient {
 
     @GetMapping("/api/internal/companies/{companyId}")
     CompanyInfoDto getCompany(@PathVariable("companyId") UUID companyId);

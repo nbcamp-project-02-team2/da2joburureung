@@ -22,6 +22,8 @@ public interface DeliveryManagerRepository {
 
     boolean existsByUserId(UserId userId);
 
+    Optional<DeliveryManager> findByUserId(UserId userId);
+
     long countActiveByTypeAndNullHub(DeliveryManagerType type);
 
     long countActiveByTypeAndHub(DeliveryManagerType type, HubId hubId);

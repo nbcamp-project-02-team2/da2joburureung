@@ -30,6 +30,14 @@ kakao:
   api:
     key: ${KAKAO_API_KEY:}
 
+# 내부 API 보호용 Pre-shared secret.
+# 서비스 간 직접 호출 시 X-Internal-Secret 헤더에 이 값을 설정해야 한다.
+# 미설정(빈 값)이면 헤더 검증을 건너뛰고 네트워크 격리에만 의존한다.
+delivery:
+  internal:
+    api:
+      secret: ${INTERNAL_API_SECRET:}
+
 server:
   port: ${DELIVERY_SERVER_PORT:8094}
 

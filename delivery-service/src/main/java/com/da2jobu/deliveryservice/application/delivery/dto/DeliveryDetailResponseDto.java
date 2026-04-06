@@ -25,6 +25,8 @@ public record DeliveryDetailResponseDto(
         String receiverName,
         @Schema(description = "수령인 슬랙 ID", example = "U12345678")
         String receiverSlackId,
+        UUID supplierCompanyId,
+        UUID receiverCompanyId,
         @Schema(description = "업체 배송 담당자 ID", example = "55555555-5555-5555-5555-555555555555", nullable = true)
         UUID companyDeliveryManagerId,
         @Schema(description = "요청사항", example = "문 앞에 놓아주세요.", nullable = true)
@@ -48,6 +50,8 @@ public record DeliveryDetailResponseDto(
                 delivery.getDeliveryAddress(),
                 delivery.getReceiverName(),
                 delivery.getReceiverSlackId(),
+                delivery.getSupplierCompanyId(),
+                delivery.getReceiverCompanyId(),
                 delivery.getCompanyDeliveryManagerId(),
                 delivery.getRequestNote(),
                 delivery.getExpectedDurationTotalMin(),

@@ -28,6 +28,7 @@ import java.util.UUID;
 public class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+    private final DeliveryPermissionChecker permissionChecker;
 
     @Override
     @Transactional
@@ -35,12 +36,14 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         Delivery delivery = Delivery.builder()
                 .orderId(command.orderId())
-                .status(command.status() != null ? command.status() : DeliveryStatus.HUB_WAITING)   // status를 기본 값으로 HUB_WAITING 으로 설정
+                .status(command.status() != null ? command.status() : DeliveryStatus.HUB_WAITING)
                 .originHubId(command.originHubId())
                 .destinationHubId(command.destinationHubId())
                 .deliveryAddress(command.deliveryAddress())
                 .receiverName(command.receiverName())
                 .receiverSlackId(command.receiverSlackId())
+                .supplierCompanyId(command.supplierCompanyId())
+                .receiverCompanyId(command.receiverCompanyId())
                 .companyDeliveryManagerId(command.companyDeliveryManagerId())
                 .requestNote(command.requestNote())
                 .expectedDurationTotalMin(command.expectedDurationTotalMin())
@@ -55,9 +58,11 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public DeliveryDetailResponseDto getDelivery(UUID deliveryId) {
+    public DeliveryDetailResponseDto getDelivery(UUID deliveryId, UUID requesterId, String requesterRole) {
         Delivery delivery = deliveryRepository.findByDeliveryIdAndDeletedAtIsNull(deliveryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
+
+        permissionChecker.checkDeliveryAccess(delivery, requesterId, requesterRole);
 
         return DeliveryDetailResponseDto.from(delivery);
     }
@@ -69,22 +74,14 @@ public class DeliveryServiceImpl implements DeliveryService {
             UUID originHubId,
             UUID destinationHubId,
             int page,
-            int size
+            int size,
+            UUID requesterId,
+            String requesterRole
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Delivery> deliveryPage;
-
-        if (orderId != null) {
-            deliveryPage = deliveryRepository.findByOrderIdAndDeletedAtIsNull(orderId, pageable);
-        } else if (status != null) {
-            deliveryPage = deliveryRepository.findByStatusAndDeletedAtIsNull(status, pageable);
-        } else if (originHubId != null) {
-            deliveryPage = deliveryRepository.findByOriginHubIdAndDeletedAtIsNull(originHubId, pageable);
-        } else if (destinationHubId != null) {
-            deliveryPage = deliveryRepository.findByDestinationHubIdAndDeletedAtIsNull(destinationHubId, pageable);
-        } else {
-            deliveryPage = deliveryRepository.findAllByDeletedAtIsNull(pageable);
-        }
+        Page<Delivery> deliveryPage = fetchDeliveriesByRole(
+                orderId, status, originHubId, destinationHubId, pageable, requesterId, requesterRole
+        );
 
         List<DeliverySummaryResponseDto> content = deliveryPage.getContent()
                 .stream()
@@ -92,9 +89,7 @@ public class DeliveryServiceImpl implements DeliveryService {
                 .toList();
 
         Page<DeliverySummaryResponseDto> responsePage = new PageImpl<>(
-                content,
-                pageable,
-                deliveryPage.getTotalElements()
+                content, pageable, deliveryPage.getTotalElements()
         );
 
         return DeliveryListResponseDto.from(responsePage);
@@ -102,9 +97,12 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public DeliveryDetailResponseDto updateDeliveryStatus(UUID deliveryId, UpdateDeliveryStatusCommand command) {
+    public DeliveryDetailResponseDto updateDeliveryStatus(UUID deliveryId, UpdateDeliveryStatusCommand command,
+                                                          UUID requesterId, String requesterRole) {
         Delivery delivery = deliveryRepository.findByDeliveryIdAndDeletedAtIsNull(deliveryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
+
+        permissionChecker.checkDeliveryStatusUpdateAccess(delivery, requesterId, requesterRole);
 
         delivery.updateStatus(command.status());
 
@@ -113,14 +111,63 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public void deleteDelivery(UUID deliveryId, String deletedBy) {
+    public void deleteDelivery(UUID deliveryId, String deletedBy, UUID requesterId, String requesterRole) {
         Delivery delivery = deliveryRepository.findByDeliveryIdAndDeletedAtIsNull(deliveryId)
                 .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
+
+        permissionChecker.checkDeliveryDeleteAccess(delivery, requesterId, requesterRole);
 
         if (delivery.isDeleted()) {
             throw new CustomException(ErrorCode.DELIVERY_ALREADY_DELETED);
         }
 
         delivery.softDelete(deletedBy);
+    }
+
+    // ── private helpers ────────────────────────────────────────────────────────
+
+    /**
+     * 역할에 따라 적절한 배송 목록 쿼리를 선택한다.
+     * MASTER는 기존 필터 파라미터를 그대로 사용하고,
+     * 나머지 역할은 소유권 기반 필터를 우선 적용한다.
+     */
+    private Page<Delivery> fetchDeliveriesByRole(
+            UUID orderId, DeliveryStatus status, UUID originHubId, UUID destinationHubId,
+            Pageable pageable, UUID requesterId, String requesterRole
+    ) {
+        return switch (requesterRole) {
+            case "MASTER" -> fetchDeliveriesForMaster(orderId, status, originHubId, destinationHubId, pageable);
+            case "HUB_MANAGER" -> {
+                UUID hubId = permissionChecker.fetchHubId(requesterId);
+                yield deliveryRepository.findByHubRelatedAndDeletedAtIsNull(hubId, pageable);
+            }
+            case "DELIVERY_MANAGER" -> {
+                // 허브 배송 담당자(route 배정)와 업체 배송 담당자(delivery 직접 배정) 모두 커버
+                UUID managerId = permissionChecker.fetchDeliveryManagerId(requesterId);
+                yield deliveryRepository.findByManagerRelatedAndDeletedAtIsNull(managerId, pageable);
+            }
+            case "COMPANY_MANAGER" -> {
+                // 발송 업체 또는 수령 업체가 본인 업체인 배송 모두 조회
+                UUID companyId = permissionChecker.fetchCompanyId(requesterId);
+                yield deliveryRepository.findByCompanyRelatedAndDeletedAtIsNull(companyId, pageable);
+            }
+            default -> throw new CustomException(ErrorCode.FORBIDDEN);
+        };
+    }
+
+    private Page<Delivery> fetchDeliveriesForMaster(
+            UUID orderId, DeliveryStatus status, UUID originHubId, UUID destinationHubId, Pageable pageable
+    ) {
+        if (orderId != null) {
+            return deliveryRepository.findByOrderIdAndDeletedAtIsNull(orderId, pageable);
+        } else if (status != null) {
+            return deliveryRepository.findByStatusAndDeletedAtIsNull(status, pageable);
+        } else if (originHubId != null) {
+            return deliveryRepository.findByOriginHubIdAndDeletedAtIsNull(originHubId, pageable);
+        } else if (destinationHubId != null) {
+            return deliveryRepository.findByDestinationHubIdAndDeletedAtIsNull(destinationHubId, pageable);
+        } else {
+            return deliveryRepository.findAllByDeletedAtIsNull(pageable);
+        }
     }
 }

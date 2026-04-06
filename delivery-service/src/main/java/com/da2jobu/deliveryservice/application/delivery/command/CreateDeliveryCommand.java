@@ -25,6 +25,8 @@ public record CreateDeliveryCommand(
 
         @Schema(description = "수령인 슬랙 ID", example = "U12345678")
         String receiverSlackId,
+        UUID supplierCompanyId,
+        UUID receiverCompanyId,
 
         @Schema(description = "업체 배송 담당자 ID", example = "44444444-4444-4444-4444-444444444444", nullable = true)
         UUID companyDeliveryManagerId,
