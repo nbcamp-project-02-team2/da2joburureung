@@ -28,8 +28,8 @@ public class GetTodayCompanyDeliveryRoutesServiceImpl implements GetTodayCompany
     @Override
     public List<TodayCompanyDeliveryRouteResponseDto> getTodayCompanyDeliveryRoutes(UUID hubId) {
         LocalDate today = LocalDate.now(KOREA_ZONE_ID);
-        LocalDateTime todayStart = today.atStartOfDay();
-        LocalDateTime tomorrowStart = today.plusDays(1).atStartOfDay();
+        LocalDateTime todayStart = today.atTime(6, 0);
+        LocalDateTime tomorrowStart = today.plusDays(1).atTime(6, 0);
 
         log.info("허브별 당일 업체배송 대상 조회 시작 - hubId={}, todayStart={}, tomorrowStart={}",
                 hubId, todayStart, tomorrowStart);

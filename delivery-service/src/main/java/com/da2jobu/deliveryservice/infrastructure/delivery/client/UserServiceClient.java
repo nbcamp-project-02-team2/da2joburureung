@@ -16,5 +16,5 @@ public interface UserServiceClient {
     UserInfoDto getUserByUsername(@RequestParam("username") String username);
 
     @GetMapping("/api/internal/users/by-userId/{userId}")
-    com.da2jobu.deliveryservice.infrastructure.dto.UserInfoByIdDto getUserByUserId(@PathVariable UUID userId);
+    CommonResponse<com.da2jobu.deliveryservice.infrastructure.dto.UserInfoByIdDto> getUserByUserId(@PathVariable UUID userId);
 }
