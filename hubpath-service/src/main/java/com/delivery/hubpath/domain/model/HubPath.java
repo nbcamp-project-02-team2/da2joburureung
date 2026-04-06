@@ -43,6 +43,13 @@ public class HubPath extends common.entity.BaseEntity {
         this.pathSteps.add(step);
     }
 
+    public void updateRouteInfo(UUID departHubId, String departHubName, UUID arriveHubId, String arriveHubName) {
+        this.departHubId = departHubId;
+        this.departHubName = departHubName;
+        this.arriveHubId = arriveHubId;
+        this.arriveHubName = arriveHubName;
+    }
+
     public void updateTotalInfo(BigDecimal totalDistance, Integer totalDuration) {
         this.totalDistance = totalDistance;
         this.totalDuration = totalDuration;

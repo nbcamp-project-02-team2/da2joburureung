@@ -69,6 +69,12 @@ public class HubPathService {
                     null
             );
 
+            validateRouteSummary(
+                    new GeoPoint(startNode.getLatitude(), startNode.getLongitude()),
+                    new GeoPoint(endNode.getLatitude(), endNode.getLongitude()),
+                    legSummary
+            );
+
             HubPathStep step = HubPathStep.builder()
                     .stepOrder(i + 1)
                     .startHubId(startNode.getId())
@@ -122,7 +128,7 @@ public class HubPathService {
 
                 double d = haversine(u, v);
 
-                if (d > 180) continue;
+                if (d > 150) continue;
 
                 // 기존 기록된 거리보다 현재 노드를 거쳐가는 거리가 더 짧으면 갱신
                 double newDist = dists.get(u.getId()) + d;
@@ -204,6 +210,10 @@ public class HubPathService {
 
     private void validateRouteSummary(GeoPoint origin, GeoPoint destination, RouteSummary summary) {
         boolean isDifferentLocation = !origin.equals(destination);
+
+        if (summary == null) {
+            throw new IllegalStateException("카카오 경로 API 응답이 비어있습니다. (네트워크 오류 또는 서비스 제한)");
+        }
 
         if (isDifferentLocation && (summary.distanceMeter() <= 0 || summary.durationSecond() <= 0)) {
             throw new IllegalStateException("카카오 경로 호출에 실패했거나 유효하지 않은 경로 응답입니다. (0km/0분)");

@@ -107,7 +107,15 @@ public class HubPathApiService {
 
         HubPath newCalculatedPath = hubPathService.createAndSavePath(departHub, arriveHub, allHubs);
 
+        hubPath.updateRouteInfo(
+                newCalculatedPath.getDepartHubId(),
+                newCalculatedPath.getDepartHubName(),
+                newCalculatedPath.getArriveHubId(),
+                newCalculatedPath.getArriveHubName()
+        );
+
         hubPath.updateTotalInfo(newCalculatedPath.getTotalDistance(), newCalculatedPath.getTotalDuration());
+
         hubPath.getPathSteps().clear();
         newCalculatedPath.getPathSteps().forEach(hubPath::addStep);
 
@@ -142,7 +150,9 @@ public class HubPathApiService {
 
     private HubResponse fetchHubById(UUID hubId) {
         CommonResponse<PageResponse<HubResponse>> response = hubClient.getHubs(hubId, 1, 0);
-        if (response == null || response.getData() == null) throw new IllegalArgumentException("허브를 찾을 수 없습니다.");
+        if (response == null || response.getData() == null) {
+            throw new EntityNotFoundException("허브 정보를 불러올 수 없습니다. ID: " + hubId);
+        }
 
         PageResponse<HubResponse> pageData;
         if (response.getData() instanceof java.util.Map) {
@@ -152,6 +162,11 @@ public class HubPathApiService {
         } else {
             pageData = (PageResponse<HubResponse>) response.getData();
         }
+
+        if (pageData == null || pageData.getContent() == null || pageData.getContent().isEmpty()) {
+            throw new EntityNotFoundException("해당 ID의 허브가 존재하지 않습니다: " + hubId);
+        }
+
         return pageData.getContent().get(0);
     }
 

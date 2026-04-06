@@ -92,7 +92,11 @@ public class HubPathController {
             @RequestHeader("X-User-Role") String userRole,
             @RequestHeader("X-Username") String username) {
 
-        UpdateHubPathCommand command = UpdateHubPathCommand.of(hubPathId, request.departHubId(), request.arriveHubId());
+        UpdateHubPathCommand command = UpdateHubPathCommand.of(
+                hubPathId,
+                request.departHubId(),
+                request.arriveHubId()
+        );
         HubPathResponse response = hubPathApiService.updateHubPath(command, userRole, username);
 
         return CommonResponse.ok("경로가 성공적으로 수정되었습니다.", response);
