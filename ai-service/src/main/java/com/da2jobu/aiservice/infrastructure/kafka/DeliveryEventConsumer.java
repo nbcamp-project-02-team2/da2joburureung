@@ -15,12 +15,12 @@ public class DeliveryEventConsumer {
     private final AiDeliveryService aiDeliveryService;
 
     @KafkaListener(
-            topics = "${kafka.consumer.topics.delivery-confirmed}",
+            topics = "${kafka.consumer.topics.delivery-prepared}",
             groupId = "${kafka.consumer.group-id}",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void onDeliveryConfirmed(DeliveryConfirmedEvent event) {
-        log.info("[AI-SERVICE] delivery.confirmed 수신 - deliveryId: {}", event.deliveryId());
+        log.info("[AI-SERVICE] delivery.prepared 수신 - deliveryId: {}", event.deliveryId());
         try {
             aiDeliveryService.processDelivery(event);
         } catch (Exception e) {

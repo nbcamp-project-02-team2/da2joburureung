@@ -75,8 +75,15 @@ public enum ErrorCode {
     DELIVERY_MANAGER_INVALID_ROLE(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_INVALID_ROLE", "배송 담당자 권한을 가진 사용자만 등록할 수 있습니다."),
     DELIVERY_MANAGER_HUB_REQUIRED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_REQUIRED", "업체 배송 담당자는 소속 허브를 지정해야 합니다."),
     DELIVERY_MANAGER_HUB_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_NOT_ALLOWED", "허브 배송 담당자는 소속 허브를 지정할 수 없습니다."),
-    DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다.");
+    DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다."),
 
+    // ── Notification ─────────────────────────────────────────────────────
+    NOTIFICATION_NOT_SEND(HttpStatus.BAD_REQUEST, "NOTIFICATION_NOT_SEND", "메세지가 발송될 수 없습니다."),
+    NOTIFICATION_NOT_DELETED(HttpStatus.BAD_REQUEST, "NOTIFICATION_NOT_DELETED", "메세지가 삭제될 수 없습니다."),
+
+    // ── AI ─────────────────────────────────────────────────────
+    AI_NOT_CREATED(HttpStatus.BAD_REQUEST, "AI_NOT_CREATED", "AI 결과가 생성될 수 없습니다."),
+    ;
     private final HttpStatus status;
     private final String code;
     private final String message;

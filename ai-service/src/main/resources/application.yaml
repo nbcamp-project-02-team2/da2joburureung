@@ -36,12 +36,14 @@ weather:
 kafka:
   bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   consumer:
-    group-id: ai-service-group
+    group-id: ai-service
     topics:
-      delivery-confirmed: delivery.confirmed
+      delivery-prepared: delivery.prepared.v1
+
   producer:
     topics:
-      ai-delivery-info: ai.delivery.info.generated
+      ai-delivery-info: deliverySummary.generated.v1
+
 
 server:
   port: ${AI_SERVER_PORT:8102}

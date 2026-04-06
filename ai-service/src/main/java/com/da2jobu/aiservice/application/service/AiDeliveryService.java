@@ -4,14 +4,19 @@ import com.da2jobu.aiservice.domain.model.DeliveryAiResult;
 import com.da2jobu.aiservice.domain.model.DeliveryRequest;
 import com.da2jobu.aiservice.domain.repository.DeliveryAiResultRepository;
 import com.da2jobu.aiservice.domain.repository.DeliveryRequestRepository;
+import com.da2jobu.aiservice.infrastructure.client.ProductClient;
 import com.da2jobu.aiservice.infrastructure.kafka.AiResultProducer;
 import com.da2jobu.aiservice.infrastructure.kafka.dto.AiDeliveryInfoEvent;
 import com.da2jobu.aiservice.infrastructure.kafka.dto.DeliveryConfirmedEvent;
 import com.da2jobu.aiservice.infrastructure.openai.OpenAiDeliveryAdvisor;
 import com.da2jobu.aiservice.infrastructure.weather.WeatherClient;
+import com.da2jobu.aiservice.interfaces.controller.dto.AiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +32,7 @@ public class AiDeliveryService {
     private final DeliveryRequestRepository deliveryRequestRepository;
     private final DeliveryAiResultRepository deliveryAiResultRepository;
     private final WeatherClient weatherClient;
+    private final ProductClient productClient;
     private final OpenAiDeliveryAdvisor openAiDeliveryAdvisor;
     private final AiResultProducer aiResultProducer;
     private final EmbeddingModel embeddingModel;
@@ -39,6 +45,7 @@ public class AiDeliveryService {
                 .deliveryManagerSlackId(event.deliveryManagerSlackId())
                 .hubManagerSlackId(event.hubManagerSlackId())
                 .departureHubName(event.departureHubName())
+                .productName(event.productName())
                 .arrivalHubName(event.arrivalHubName())
                 .departureLat(event.departureLat())
                 .departureLon(event.departureLon())
@@ -100,6 +107,33 @@ public class AiDeliveryService {
                 aiResult.routeSummary(),
                 aiResult.weatherSafetyComment()
         ));
+    }
+
+    @Transactional(readOnly = true)
+    public AiResponse getAiHistory(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<DeliveryAiResult> resultPage = deliveryAiResultRepository.findAll(pageRequest);
+
+        List<AiResponse.AiResultDto> dtos = resultPage.getContent().stream()
+                .map(r -> new AiResponse.AiResultDto(
+                        r.getResultId(),
+                        r.getDeliveryId(),
+                        r.getEstimatedArrivalTime(),
+                        r.getRouteSummary(),
+                        r.getWeatherSafetyComment(),
+                        r.getCreatedAt()
+                ))
+                .toList();
+
+        return new AiResponse(
+                dtos,
+                resultPage.getNumber(),
+                resultPage.getSize(),
+                resultPage.getTotalElements(),
+                resultPage.getTotalPages(),
+                resultPage.isFirst(),
+                resultPage.isLast()
+        );
     }
 }
 

@@ -8,6 +8,7 @@ public record DeliveryConfirmedEvent(
         String deliveryManagerSlackId,
         String hubManagerSlackId,
         String departureHubName,
+        String productName,
         String arrivalHubName,
         double departureLat,
         double departureLon,

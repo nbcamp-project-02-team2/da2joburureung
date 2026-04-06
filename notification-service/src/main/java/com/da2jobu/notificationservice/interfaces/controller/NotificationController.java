@@ -1,6 +1,9 @@
 package com.da2jobu.notificationservice.interfaces.controller;
 
 import com.da2jobu.notificationservice.application.service.NotificationService;
+import com.da2jobu.notificationservice.infrastructure.client.dto.UserRole;
+import com.da2jobu.notificationservice.infrastructure.client.dto.UserStatus;
+import com.da2jobu.notificationservice.interfaces.dto.MessageSendAllRequest;
 import com.da2jobu.notificationservice.interfaces.dto.MessageSendRequest;
 import com.da2jobu.notificationservice.interfaces.dto.MessageSendResponse;
 import com.da2jobu.notificationservice.interfaces.dto.SlackMessageCursorResponse;
@@ -34,11 +37,20 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<CommonResponse<SlackMessageCursorResponse>> getMessages(
             @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
             LocalDateTime cursor,
             @RequestParam(defaultValue = "10") int size
     ) {
         return CommonResponse.ok(notificationService.getMessages(cursor, size));
+    }
+
+    /**
+     * 슬랙 메시지 단건 삭제
+     */
+    @DeleteMapping("/{messageId}")
+    public ResponseEntity<CommonResponse<?>> deleteMessage(@PathVariable String messageId) {
+        notificationService.deleteMessage(messageId);
+        return CommonResponse.ok("메시지 삭제가 완료되었습니다.");
     }
 }
 
