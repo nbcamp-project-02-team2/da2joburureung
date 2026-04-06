@@ -45,7 +45,7 @@ public class DeliveryManagerService {
     public DeliveryManagerResult createDeliveryManager(CreateDeliveryManagerCommand command) {
         UserInfoByIdDto targetUser = fetchUserOrThrow(command.userId());
         validateIsDeliveryManagerRole(targetUser);
-        validateHubExists(command.hubId());
+        validateHubExists(command.hubId(), command.type());
 
         HubId hubId = HubId.of(command.hubId());
         validateHubAccess(command.requesterId(), command.requesterRole(), command.type(), hubId);
@@ -75,7 +75,7 @@ public class DeliveryManagerService {
 
     @Transactional
     public DeliveryManagerResult updateDeliveryManagers(UpdateDeliveryManagerCommand command) {
-        validateHubExists(command.hubId());
+        validateHubExists(command.hubId(), command.type());
         validateHubAccess(command.requesterId(), command.requesterRole(), command.type(), HubId.of(command.hubId()));
         DeliveryManager deliveryManager = findDeliveryManagerOrThrow(command.deliveryManagerId());
         HubId hubId = HubId.of(command.hubId());
@@ -153,7 +153,10 @@ public class DeliveryManagerService {
         }
     }
 
-    private void validateHubExists(UUID hubId) {
+    private void validateHubExists(UUID hubId, DeliveryManagerType type) {
+        if (DeliveryManager.isHubDeliveryManager(type, HubId.of(hubId))) {
+            return;
+        }
         try {
             hubServiceClient.getHub(hubId);
         } catch (FeignException.NotFound e) {
