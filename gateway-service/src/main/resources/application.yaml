@@ -26,7 +26,7 @@ spring:
         - id: user-internal-route-root
           uri: lb://user-service
           predicates:
-            - Path=/api/internal/users/**
+            - Path=/api/internal/users
         - id: user-internal-route-sub
           uri: lb://user-service
           predicates:
