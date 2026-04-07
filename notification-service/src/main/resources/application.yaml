@@ -1,12 +1,13 @@
 spring:
+  main:
+    lazy-initialization: true
   application:
     name: notification-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/${NOTIFICATION_DB:notification_db}}
-    username: ${SPRING_DATASOURCE_USERNAME:da2jobu}
-    password: ${SPRING_DATASOURCE_PASSWORD:p@ssw0rd}
     driver-class-name: org.postgresql.Driver
-
+    url: jdbc:postgresql://postgres:5432/notification
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,6 +19,23 @@ spring:
         default_schema: ${POSTGRES_DEFAULT_SCHEMA:public}
         format_sql: true
         jdbc.time_zone: Asia/Seoul
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: notification-service-group
+      topics:
+        delivery-summary-generated: ai.delivery.info.generated
+
+slack:
+  token: ${SLACK_USER_TOKEN}
+  baseUrl: ${SLACK_BASE_URL:https://slack.com/api}
+  conversationOpenUrl: ${SLACK_CONVERSATION_OPEN_URL:/conversations.open}
+  chatPostMessageUrl: ${SLACK_CHAT_POST_MESSAGE_URL:/chat.postMessage}
+  webhook:
+    url: ${SLACK_WEBHOOK_URL:${SLACK_BASE_URL:https://slack.com/api}}
+
+server:
+  port: ${NOTIFICATION_SERVER_PORT:8100}
 
 eureka:
   client:

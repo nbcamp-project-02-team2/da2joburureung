@@ -1,0 +1,8 @@
+### 슬랙 DM 보내기
+POST http://localhost:8100/api/notifications/users
+Content-Type: application/json
+
+{
+  "ids": ["U0123456789"],
+  "message": "테스트 메시지입니다."
+}

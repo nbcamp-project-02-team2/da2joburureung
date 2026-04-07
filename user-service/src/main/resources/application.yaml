@@ -2,14 +2,16 @@ server:
   port: ${SERVER_PORT:8082}
 
 spring:
+  main:
+    lazy-initialization: true
   application:
     name: user-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/user
+    username: ${POSTGRES_USER:da2jobu}
+    password: ${POSTGRES_PASSWORD:p@ssw0rd}
   jpa:
     hibernate:
       ddl-auto: update

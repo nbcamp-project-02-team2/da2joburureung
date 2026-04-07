@@ -1,0 +1,49 @@
+spring:
+  main:
+    lazy-initialization: true
+  application:
+    name: ai-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/ai-db
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: public
+        format_sql: true
+        jdbc.time_zone: Asia/Seoul
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o
+          temperature: 0.3
+      embedding:
+        options:
+          model: text-embedding-3-small
+
+weather:
+  api-key: ${OPENWEATHERMAP_API_KEY}
+  base-url: https://api.openweathermap.org/data/2.5
+
+kafka:
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  consumer:
+    group-id: ai-service
+    topics:
+      delivery-prepared: delivery.prepared.v1
+
+  producer:
+    topics:
+      ai-delivery-info: deliverySummary.generated.v1
+
+
+server:
+  port: ${AI_SERVER_PORT:8102}

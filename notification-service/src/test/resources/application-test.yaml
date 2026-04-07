@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: false
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: public
+        format_sql: true
+        jdbc.time_zone: Asia/Seoul
+
+slack:
+  token: ${SLACK_USER_TOKEN}
+  baseUrl: ${SLACK_BASE_URL:https://slack.com/api}
+  conversationOpenUrl: ${SLACK_CONVERSATION_OPEN_URL:/conversations.open}
+  chatPostMessageUrl: ${SLACK_CHAT_POST_MESSAGE_URL:/chat.postMessage}
+  webhook:
+    url: slack.com/api
+
+kafka:
+  bootstrap-servers: localhost:9092
+  consumer:
+    group-id: notification-test-group
+    topics:
+      ai-delivery-info: ai.delivery.info.generated

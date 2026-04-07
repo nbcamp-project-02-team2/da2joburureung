@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: public
+        format_sql: true
+        jdbc.time_zone: Asia/Seoul
+
+  ai:
+    openai:
+      api-key: test-key
+
+weather:
+  api-key: test-weather-key
+  base-url: https://api.openweathermap.org/data/2.5
+
+kafka:
+  bootstrap-servers: localhost:9092

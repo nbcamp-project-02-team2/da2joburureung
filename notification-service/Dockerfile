@@ -20,6 +20,6 @@ WORKDIR /app
 
 COPY --from=builder /app/notification-service/build/libs/*.jar app.jar
 
-EXPOSE 8094
+EXPOSE 8100
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

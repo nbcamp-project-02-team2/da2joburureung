@@ -1,28 +1,38 @@
--- Role이 없을 때만 생성 (DO 블록 안에서는 CREATE ROLE만)
+-- Role이 없을 때만 생성
 DO
 $$
 BEGIN
    IF NOT EXISTS (
       SELECT FROM pg_catalog.pg_roles
-      WHERE rolname = 'notification_admin'
+      WHERE rolname = 'da2jobu'
    ) THEN
-      CREATE ROLE notification_admin LOGIN PASSWORD 'p@ssw0rd';
+      CREATE ROLE da2jobu LOGIN PASSWORD 'p@ssw0rd';
    END IF;
 END
 $$;
 
--- GRANT/ALTER는 DO 블록 밖에서 실행 (멱등성 보장)
-ALTER USER notification_admin CREATEDB;
-GRANT ALL PRIVILEGES ON DATABASE notification TO notification_admin;
+ALTER USER da2jobu CREATEDB;
 
-ALTER DATABASE notification SET search_path TO notification_admin, public;
+-- MSA 서비스용 데이터베이스 생성 (소유자: da2jobu)
+CREATE DATABASE "user" OWNER da2jobu;
+CREATE DATABASE hub OWNER da2jobu;
+CREATE DATABASE company OWNER da2jobu;
+CREATE DATABASE product OWNER da2jobu;
+CREATE DATABASE "order" OWNER da2jobu;
+CREATE DATABASE delivery OWNER da2jobu;
+CREATE DATABASE "delivery-route" OWNER da2jobu;
+CREATE DATABASE notification OWNER da2jobu;
+CREATE DATABASE "ai-db" OWNER da2jobu;
 
-CREATE SCHEMA IF NOT EXISTS notification AUTHORIZATION notification_admin;
-GRANT ALL ON SCHEMA notification TO notification_admin;
-GRANT ALL ON ALL TABLES IN SCHEMA notification TO notification_admin;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA notification TO notification_admin;
-
-SET search_path TO notification;
+-- -- 이후 알림 서비스 데이터를 처리하기 위해 notification DB에 연결 (psql 명령)
+-- \c notification da2jobu
+--
+-- CREATE SCHEMA IF NOT EXISTS da2jobu AUTHORIZATION da2jobu;
+-- GRANT ALL ON SCHEMA da2jobu TO da2jobu;
+-- GRANT ALL ON ALL TABLES IN SCHEMA da2jobu TO da2jobu;
+-- GRANT ALL ON ALL SEQUENCES IN SCHEMA da2jobu TO da2jobu;
+--
+-- SET search_path TO notification;
 
 -- pgvector extension 추가 (public 스키마에 명시적으로 추가)
 CREATE EXTENSION IF NOT EXISTS vector SCHEMA public;
