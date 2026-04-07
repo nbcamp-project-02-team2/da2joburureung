@@ -2,6 +2,9 @@ package com.da2jobu.productservice.interfaces.controller;
 
 import com.da2jobu.productservice.application.service.ProductService;
 import common.dto.CommonResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +19,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/internal/products")
 @RequiredArgsConstructor
+@Tag(name = "Product Internal", description = "상품 내부 연동 API")
 public class ProductInternalController {
 
     private final ProductService productService;
@@ -23,9 +27,12 @@ public class ProductInternalController {
     /**
      * 재고 차감 (order-service 내부 호출용).
      */
+    @Operation(summary = "재고 차감", description = "order-service 내부 호출용으로 상품 재고를 차감합니다.")
     @PatchMapping("/{productId}/stock")
     public ResponseEntity<CommonResponse<?>> reduceStock(
+            @Parameter(description = "상품 ID", example = "11111111-1111-1111-1111-111111111111")
             @PathVariable UUID productId,
+            @Parameter(description = "차감 수량", example = "5")
             @RequestParam int quantity) {
 
         productService.reduceStock(productId, quantity);
@@ -35,9 +42,12 @@ public class ProductInternalController {
     /**
      * 재고 복구 (주문 취소 시).
      */
+    @Operation(summary = "재고 복구", description = "주문 취소 시 상품 재고를 복구합니다.")
     @PatchMapping("/{productId}/stock/restore")
     public ResponseEntity<CommonResponse<?>> restoreStock(
+            @Parameter(description = "상품 ID", example = "11111111-1111-1111-1111-111111111111")
             @PathVariable UUID productId,
+            @Parameter(description = "복구 수량", example = "5")
             @RequestParam int quantity) {
 
         productService.restoreStock(productId, quantity);

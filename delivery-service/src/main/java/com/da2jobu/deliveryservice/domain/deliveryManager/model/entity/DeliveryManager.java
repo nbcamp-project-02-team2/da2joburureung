@@ -7,6 +7,7 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.UserId;
 import common.entity.BaseEntity;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,25 +25,31 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@Schema(description = "배송 담당자 엔티티")
 public class DeliveryManager extends BaseEntity {
 
     @EmbeddedId
     @AttributeOverride(name = "deliveryManagerId", column = @Column(name = "delivery_manager_id"))
+    @Schema(description = "배송 담당자 ID")
     private DeliveryManagerId deliveryManagerId;
 
     @Embedded
     @AttributeOverride(name = "userId", column = @Column(name = "user_id", nullable = false))
+    @Schema(description = "사용자 ID")
     private UserId userId;
 
     @Embedded
     @AttributeOverride(name = "hubId", column = @Column(name = "hub_id"))
+    @Schema(description = "소속 허브 ID")
     private HubId hubId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 20)
+    @Schema(description = "배송 담당자 유형", example = "HUB_DELIVERY")
     private DeliveryManagerType type;
 
     @Column(name = "seq", nullable = false)
+    @Schema(description = "담당자 순번", example = "1")
     private Integer seq;
 
     // ── Factory Method ────────────────────────────────────────────────────────

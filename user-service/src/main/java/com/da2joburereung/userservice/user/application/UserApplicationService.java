@@ -92,4 +92,16 @@ public class UserApplicationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         return InternalUserResponse.from(user);
     }
+
+    public InternalUserByIdResponseDto getUserByUserId(UUID userId) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return new InternalUserByIdResponseDto(
+                user.getUserId(),
+                user.getRole(),
+                user.getHubId(),
+                user.getCompanyId()
+        );
+    }
 }

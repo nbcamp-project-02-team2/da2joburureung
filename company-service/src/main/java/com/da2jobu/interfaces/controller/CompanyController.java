@@ -11,6 +11,8 @@ import com.da2jobu.interfaces.dto.request.UpdateCompanyRequest;
 import com.da2jobu.interfaces.dto.response.CompanyResponse;
 import com.da2jobu.interfaces.annotation.RequireRoles;
 import common.dto.CommonResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +33,14 @@ public class CompanyController {
     /**
      * 업체 생성
      */
+    @Operation(summary = "업체 생성", description = "MASTER 또는 HUB_MANAGER 권한으로 업체를 생성합니다.")
     @PostMapping
     @RequireRoles({"MASTER", "HUB_MANAGER"})
     public ResponseEntity<CommonResponse<CompanyResponse>> createCompany(
             @Valid @RequestBody CreateCompanyRequest request,
+            @Parameter(description = "요청 사용자 역할", example = "MASTER")
             @RequestHeader("X-User-Role") String userRole,
+            @Parameter(description = "요청 사용자 ID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             @RequestHeader("X-User-Id") UUID userId
     ) {
         CreateCompanyCommand command = new CreateCompanyCommand(
@@ -53,12 +58,16 @@ public class CompanyController {
     /**
      * 업체 수정
      */
+    @Operation(summary = "업체 수정", description = "MASTER, HUB_MANAGER, COMPANY_MANAGER 권한으로 업체를 수정합니다.")
     @PutMapping("/{companyId}")
     @RequireRoles({"MASTER", "HUB_MANAGER", "COMPANY_MANAGER"})
     public ResponseEntity<CommonResponse<CompanyResponse>> updateCompany(
+            @Parameter(description = "수정할 업체 ID", example = "22222222-2222-2222-2222-222222222222")
             @PathVariable UUID companyId,
             @Valid @RequestBody UpdateCompanyRequest request,
+            @Parameter(description = "요청 사용자 역할", example = "COMPANY_MANAGER")
             @RequestHeader("X-User-Role") String userRole,
+            @Parameter(description = "요청 사용자 ID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             @RequestHeader("X-User-Id") UUID userId
     ) {
         UpdateCompanyCommand command = new UpdateCompanyCommand(
@@ -77,12 +86,18 @@ public class CompanyController {
     /**
      * 업체 목록 검색
      */
+    @Operation(summary = "업체 목록 조회", description = "업체명, 타입, 허브 ID 조건으로 업체 목록을 페이징 조회합니다.")
     @GetMapping
     public ResponseEntity<CommonResponse<Page<CompanyResponse>>> searchCompanies(
+            @Parameter(description = "업체명 검색어", example = "서울")
             @RequestParam(required = false) String name,
+            @Parameter(description = "업체 타입", example = "PRODUCER")
             @RequestParam(required = false) CompanyType type,
+            @Parameter(description = "허브 ID", example = "11111111-1111-1111-1111-111111111111")
             @RequestParam(required = false) UUID hubId,
+            @Parameter(description = "페이지 번호", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기", example = "10")
             @RequestParam(defaultValue = "10") int size
     ) {
         SearchCompanyCommand command = new SearchCompanyCommand(name, type, hubId, page, size);
@@ -93,8 +108,10 @@ public class CompanyController {
     /**
      * 업체 단건 조회
      */
+    @Operation(summary = "업체 단건 조회", description = "업체 ID로 업체 상세 정보를 조회합니다.")
     @GetMapping("/{companyId}")
     public ResponseEntity<CommonResponse<CompanyResponse>> getCompany(
+            @Parameter(description = "조회할 업체 ID", example = "22222222-2222-2222-2222-222222222222")
             @PathVariable UUID companyId
     ) {
         CompanyResult result = companyService.getCompany(companyId);
@@ -104,11 +121,15 @@ public class CompanyController {
     /**
      * 업체 삭제
      */
+    @Operation(summary = "업체 삭제", description = "MASTER 또는 HUB_MANAGER 권한으로 업체를 삭제합니다.")
     @DeleteMapping("/{companyId}")
     @RequireRoles({"MASTER", "HUB_MANAGER"})
     public ResponseEntity<CommonResponse<?>> deleteCompany(
+            @Parameter(description = "삭제할 업체 ID", example = "22222222-2222-2222-2222-222222222222")
             @PathVariable UUID companyId,
+            @Parameter(description = "요청 사용자 역할", example = "MASTER")
             @RequestHeader("X-User-Role") String userRole,
+            @Parameter(description = "요청 사용자 ID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             @RequestHeader("X-User-Id") UUID userId
     ) {
         companyService.deleteCompany(companyId, userRole, userId);

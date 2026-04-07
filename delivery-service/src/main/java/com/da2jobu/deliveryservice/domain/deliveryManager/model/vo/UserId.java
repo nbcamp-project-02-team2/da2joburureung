@@ -1,5 +1,6 @@
 package com.da2jobu.deliveryservice.domain.deliveryManager.model.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -12,7 +13,9 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Schema(description = "사용자 ID VO")
 public class UserId {
+    @Schema(description = "사용자 ID", example = "66666666-6666-6666-6666-666666666666")
     private UUID userId;
 
     public static UserId of(UUID userId) {

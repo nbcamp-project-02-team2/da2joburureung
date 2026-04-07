@@ -1,5 +1,6 @@
 package com.da2jobu.deliveryservice.domain.deliveryManager.model.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -14,9 +15,12 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Schema(description = "배송 담당자 ID VO")
 public class DeliveryManagerId implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @Schema(description = "배송 담당자 ID", example = "33333333-3333-3333-3333-333333333333")
     private UUID deliveryManagerId;
 
     public static DeliveryManagerId of() {

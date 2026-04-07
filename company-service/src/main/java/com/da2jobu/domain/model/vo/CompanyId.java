@@ -1,5 +1,6 @@
 package com.da2jobu.domain.model.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Embeddable;
 import lombok.*;
 
@@ -11,10 +12,12 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Schema(description = "업체 ID VO")
 public class CompanyId implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Schema(description = "업체 ID", example = "11111111-1111-1111-1111-111111111111")
     private UUID companyId;
 
     public static CompanyId of() {
