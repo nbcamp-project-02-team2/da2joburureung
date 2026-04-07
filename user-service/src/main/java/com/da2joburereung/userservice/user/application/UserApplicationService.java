@@ -5,6 +5,7 @@ import com.da2joburereung.userservice.user.domain.UserRepository;
 import com.da2joburereung.userservice.user.domain.UserRole;
 import com.da2joburereung.userservice.user.domain.UserStatus;
 import com.da2joburereung.userservice.user.dto.request.UserMeUpdateRequest;
+import com.da2joburereung.userservice.user.dto.request.UserPasswordUpdateRequest;
 import com.da2joburereung.userservice.user.dto.response.InternalUserByIdResponseDto;
 import com.da2joburereung.userservice.user.dto.response.InternalUserResponse;
 import com.da2joburereung.userservice.user.dto.response.UserPageResponse;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ import java.util.UUID;
 public class UserApplicationService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserResponse getUser(UUID userId) {
         User user = userRepository.findActiveById(userId)
@@ -69,6 +72,23 @@ public class UserApplicationService {
 
         user.updateMyInfo(request.name(), request.email(), request.slackId());
         return UserResponse.from(user);
+    }
+
+    @Transactional
+    public void updateMyPassword(String userId, UserPasswordUpdateRequest request) {
+        User user = userRepository.findActiveById(UUID.fromString(userId))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        if (request.currentPassword().equals(request.newPassword())) {
+            throw new CustomException(ErrorCode.SAME_AS_OLD_PASSWORD);
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(request.newPassword());
+        user.changePassword(encodedNewPassword);
     }
 
     @Transactional

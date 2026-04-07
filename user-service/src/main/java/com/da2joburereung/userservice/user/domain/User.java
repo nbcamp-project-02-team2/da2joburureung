@@ -142,4 +142,8 @@ public class User extends BaseEntity {
             this.slackId = slackId;
         }
     }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

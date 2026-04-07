@@ -5,6 +5,7 @@ import com.da2joburereung.userservice.user.application.UserApplicationService;
 import com.da2joburereung.userservice.user.domain.UserRole;
 import com.da2joburereung.userservice.user.domain.UserStatus;
 import com.da2joburereung.userservice.user.dto.request.UserMeUpdateRequest;
+import com.da2joburereung.userservice.user.dto.request.UserPasswordUpdateRequest;
 import com.da2joburereung.userservice.user.dto.response.UserPageResponse;
 import com.da2joburereung.userservice.user.dto.response.UserResponse;
 import common.dto.CommonResponse;
@@ -45,6 +46,16 @@ public class UserController {
     ) {
         UserResponse response = userApplicationService.updateMyInfo(userId, request);
         return CommonResponse.ok("내 정보 수정에 성공했습니다.", response);
+    }
+
+    @Operation(summary = "내 비밀번호 변경", description = "게이트웨이가 전달한 X-User-Id 헤더를 기준으로 내 비밀번호를 변경합니다.")
+    @PatchMapping("/me/password")
+    public ResponseEntity<CommonResponse<?>> updateMyPassword(
+            @RequestHeader("X-User-Id") String userId,
+            @Valid @RequestBody UserPasswordUpdateRequest request
+    ) {
+        userApplicationService.updateMyPassword(userId, request);
+        return CommonResponse.ok("비밀번호 변경에 성공했습니다.");
     }
 
     @Operation(summary = "사용자 단건 조회", description = "MASTER 권한으로 특정 사용자를 조회합니다.")
