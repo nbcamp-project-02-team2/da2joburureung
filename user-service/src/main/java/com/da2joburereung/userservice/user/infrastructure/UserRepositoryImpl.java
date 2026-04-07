@@ -52,4 +52,9 @@ public class UserRepositoryImpl implements UserRepository {
     public Page<User> searchActiveUsers(String keyword, UserRole role, UserStatus status, Pageable pageable) {
         return userJpaRepository.searchUsers(keyword, role, status, pageable);
     }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userJpaRepository.existsByEmail(email);
+    }
 }

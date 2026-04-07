@@ -34,4 +34,6 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
             @Param("status") UserStatus status,
             Pageable pageable
     );
+
+    boolean existsByEmail(String email);
 }
