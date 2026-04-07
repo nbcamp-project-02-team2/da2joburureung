@@ -59,9 +59,9 @@ public class HubApiService {
     }
 
     //허브 전체 조회 및 검색
-    @Cacheable(
-            cacheNames = "hubPages",
-            key = "{#command.hub_id(), #command.hub_name(), #command.address(), #pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
+//    @Cacheable(
+//            cacheNames = "hubPages",
+//            key = "{#command.hub_id(), #command.hub_name(), #command.address(), #pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
     public RestPage<HubResponse> getHubs(SearchHubCommand command, Pageable pageable) {
         Page<HubResponse> result = hubrepository.searchHubs(command, pageable);
         return new RestPage<>(result);

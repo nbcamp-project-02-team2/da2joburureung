@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface UserServiceClient {
 
     @GetMapping("/api/internal/users/by-username")
-    UserInfoDto getUserByUsername(@RequestParam("username") String username);
+    CommonResponse<UserInfoDto> getUserByUsername(@RequestParam("username") String username);
 
     @GetMapping("/api/internal/users/by-userId/{userId}")
     CommonResponse<com.da2jobu.deliveryservice.infrastructure.delivery.dto.UserInfoByIdDto> getUserByUserId(@PathVariable UUID userId);

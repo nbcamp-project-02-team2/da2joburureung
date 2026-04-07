@@ -150,6 +150,10 @@ public class DeliveryRouteRecord extends BaseEntity {
         this.remainDurationMin = remainDurationMin;
     }
 
+    public void updateDeliveryId(UUID deliveryId) {
+        this.deliveryId = deliveryId;
+    }
+
     public void updateCoordinates(
             Double originLatitude,
             Double originLongitude,

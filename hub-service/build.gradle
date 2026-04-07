@@ -34,6 +34,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     compileOnly project(':common')
     annotationProcessor project(':common')
 

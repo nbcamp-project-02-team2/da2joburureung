@@ -69,7 +69,7 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = "company", key = "#companyId")
+    //@Cacheable(value = "company", key = "#companyId")
     public CompanyResult getCompany(UUID companyId) {
         return CompanyResult.from(findCompanyOrThrow(companyId));
     }

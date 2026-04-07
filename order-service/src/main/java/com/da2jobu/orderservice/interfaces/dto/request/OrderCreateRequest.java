@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -35,5 +36,5 @@ public class OrderCreateRequest {
     private String requirements;
 
     @Schema(description = "희망 배송일", example = "2026-04-10", nullable = true)
-    private LocalDate desiredDeliveryDate;
+    private LocalDateTime desiredDeliveryAt;
 }

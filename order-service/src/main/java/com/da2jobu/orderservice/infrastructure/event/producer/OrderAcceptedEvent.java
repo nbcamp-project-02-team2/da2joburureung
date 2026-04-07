@@ -1,6 +1,7 @@
 package com.da2jobu.orderservice.infrastructure.event.producer;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record OrderAcceptedEvent(
@@ -9,5 +10,5 @@ public record OrderAcceptedEvent(
         UUID receiverId,
         String requirements,
         String createdBy,
-        LocalDate desiredDeliveryDate
+        LocalDateTime desiredDeliveryAt
 ) {}

@@ -43,8 +43,8 @@ public class OrderResponse {
     @Schema(description = "요청 사항", example = "파손 주의", nullable = true)
     private String requirements;
 
-    @Schema(description = "희망 배송일", example = "2026-04-10", nullable = true)
-    private LocalDate desiredDeliveryDate;
+    @Schema(description = "희망 배송일", example = "2026-04-10T10:30:00", nullable = true)
+    private LocalDateTime desiredDeliveryAt;
 
     @Schema(description = "주문 상태", example = "PENDING")
     private OrderStatus status;
@@ -66,7 +66,7 @@ public class OrderResponse {
                 .deliveryId(order.getDeliveryId())
                 .hubId(order.getHubId())
                 .requirements(order.getRequirements())
-                .desiredDeliveryDate(order.getDesiredDeliveryDate())
+                .desiredDeliveryAt(order.getDesiredDeliveryAt())
                 .status(order.getStatus())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())

@@ -318,7 +318,7 @@ class CreateDeliveryFromOrderServiceImplTest {
         CommonResponse<HubPathResponseDto> hubPathResponse = success(fixture.hubPath);
 
         when(deliveryRepository.existsByOrderIdAndDeletedAtIsNull(fixture.orderId)).thenReturn(false);
-        when(userServiceClient.getUserByUsername("receiver_manager")).thenReturn(fixture.userInfoDto);
+        //when(userServiceClient.getUserByUsername("receiver_manager")).thenReturn(fixture.userInfoDto);
         when(companyServiceClient.getCompany(fixture.supplierId)).thenReturn(fixture.supplierCompany);
         when(companyServiceClient.getCompany(fixture.receiverId)).thenReturn(fixture.receiverCompany);
 

@@ -14,8 +14,8 @@ import java.util.UUID;
 @FeignClient(name = "HUB-SERVICE")
 public interface HubServiceClient {
 
-    @GetMapping("/api/hubs/{hubId}")
-    CommonResponse<HubResponse> getHub(@PathVariable UUID hubId);
+    @GetMapping("/api/internal/hubs/{hub_id}")
+    CommonResponse<HubResponse> getHub(@PathVariable("hub_id") UUID hubId);
 
     @GetMapping("/api/hubs")
     CommonResponse<PageResponse<HubListResponse>> getHubs(@RequestParam int size);

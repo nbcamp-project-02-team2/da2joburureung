@@ -14,7 +14,7 @@ public record HubResponse(
         @JsonProperty("hub_id")
         UUID hubId,
 
-        @JsonProperty("name") String name,
+        @JsonProperty("hub_name") String hubName,
 
         @JsonProperty("address") String address,
 

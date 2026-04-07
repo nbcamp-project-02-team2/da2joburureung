@@ -11,6 +11,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -62,9 +63,10 @@ public class Order extends BaseEntity {
     @Schema(description = "요청 사항", example = "파손 주의", nullable = true)
     private String requirements;
 
-    @Column(name = "desired_delivery_date")
+    // 수령 희망일
+    @Column(name = "desired_delivery_at")
     @Schema(description = "희망 배송일", example = "2026-04-10", nullable = true)
-    private LocalDate desiredDeliveryDate;
+    private LocalDateTime desiredDeliveryAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -97,12 +99,12 @@ public class Order extends BaseEntity {
     }
 
     public void update(UUID supplierId, UUID receiverId, UUID productId,
-                       Integer quantity, String requirements, LocalDate desiredDeliveryDate) {
+                       Integer quantity, String requirements, LocalDateTime desiredDeliveryAt) {
         if (supplierId != null) this.supplierId = supplierId;
         if (receiverId != null) this.receiverId = receiverId;
         if (productId != null) this.productId = productId;
         if (quantity != null) this.quantity = quantity;
         if (requirements != null) this.requirements = requirements;
-        if (desiredDeliveryDate != null) this.desiredDeliveryDate = desiredDeliveryDate;
+        if (desiredDeliveryAt != null) this.desiredDeliveryAt = desiredDeliveryAt;
     }
 }

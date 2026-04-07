@@ -74,7 +74,7 @@ public class OrderService {
                 .unitPrice(product.getPrice())
                 .hubId(supplier.getHubId())
                 .requirements(request.getRequirements())
-                .desiredDeliveryDate(request.getDesiredDeliveryDate())
+                .desiredDeliveryAt(request.getDesiredDeliveryAt())
                 .status(OrderStatus.PENDING)
                 .build();
 
@@ -90,7 +90,7 @@ public class OrderService {
                 order.getReceiverId(),
                 order.getRequirements(),
                 username,
-                order.getDesiredDeliveryDate()
+                order.getDesiredDeliveryAt()
         );
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
@@ -121,7 +121,7 @@ public class OrderService {
                 request.getProductId(),
                 request.getQuantity(),
                 request.getRequirements(),
-                request.getDesiredDeliveryDate()
+                request.getDesiredDeliveryAt()
         );
 
         return OrderResponse.from(order);

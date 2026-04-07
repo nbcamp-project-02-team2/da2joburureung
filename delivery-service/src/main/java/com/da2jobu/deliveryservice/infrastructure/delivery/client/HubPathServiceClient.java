@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@FeignClient(name = "hub-path-service")
+@FeignClient(name = "hubpath-service")
 public interface HubPathServiceClient {
 
     @GetMapping("/api/internal/hub-paths/search")
