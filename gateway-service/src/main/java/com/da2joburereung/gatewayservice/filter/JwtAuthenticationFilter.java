@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         log.info("Gateway request Path={}", path);
 
-        if (path.startsWith("/api/auth/signup") || path.startsWith("/api/auth/login")) {
+        if (isExcludedPath(path)) {
             log.info("Gateway auth excluded Path={}", path);
             return chain.filter(exchange);
         }
@@ -74,6 +74,22 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             log.warn("JWT invalid: {}", e.getMessage());
             return writeErrorResponse(exchange.getResponse(), ErrorCode.INVALID_TOKEN);
         }
+    }
+
+    private boolean isExcludedPath(String path) {
+        return path.startsWith("/api/auth/signup")
+                || path.startsWith("/api/auth/login")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/swagger-ui/")
+                || path.equals("/v3/api-docs")
+                || path.startsWith("/v3/api-docs/")
+                || path.startsWith("/user-service/v3/api-docs")
+                || path.startsWith("/company-service/v3/api-docs")
+                || path.startsWith("/delivery-service/v3/api-docs")
+                || path.startsWith("/hub-service/v3/api-docs")
+                || path.startsWith("/hubpath-service/v3/api-docs")
+                || path.startsWith("/product-service/v3/api-docs")
+                || path.startsWith("/order-service/v3/api-docs");
     }
 
     private Mono<Void> writeErrorResponse(ServerHttpResponse response, ErrorCode errorCode) {

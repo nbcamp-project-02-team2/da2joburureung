@@ -71,7 +71,61 @@ spring:
           uri: lb://delivery-service
           predicates:
             - Path=/api/delivery-managers/**
+        - id: user-service-docs
+          uri: lb://user-service
+          predicates:
+            - Path=/user-service/v3/api-docs
+          filters:
+            - RewritePath=/user-service/(?<segment>.*), /${segment}
 
+        - id: company-service-docs
+          uri: lb://company-service
+          predicates:
+            - Path=/company-service/v3/api-docs
+          filters:
+            - RewritePath=/company-service/(?<segment>.*), /${segment}
+
+        - id: delivery-service-docs
+          uri: lb://delivery-service
+          predicates:
+            - Path=/delivery-service/v3/api-docs
+          filters:
+            - RewritePath=/delivery-service/(?<segment>.*), /${segment}
+
+        - id: hub-service-docs
+          uri: lb://hub-service
+          predicates:
+            - Path=/hub-service/v3/api-docs
+          filters:
+            - RewritePath=/hub-service/(?<segment>.*), /${segment}
+
+        - id: hubpath-service-docs
+          uri: lb://hubpath-service
+          predicates:
+            - Path=/hubpath-service/v3/api-docs
+          filters:
+            - RewritePath=/hubpath-service/(?<segment>.*), /${segment}
+
+        - id: product-service-docs
+          uri: lb://product-service
+          predicates:
+            - Path=/product-service/v3/api-docs
+          filters:
+            - RewritePath=/product-service/(?<segment>.*), /${segment}
+
+        - id: order-service-docs
+          uri: lb://order-service
+          predicates:
+            - Path=/order-service/v3/api-docs
+          filters:
+            - RewritePath=/order-service/(?<segment>.*), /${segment}
+
+        - id: notification-service-docs
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification-service/v3/api-docs
+          filters:
+            - RewritePath=/notification-service/(?<segment>.*), /${segment}
 eureka:
   client:
     service-url:
@@ -85,3 +139,31 @@ management:
 
 jwt:
   secret: ${JWT_SECRET}
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    urls:
+      - name: gateway-service
+        url: /v3/api-docs
+      - name: user-service
+        url: /user-service/v3/api-docs
+      - name: company-service
+        url: /company-service/v3/api-docs
+      - name: delivery-service
+        url: /delivery-service/v3/api-docs
+      - name: hub-service
+        url: /hub-service/v3/api-docs
+      - name: hubpath-service
+        url: /hubpath-service/v3/api-docs
+      - name: product-service
+        url: /product-service/v3/api-docs
+      - name: order-service
+        url: /order-service/v3/api-docs
+      - name: notification-service
+        url: /notification-service/v3/api-docs

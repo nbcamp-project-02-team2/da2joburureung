@@ -32,7 +32,7 @@ public class UserInternalController {
     }
 
     @Operation(summary = "userId로 사용자 내부 조회", description = "다른 서비스에서 userId 기준으로 사용자 정보를 조회합니다.")
-    @GetMapping("/{userId}")
+    @GetMapping("/by-userId/{userId}")
     public ResponseEntity<CommonResponse<InternalUserByIdResponseDto>> findByUserId(
             @Parameter(
                     description = "조회할 사용자 ID",
