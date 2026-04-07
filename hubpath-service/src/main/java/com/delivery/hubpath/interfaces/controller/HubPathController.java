@@ -8,10 +8,12 @@ import com.delivery.hubpath.interfaces.dto.request.SearchHubPathRequest;
 import com.delivery.hubpath.interfaces.dto.request.UpdateHubPathRequest;
 import com.delivery.hubpath.interfaces.dto.response.HubPathResponse;
 import common.dto.CommonResponse;
+import common.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,24 +24,26 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/hub-paths")
+@RequestMapping("/api/internal/hub-paths")
 @Tag(name = "HubPath API", description = "허브 경로 관리 API")
 public class HubPathController {
 
     private final HubPathApiService hubPathApiService;
 
     @PostMapping
-    @Operation(summary = "허브 간의 경로 생성",description = "출발 허브이름과 도착 허브이름을 받아 경로를 생성합니다")
-    public ResponseEntity<CommonResponse<HubPathResponse>> createHubPath(@Valid @RequestBody CreateHubPathRequest request) {
+    @Operation(summary = "허브 간의 경로 생성", description = "출발 허브이름과 도착 허브이름을 받아 경로를 생성합니다")
+    public ResponseEntity<CommonResponse<HubPathResponse>> createHubPath(
+            @Valid @RequestBody CreateHubPathRequest request,
+            @RequestHeader("X-User-Role") String userRole,
+            @RequestHeader("X-Username") String username) {
 
-        CreateHubPathCommand command = CreateHubPathCommand.of(request.departHubName(), request.arriveHubName());
+        CreateHubPathCommand command = CreateHubPathCommand.of(request.departHubId(), request.arriveHubId());
+        HubPathResponse response = hubPathApiService.createHubPath(command, userRole, username);
 
-        HubPathResponse response = hubPathApiService.createHubPath(command);
-
-        return CommonResponse.created("경로가 성공적으로 생성되었습니다.",response);
+        return CommonResponse.created("경로가 성공적으로 생성되었습니다.", response);
     }
 
     @GetMapping
@@ -59,29 +63,53 @@ public class HubPathController {
 
     @GetMapping("/{hubPathId}")
     @Operation(summary = "특정 허브 간 이동 경로 디테일 정보", description = "이동간의 디테일 정보를 보여줍니다.")
-    public ResponseEntity<CommonResponse<HubPathResponse>> getHubPath(@PathVariable UUID hubPathId) {
-        return CommonResponse.ok(hubPathApiService.getHubPathDetail(hubPathId));
+    public ResponseEntity<?> getHubPath(
+            @PathVariable String hubPathId,
+            @RequestParam(required = false) String departHubName,
+            @RequestParam(required = false) String arriveHubName) {
+
+        if (!hubPathId.equals("search")) {
+            try {
+                UUID id = UUID.fromString(hubPathId);
+                return CommonResponse.ok(hubPathApiService.getHubPathDetail(id, null, null));
+            } catch (IllegalArgumentException e) {
+                return CommonResponse.error(ErrorCode.INVALID_INPUT, "유효하지 않은 ID 형식입니다.");
+            }
+        }
+
+        if (departHubName != null && arriveHubName != null) {
+            return CommonResponse.ok(hubPathApiService.getHubPathDetail(null, departHubName, arriveHubName));
+        }
+
+        return CommonResponse.error(ErrorCode.INVALID_INPUT, "조회 조건이 부족합니다.");
     }
 
     @PatchMapping("/{hubPathId}")
-    @Operation(summary = "허브 간 경로 수정",description = "출발 허브/도착 허브를 수정합니다")
+    @Operation(summary = "허브 간 경로 수정", description = "출발 허브/도착 허브를 수정합니다")
     public ResponseEntity<CommonResponse<HubPathResponse>> patchHubPath(
             @PathVariable UUID hubPathId,
-            @Valid @RequestBody UpdateHubPathRequest request) {
+            @Valid @RequestBody UpdateHubPathRequest request,
+            @RequestHeader("X-User-Role") String userRole,
+            @RequestHeader("X-Username") String username) {
 
-        UpdateHubPathCommand command = UpdateHubPathCommand.of(hubPathId,request.departHubName(), request.arriveHubName());
+        UpdateHubPathCommand command = UpdateHubPathCommand.of(
+                hubPathId,
+                request.departHubId(),
+                request.arriveHubId()
+        );
+        HubPathResponse response = hubPathApiService.updateHubPath(command, userRole, username);
 
-        HubPathResponse response = hubPathApiService.updateHubPath(command);
-
-        return CommonResponse.ok("경로가 성공적으로 수정되었습니다.",response);
+        return CommonResponse.ok("경로가 성공적으로 수정되었습니다.", response);
     }
 
     @DeleteMapping("/{hubPathId}")
-    @Operation(summary = "허브 간 경로 삭제",description = "허브 간 경로를 삭제합니다")
+    @Operation(summary = "허브 간 경로 삭제", description = "허브 간 경로를 삭제합니다")
     public ResponseEntity<CommonResponse<?>> deleteHubPath(
-            @PathVariable UUID hubPathId) {
+            @PathVariable UUID hubPathId,
+            @RequestHeader("X-User-Role") String userRole,
+            @RequestHeader("X-Username") String username) {
 
-        hubPathApiService.deleteHubPath(hubPathId);
+        hubPathApiService.deleteHubPath(hubPathId, userRole, username);
 
         return CommonResponse.noContent();
     }

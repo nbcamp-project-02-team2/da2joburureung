@@ -8,6 +8,9 @@ import com.da2jobu.productservice.interfaces.dto.response.ProductResponse;
 import common.dto.CommonResponse;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,6 +31,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+@Tag(name = "Product", description = "상품 관리 API")
 public class ProductController {
 
     private final ProductService productService;
@@ -38,11 +42,15 @@ public class ProductController {
      * 1. 상품 생성.
      * - 권한: MASTER, HUB_MANAGER(담당 허브), COMPANY_MANAGER(본인 업체)
      */
+    @Operation(summary = "상품 생성", description = "새 상품을 생성합니다.")
     @PostMapping
     public ResponseEntity<CommonResponse<ProductResponse>> createProduct(
             @Valid @RequestBody ProductCreateRequest request,
+            @Parameter(description = "요청 사용자 ID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             @RequestHeader("X-User-Id") String userId,
+            @Parameter(description = "요청 사용자명", example = "홍길동")
             @RequestHeader("X-Username") String username,
+            @Parameter(description = "요청 사용자 역할", example = "COMPANY_MANAGER")
             @RequestHeader("X-User-Role") String role) {
 
         ProductResponse response = productService.createProduct(request, userId, username, role);
@@ -54,12 +62,17 @@ public class ProductController {
      * - 권한: MASTER, HUB_MANAGER(담당 허브), COMPANY_MANAGER(본인 업체)
      * - 가격 변경 시 자동으로 가격 이력 기록
      */
+    @Operation(summary = "상품 수정", description = "기존 상품 정보를 부분 수정합니다.")
     @PatchMapping("/{productId}")
     public ResponseEntity<CommonResponse<ProductResponse>> updateProduct(
+            @Parameter(description = "상품 ID", example = "11111111-1111-1111-1111-111111111111")
             @PathVariable UUID productId,
             @Valid @RequestBody ProductUpdateRequest request,
+            @Parameter(description = "요청 사용자 ID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             @RequestHeader("X-User-Id") String userId,
+            @Parameter(description = "요청 사용자명", example = "홍길동")
             @RequestHeader("X-Username") String username,
+            @Parameter(description = "요청 사용자 역할", example = "COMPANY_MANAGER")
             @RequestHeader("X-User-Role") String role) {
 
         ProductResponse response = productService.updateProduct(productId, request, userId, username, role);
@@ -71,11 +84,16 @@ public class ProductController {
      * - 권한: MASTER, HUB_MANAGER(담당 허브)만 가능
      * - 삭제된 상품은 이후 조회/검색에서 자동 제외
      */
+    @Operation(summary = "상품 삭제", description = "상품을 소프트 삭제합니다.")
     @DeleteMapping("/{productId}")
     public ResponseEntity<CommonResponse<?>> deleteProduct(
+            @Parameter(description = "상품 ID", example = "11111111-1111-1111-1111-111111111111")
             @PathVariable UUID productId,
+            @Parameter(description = "요청 사용자 ID", example = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
             @RequestHeader("X-User-Id") String userId,
+            @Parameter(description = "요청 사용자명", example = "홍길동")
             @RequestHeader("X-Username") String username,
+            @Parameter(description = "요청 사용자 역할", example = "MASTER")
             @RequestHeader("X-User-Role") String role) {
 
         productService.deleteProduct(productId, userId, username, role);
@@ -86,8 +104,10 @@ public class ProductController {
      * 4. 상품 단건 조회.
      * - 권한: 모든 인증된 사용자
      */
+    @Operation(summary = "상품 단건 조회", description = "상품 1건을 조회합니다.")
     @GetMapping("/{productId}")
     public ResponseEntity<CommonResponse<ProductResponse>> getProduct(
+            @Parameter(description = "상품 ID", example = "11111111-1111-1111-1111-111111111111")
             @PathVariable UUID productId) {
 
         ProductResponse response = productService.getProduct(productId);
@@ -100,14 +120,22 @@ public class ProductController {
      * - 필터: name(상품명), hubId(허브), companyId(업체)
      * - 정렬: name, price, stockQuantity, updatedAt, createdAt(기본값)
      */
+    @Operation(summary = "상품 목록 조회", description = "조건에 맞는 상품 목록을 페이징 조회합니다.")
     @GetMapping
     public ResponseEntity<CommonResponse<Page<ProductResponse>>> searchProducts(
+            @Parameter(description = "상품명 검색어", example = "생수")
             @RequestParam(required = false) String name,
+            @Parameter(description = "허브 ID", example = "22222222-2222-2222-2222-222222222222")
             @RequestParam(required = false) UUID hubId,
+            @Parameter(description = "업체 ID", example = "33333333-3333-3333-3333-333333333333")
             @RequestParam(required = false) UUID companyId,
+            @Parameter(description = "페이지 번호", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기", example = "10")
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "정렬 기준 필드", example = "createdAt")
             @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "정렬 방향", example = "desc")
             @RequestParam(defaultValue = "desc") String direction) {
 
         validatePageSize(size);
@@ -125,10 +153,14 @@ public class ProductController {
      * - 권한: 모든 인증된 사용자
      * - 변경일시(changedAt) 기준 내림차순 정렬
      */
+    @Operation(summary = "상품 가격 이력 조회", description = "특정 상품의 가격 변동 이력을 조회합니다.")
     @GetMapping("/{productId}/price-histories")
     public ResponseEntity<CommonResponse<Page<ProductPriceHistoryResponse>>> getPriceHistories(
+            @Parameter(description = "상품 ID", example = "11111111-1111-1111-1111-111111111111")
             @PathVariable UUID productId,
+            @Parameter(description = "페이지 번호", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 크기", example = "10")
             @RequestParam(defaultValue = "10") int size) {
 
         validatePageSize(size);

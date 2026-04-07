@@ -15,10 +15,22 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/auth/**
-        - id: user-route
+        - id: user-route-root
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users
+        - id: user-route-sub
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+        - id: user-internal-route-root
+          uri: lb://user-service
+          predicates:
+            - Path=/api/internal/users
+        - id: user-internal-route-sub
+          uri: lb://user-service
+          predicates:
+            - Path=/api/internal/users/**
         - id: product-route
           uri: lb://product-service
           predicates:
@@ -26,11 +38,40 @@ spring:
         - id: hub-route
           uri: lb://hub-service
           predicates:
-            - Path=/api/hubs/**
+              - Path=/api/internal/hubs/**
+        - id: hubpath-route
+          uri: lb://hubpath-service
+          predicates:
+              - Path=/api/internal/hub-paths/**
         - id: company-route
           uri: lb://company-service
           predicates:
             - Path=/api/companies/**
+        - id: order-route
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+        - id: delivery-route-root
+          uri: lb://delivery-service
+          predicates:
+            - Path=/api/deliveries
+        - id: delivery-route-sub
+          uri: lb://delivery-service
+          predicates:
+            - Path=/api/deliveries/**
+        - id: delivery-record-route
+          uri: lb://delivery-service
+          predicates:
+            - Path=/api/delivery-routes/**
+        - id: delivery-manager-route-root
+          uri: lb://delivery-service
+          predicates:
+            - Path=/api/delivery-managers
+        - id: delivery-manager-route-sub
+          uri: lb://delivery-service
+          predicates:
+            - Path=/api/delivery-managers/**
+
 eureka:
   client:
     service-url:

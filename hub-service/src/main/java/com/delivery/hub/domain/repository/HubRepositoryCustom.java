@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface HubRepositoryCustom {
     Page<HubResponse> searchHubs(SearchHubCommand command, Pageable pageable);
+
 }

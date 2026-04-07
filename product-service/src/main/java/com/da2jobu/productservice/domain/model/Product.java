@@ -1,6 +1,9 @@
 package com.da2jobu.productservice.domain.model;
 
 import common.entity.BaseEntity;
+import common.exception.CustomException;
+import common.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -24,46 +27,49 @@ import java.util.UUID;
 @Builder
 @SQLDelete(sql = "UPDATE p_product SET deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("deleted_at IS NULL")
+@Schema(description = "상품 엔티티")
 public class Product extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
+    @Schema(description = "상품 ID", example = "11111111-1111-1111-1111-111111111111")
     private UUID id;
 
-    // 상품명
     @Column(name = "name", nullable = false, length = 255)
+    @Schema(description = "상품명", example = "생수 2L")
     private String name;
 
-    // 상품 가격 (DECIMAL(15,2) — 소수점 2자리까지 저장)
     @Column(name = "price", nullable = false, precision = 15, scale = 2)
+    @Schema(description = "상품 가격", example = "1500.00")
     private BigDecimal price;
 
-    // 재고 수량
     @Column(name = "stock_quantity", nullable = false)
+    @Schema(description = "재고 수량", example = "100")
     private Integer stockQuantity;
 
-    // 소속 허브 ID (FeignClient로 유효성 검증)
     @Column(name = "hub_id", nullable = false)
+    @Schema(description = "소속 허브 ID", example = "22222222-2222-2222-2222-222222222222")
     private UUID hubId;
 
-    // 소속 업체 ID (FeignClient로 유효성 검증)
     @Column(name = "company_id", nullable = false)
+    @Schema(description = "소속 업체 ID", example = "33333333-3333-3333-3333-333333333333")
     private UUID companyId;
 
-    // 상품 노출 여부 (true: 노출, false: 비노출)
     @Column(name = "is_visible", nullable = false)
     @Builder.Default
+    @Schema(description = "상품 노출 여부", example = "true")
     private Boolean isVisible = true;
 
-    // 상품 설명
     @Column(name = "description", columnDefinition = "TEXT")
+    @Schema(description = "상품 설명", example = "대용량 생수 상품입니다.", nullable = true)
     private String description;
 
-    // 가격 변동 이력 (1:N 관계, 양방향 매핑)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @Schema(description = "가격 변동 이력 목록")
     private List<ProductPriceHistory> priceHistories = new ArrayList<>();
+
 
     /**
      * 상품 정보 수정.
@@ -81,6 +87,29 @@ public class Product extends BaseEntity {
             addPriceHistory(this.price, price, reason, changedBy);
             this.price = price;
         }
+    }
+
+    /**
+     * 재고 차감.
+     */
+    public void reduceStock(int quantity) {
+        if (quantity <= 0) {
+            throw new CustomException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+        if (this.stockQuantity < quantity) {
+            throw new CustomException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+        this.stockQuantity -= quantity;
+    }
+
+    /**
+     * 재고 복구 (주문 취소 시).
+     */
+    public void restoreStock(int quantity) {
+        if (quantity <= 0) {
+            throw new CustomException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+        this.stockQuantity += quantity;
     }
 
     /**

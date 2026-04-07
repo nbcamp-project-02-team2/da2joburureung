@@ -8,6 +8,7 @@ import com.da2jobu.deliveryservice.domain.deliveryManager.model.vo.UserId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +22,8 @@ public interface DeliveryManagerRepository {
 
     boolean existsByUserId(UserId userId);
 
+    Optional<DeliveryManager> findByUserId(UserId userId);
+
     long countActiveByTypeAndNullHub(DeliveryManagerType type);
 
     long countActiveByTypeAndHub(DeliveryManagerType type, HubId hubId);
@@ -28,4 +31,8 @@ public interface DeliveryManagerRepository {
     int findMaxSeqByTypeAndNullHubForUpdate(DeliveryManagerType type);
 
     int findMaxSeqByTypeAndHubForUpdate(DeliveryManagerType type, HubId hubId);
+
+    List<DeliveryManager> findHubDeliveryManagersWithNoAssignment();
+
+    List<DeliveryManager> findAvailableCompanyManagersByHub(HubId of);
 }

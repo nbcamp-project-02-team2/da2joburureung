@@ -2,13 +2,12 @@ package com.delivery.hub.application.service;
 
 import com.delivery.hub.application.dto.CreateHubCommand;
 import com.delivery.hub.application.dto.SearchHubCommand;
+import com.delivery.hub.application.dto.UpdateHubCommand;
 import com.delivery.hub.domain.model.Hub;
 import com.delivery.hub.domain.repository.HubRepository;
-import common.client.KakaoAddressService;
 import com.delivery.hub.infrastructure.config.Redis.RestPage;
-import com.delivery.hub.interfaces.dto.Request.UpdateHubRequest;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;
-import jakarta.validation.Valid;
+import common.client.KakaoAddressService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -34,14 +33,24 @@ public class HubApiService {
     // 허브 저장
     @CacheEvict(cacheNames = "hubPages", allEntries = true)
     @Transactional
-    public HubResponse createHub(CreateHubCommand command) {
-        if (hubrepository.existsByHubName(command.hub_name())) {
-            throw new IllegalArgumentException("이미 존재하는 허브 이름입니다: " + command.hub_name());
+    public HubResponse createHub(CreateHubCommand command, String userRole, String username) {
+        if (!"MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("MASTER 권한만 허브를 생성할 수 있습니다.");
+        }
+
+        int count = hubrepository.countActiveHubByName(command.hub_name());
+        if (count > 0) {
+            throw new IllegalArgumentException("현재 운영 중인 허브 이름입니다: " + command.hub_name());
         }
 
         KakaoAddressService.GeoPoint geoPoint = kakaoaddressservice.getGeoPoint(command.address());
+
         Hub hub = Hub.createHub(
-                command.hub_name(), command.address(), geoPoint.latitude(), geoPoint.longitude()
+                command.hub_name(),
+                command.address(),
+                geoPoint.latitude(),
+                geoPoint.longitude(),
+                username
         );
 
         Hub save = hubrepository.save(hub);
@@ -52,7 +61,7 @@ public class HubApiService {
     //허브 전체 조회 및 검색
     @Cacheable(
             cacheNames = "hubPages",
-            key = "{#command.hub_name(), #command.address(), #pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
+            key = "{#command.hub_id(), #command.hub_name(), #command.address(), #pageable.pageNumber, #pageable.pageSize, #pageable.sort}")
     public RestPage<HubResponse> getHubs(SearchHubCommand command, Pageable pageable) {
         Page<HubResponse> result = hubrepository.searchHubs(command, pageable);
         return new RestPage<>(result);
@@ -60,8 +69,8 @@ public class HubApiService {
 
     //특정 허브 상세 내용 조회
     @Cacheable(cacheNames = "hubDetails", key = "#hubId")
-    public HubResponse getHub(@Valid UUID hubId) {
-        Hub hub = hubrepository.findById(hubId)
+    public HubResponse getHub(UUID hubId) {
+        Hub hub = hubrepository.findByHubIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브를 찾을 수 없습니다. ID: " + hubId));
 
         return HubResponse.detailFrom(hub);
@@ -71,32 +80,36 @@ public class HubApiService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(cacheNames = "hubPages", allEntries = true),
-            @CacheEvict(cacheNames = "hubDetails", key = "#hubId")
+            @CacheEvict(cacheNames = "hubDetails", key = "#command.hubId()")
     })
-    public HubResponse updateHub(UUID hubId, @Valid UpdateHubRequest request) {
+    public HubResponse updateHub(UpdateHubCommand command, String userRole, String username) {
+        if (!"MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("MASTER 권한만 허브를 수정할 수 있습니다.");
+        }
 
-        Hub hub = hubrepository.findById(hubId)
+        Hub hub = hubrepository.findByHubIdAndDeletedAtIsNull(command.hubId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 허브가 존재하지 않습니다."));
-        if (request.hub_name() != null && !hub.getHubName().equals(request.hub_name())) {
-            if (hubrepository.existsByHubName(request.hub_name())) {
+
+        if (command.hub_name() != null && !hub.getHubName().equals(command.hub_name())) {
+            if (hubrepository.countActiveHubByName(command.hub_name()) > 0) {
                 throw new IllegalArgumentException("이미 사용 중인 이름입니다.");
             }
         }
 
         BigDecimal newLat = hub.getLatitude();
         BigDecimal newLon = hub.getLongitude();
-        if (request.address() != null && !hub.getAddress().equals(request.address())) {
-            KakaoAddressService.GeoPoint geoPoint = kakaoaddressservice.getGeoPoint(request.address());
+        if (command.address() != null && !hub.getAddress().equals(command.address())) {
+            KakaoAddressService.GeoPoint geoPoint = kakaoaddressservice.getGeoPoint(command.address());
             newLat = geoPoint.latitude();
             newLon = geoPoint.longitude();
         }
 
         hub.updateHub(
-                request.hub_name() != null ? request.hub_name() : hub.getHubName(),
-                request.address() != null ? request.address() : hub.getAddress(),
+                command.hub_name() != null ? command.hub_name() : hub.getHubName(),
+                command.address() != null ? command.address() : hub.getAddress(),
                 newLat,
                 newLon,
-                "master"
+                username
         );
 
         return HubResponse.detailFrom(hub);
@@ -108,7 +121,10 @@ public class HubApiService {
             @CacheEvict(cacheNames = "hubPages", allEntries = true),
             @CacheEvict(cacheNames = "hubDetails", key = "#hubId")
     })
-    public void deleteHub(UUID hubId) {
+    public void deleteHub(UUID hubId, String userRole, String username) {
+        if (!"MASTER".equals(userRole)) {
+            throw new IllegalArgumentException("MASTER 권한만 허브를 삭제할 수 있습니다.");
+        }
 
         Hub hub = hubrepository.findById(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제하려는 허브가 존재하지 않습니다. ID: " + hubId));
@@ -116,7 +132,7 @@ public class HubApiService {
             throw new IllegalArgumentException("이미 삭제된 허브입니다.");
         }
 
-        hub.softDelete("master"); // TODO: 나중에 로그인한 유저 ID로 교체
+        hub.softDelete(username);
     }
 
     public List<HubResponse> findAllActiveHubs() {

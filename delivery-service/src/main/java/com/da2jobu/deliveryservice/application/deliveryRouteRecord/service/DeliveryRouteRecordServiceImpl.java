@@ -1,9 +1,12 @@
 package com.da2jobu.deliveryservice.application.deliveryRouteRecord.service;
 
+import com.da2jobu.deliveryservice.application.delivery.service.DeliveryPermissionChecker;
 import com.da2jobu.deliveryservice.application.deliveryRouteRecord.command.CreateDeliveryRouteRecordsCommand;
 import com.da2jobu.deliveryservice.application.deliveryRouteRecord.command.UpdateDeliveryRouteMetricsCommand;
 import com.da2jobu.deliveryservice.application.deliveryRouteRecord.command.UpdateDeliveryRouteStatusCommand;
 import com.da2jobu.deliveryservice.application.deliveryRouteRecord.dto.*;
+import com.da2jobu.deliveryservice.domain.delivery.entity.Delivery;
+import com.da2jobu.deliveryservice.domain.delivery.repository.DeliveryRepository;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.entity.DeliveryRouteRecord;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.repository.DeliveryRouteRecordRepository;
 import com.da2jobu.deliveryservice.domain.deliveryRouteRecord.vo.DeliveryRouteStatus;
@@ -22,6 +25,8 @@ import java.util.UUID;
 public class DeliveryRouteRecordServiceImpl implements DeliveryRouteRecordService {
 
     private final DeliveryRouteRecordRepository deliveryRouteRecordRepository;
+    private final DeliveryRepository deliveryRepository;
+    private final DeliveryPermissionChecker permissionChecker;
 
     @Override
     @Transactional
@@ -38,7 +43,7 @@ public class DeliveryRouteRecordServiceImpl implements DeliveryRouteRecordServic
                         .destinationType(route.destinationType())
                         .expectedDistanceKm(route.expectedDistanceKm())
                         .expectedDurationMin(route.expectedDurationMin())
-                        .status(DeliveryRouteStatus.WAITING)
+                        .status(DeliveryRouteStatus.HUB_WAITING)
                         .deliveryManagerId(route.deliveryManagerId())
                         .realDistanceKm(null)
                         .realDurationMin(null)
@@ -59,16 +64,23 @@ public class DeliveryRouteRecordServiceImpl implements DeliveryRouteRecordServic
     }
 
     @Override
-    public DeliveryRouteRecordDetailResponseDto getDeliveryRouteRecord(UUID routeRecordId) {
-        DeliveryRouteRecord routeRecord = deliveryRouteRecordRepository
-                .findByDeliveryRouteRecordIdAndDeletedAtIsNull(routeRecordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_ROUTE_RECORD_NOT_FOUND));
+    public DeliveryRouteRecordDetailResponseDto getDeliveryRouteRecord(UUID routeRecordId,
+                                                                        UUID requesterId, String requesterRole) {
+        DeliveryRouteRecord routeRecord = findRouteRecordOrThrow(routeRecordId);
+        Delivery delivery = findDeliveryOrThrow(routeRecord.getDeliveryId());
+
+        permissionChecker.checkRouteRecordAccess(routeRecord, delivery, requesterId, requesterRole);
 
         return DeliveryRouteRecordDetailResponseDto.from(routeRecord);
     }
 
     @Override
-    public DeliveryRouteRecordListResponseDto getDeliveryRouteRecords(UUID deliveryId) {
+    public DeliveryRouteRecordListResponseDto getDeliveryRouteRecords(UUID deliveryId,
+                                                                       UUID requesterId, String requesterRole) {
+        Delivery delivery = findDeliveryOrThrow(deliveryId);
+
+        permissionChecker.checkDeliveryRouteListAccess(delivery, requesterId, requesterRole);
+
         List<DeliveryRouteRecordSummaryResponseDto> routes = deliveryRouteRecordRepository
                 .findAllByDeliveryIdAndDeletedAtIsNullOrderBySequenceAsc(deliveryId)
                 .stream()
@@ -82,11 +94,13 @@ public class DeliveryRouteRecordServiceImpl implements DeliveryRouteRecordServic
     @Transactional
     public UpdateDeliveryRouteStatusResponseDto updateDeliveryRouteStatus(
             UUID routeRecordId,
-            UpdateDeliveryRouteStatusCommand command
+            UpdateDeliveryRouteStatusCommand command,
+            UUID requesterId, String requesterRole
     ) {
-        DeliveryRouteRecord routeRecord = deliveryRouteRecordRepository
-                .findByDeliveryRouteRecordIdAndDeletedAtIsNull(routeRecordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_ROUTE_RECORD_NOT_FOUND));
+        DeliveryRouteRecord routeRecord = findRouteRecordOrThrow(routeRecordId);
+        Delivery delivery = findDeliveryOrThrow(routeRecord.getDeliveryId());
+
+        permissionChecker.checkRouteRecordModifyAccess(routeRecord, delivery, requesterId, requesterRole);
 
         routeRecord.updateStatus(command.status());
 
@@ -97,11 +111,13 @@ public class DeliveryRouteRecordServiceImpl implements DeliveryRouteRecordServic
     @Transactional
     public UpdateDeliveryRouteMetricsResponseDto updateDeliveryRouteMetrics(
             UUID routeRecordId,
-            UpdateDeliveryRouteMetricsCommand command
+            UpdateDeliveryRouteMetricsCommand command,
+            UUID requesterId, String requesterRole
     ) {
-        DeliveryRouteRecord routeRecord = deliveryRouteRecordRepository
-                .findByDeliveryRouteRecordIdAndDeletedAtIsNull(routeRecordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_ROUTE_RECORD_NOT_FOUND));
+        DeliveryRouteRecord routeRecord = findRouteRecordOrThrow(routeRecordId);
+        Delivery delivery = findDeliveryOrThrow(routeRecord.getDeliveryId());
+
+        permissionChecker.checkRouteRecordModifyAccess(routeRecord, delivery, requesterId, requesterRole);
 
         routeRecord.updateMetrics(command.actualDistanceKm(), command.actualDurationMin());
         routeRecord.updateRemainDurationMin(command.remainDurationMin());
@@ -111,13 +127,28 @@ public class DeliveryRouteRecordServiceImpl implements DeliveryRouteRecordServic
 
     @Override
     @Transactional
-    public DeleteDeliveryRouteRecordResponseDto deleteDeliveryRouteRecord(UUID routeRecordId, String deletedBy) {
-        DeliveryRouteRecord routeRecord = deliveryRouteRecordRepository
-                .findByDeliveryRouteRecordIdAndDeletedAtIsNull(routeRecordId)
-                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_ROUTE_RECORD_NOT_FOUND));
+    public DeleteDeliveryRouteRecordResponseDto deleteDeliveryRouteRecord(UUID routeRecordId, String deletedBy,
+                                                                           UUID requesterId, String requesterRole) {
+        DeliveryRouteRecord routeRecord = findRouteRecordOrThrow(routeRecordId);
+        Delivery delivery = findDeliveryOrThrow(routeRecord.getDeliveryId());
+
+        permissionChecker.checkRouteRecordDeleteAccess(routeRecord, delivery, requesterId, requesterRole);
 
         routeRecord.softDelete(deletedBy);
 
         return DeleteDeliveryRouteRecordResponseDto.of("배송 경로가 논리 삭제되었습니다.");
+    }
+
+    // ── private helpers ────────────────────────────────────────────────────────
+
+    private DeliveryRouteRecord findRouteRecordOrThrow(UUID routeRecordId) {
+        return deliveryRouteRecordRepository
+                .findByDeliveryRouteRecordIdAndDeletedAtIsNull(routeRecordId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_ROUTE_RECORD_NOT_FOUND));
+    }
+
+    private Delivery findDeliveryOrThrow(UUID deliveryId) {
+        return deliveryRepository.findByDeliveryIdAndDeletedAtIsNull(deliveryId)
+                .orElseThrow(() -> new CustomException(ErrorCode.DELIVERY_NOT_FOUND));
     }
 }

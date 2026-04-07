@@ -35,6 +35,7 @@ public class AuthApplicationService {
                 request.username(),
                 encodedPassword,
                 request.name(),
+                request.email(),
                 request.slackId(),
                 request.role(),
                 request.hubId(),

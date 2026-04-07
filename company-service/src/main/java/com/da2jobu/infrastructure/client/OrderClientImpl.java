@@ -1,6 +1,6 @@
 package com.da2jobu.infrastructure.client;
 
-import com.da2jobu.application.service.OrderClient;
+import com.da2jobu.application.client.OrderClient;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -23,7 +23,7 @@ public class OrderClientImpl implements OrderClient {
     @CircuitBreaker(name = "orderService", fallbackMethod = "orderServiceFallback")
     public boolean hasActiveOrders(UUID companyId) {
         // FeignException은 Retry가 재시도, 소진 시 CB fallback
-        return orderFeignClient.hasActiveOrders(companyId);
+        return orderFeignClient.countActiveOrders(companyId).getData() > 0;
     }
 
     private boolean orderServiceFallback(UUID companyId, Throwable t) {

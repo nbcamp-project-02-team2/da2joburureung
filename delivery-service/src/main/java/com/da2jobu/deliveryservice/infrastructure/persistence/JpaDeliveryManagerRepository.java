@@ -19,6 +19,9 @@ public interface JpaDeliveryManagerRepository extends JpaRepository<DeliveryMana
     // 배송담당자로 등록되어있는지 여부
     boolean existsByUserId_UserId(UUID userId);
 
+    // userId로 배송담당자 단건 조회
+    Optional<DeliveryManager> findByUserId_UserIdAndDeletedAtIsNull(UUID userId);
+
     // 허브 배송 담당자 수 (락 획득)
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<DeliveryManager> findByTypeAndHubId_HubIdIsNullAndDeletedAtIsNull(DeliveryManagerType type);

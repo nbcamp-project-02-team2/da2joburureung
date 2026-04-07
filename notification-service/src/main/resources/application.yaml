@@ -10,7 +10,7 @@ spring:
     password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     defer-datasource-initialization: false
     show-sql: true
     open-in-view: false
@@ -36,3 +36,10 @@ slack:
 
 server:
   port: ${NOTIFICATION_SERVER_PORT:8100}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true

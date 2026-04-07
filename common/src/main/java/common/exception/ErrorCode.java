@@ -28,6 +28,7 @@ public enum ErrorCode {
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "LOGIN_FAILED", "아이디 또는 비밀번호가 올바르지 않습니다."),
     CANNOT_DELETE_SELF(HttpStatus.FORBIDDEN,"CANNOT_DELETE_SELF","본인 계정은 삭제할 수 없습니다."),
     CANNOT_UPDATE_ROLE_SELF(HttpStatus.FORBIDDEN,"CANNOT_UPDATE_ROLE_SELF","본인 권한은 변경할 수 없습니다."),
+    USER_NOT_APPROVED(HttpStatus.FORBIDDEN, "USER_NOT_APPROVED", "승인되지 않은 사용자입니다."),
 
     // ── Common ────────────────────────────────────────
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "INVALID_INPUT", "입력값이 유효하지 않습니다."),
@@ -57,6 +58,9 @@ public enum ErrorCode {
     COMPANY_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "COMPANY_SERVICE_UNAVAILABLE", "업체 서비스에 일시적으로 접근할 수 없습니다."),
     USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "USER_SERVICE_UNAVAILABLE", "사용자 서비스에 일시적으로 접근할 수 없습니다."),
 
+    // ── hub ───────────────────────────────────────
+    HUB_NOT_FOUND(HttpStatus.NOT_FOUND, "HUB_NOT_FOUND", "존재하지 않는 허브입니다."),
+
     // ── Delivery ────────────────────────────────────────
     DELIVERY_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_NOT_FOUND", "존재하지 않는 배송입니다."),
     DELIVERY_ALREADY_DELETED(HttpStatus.CONFLICT, "DELIVERY_ALREADY_DELETED", "이미 삭제된 배송입니다."),
@@ -68,6 +72,18 @@ public enum ErrorCode {
     DELIVERY_ROUTE_RECORD_ALREADY_DELETED(HttpStatus.CONFLICT, "DELIVERY_ROUTE_RECORD_ALREADY_DELETED", "이미 삭제된 배송 경로 기록입니다."),
     INVALID_DELIVERY_ROUTE_STATUS(HttpStatus.BAD_REQUEST, "INVALID_DELIVERY_ROUTE_STATUS", "유효하지 않은 배송 경로 상태입니다."),
 
+    // ── Order ─────────────────────────────────────────────────────────────────
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "존재하지 않는 주문입니다."),
+    ORDER_CREATE_FORBIDDEN(HttpStatus.FORBIDDEN, "ORDER_CREATE_FORBIDDEN", "주문 생성 권한이 없습니다."),
+    ORDER_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "ORDER_UPDATE_FORBIDDEN", "주문 수정 권한이 없습니다."),
+    ORDER_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "ORDER_DELETE_FORBIDDEN", "주문 삭제 권한이 없습니다."),
+    ORDER_ALREADY_ACCEPTED(HttpStatus.CONFLICT, "ORDER_ALREADY_ACCEPTED", "이미 수락된 주문입니다."),
+    ORDER_ALREADY_CANCELLED(HttpStatus.CONFLICT, "ORDER_ALREADY_CANCELLED", "이미 취소된 주문입니다."),
+    ORDER_INVALID_STATUS_TRANSITION(HttpStatus.CONFLICT, "ORDER_INVALID_STATUS_TRANSITION", "현재 상태에서 해당 상태로 전환할 수 없습니다."),
+    INSUFFICIENT_STOCK(HttpStatus.CONFLICT, "INSUFFICIENT_STOCK", "재고가 부족합니다."),
+    INVALID_STOCK_QUANTITY(HttpStatus.BAD_REQUEST, "INVALID_STOCK_QUANTITY", "유효하지 않은 재고 수량입니다."),
+    PRODUCT_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "PRODUCT_SERVICE_UNAVAILABLE", "상품 서비스에 일시적으로 접근할 수 없습니다."),
+
     // ── Delivery Manager ─────────────────────────────────────────────────────
     DELIVERY_MANAGER_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_MANAGER_NOT_FOUND", "존재하지 않는 배송 담당자입니다."),
     DELIVERY_MANAGER_ALREADY_EXISTS(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ALREADY_EXISTS", "이미 등록된 배송 담당자입니다."),
@@ -76,6 +92,11 @@ public enum ErrorCode {
     DELIVERY_MANAGER_HUB_REQUIRED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_REQUIRED", "업체 배송 담당자는 소속 허브를 지정해야 합니다."),
     DELIVERY_MANAGER_HUB_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "DELIVERY_MANAGER_HUB_NOT_ALLOWED", "허브 배송 담당자는 소속 허브를 지정할 수 없습니다."),
     DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다."),
+    DELIVERY_MANAGER_ACTIVE(HttpStatus.CONFLICT, "DELIVERY_MANAGER_ACTIVE", "현재 배정되어 있거나 배송 중인 담당자는 삭제할 수 없습니다."),
+    DELIVERY_ASSIGNMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "DELIVERY_ASSIGNMENT_NOT_FOUND", "존재하지 않는 배송 배정입니다."),
+    NO_AVAILABLE_COMPANY_DELIVERY_MANAGER(HttpStatus.CONFLICT, "NO_AVAILABLE_COMPANY_DELIVERY_MANAGER", "배정 가능한 업체 배송 담당자가 없습니다."),
+    ROUTE_OPTIMIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "ROUTE_OPTIMIZATION_FAILED", "경로 최적화에 실패했습니다. 제약 완화 후에도 해를 찾지 못했습니다."),
+    DELIVERY_MANAGER_HUB_MISMATCH(HttpStatus.FORBIDDEN, "DELIVERY_MANAGER_HUB_MISMATCH", "담당 허브의 배송 담당자만 관리할 수 있습니다."),
 
     // ── Notification ─────────────────────────────────────────────────────
     NOTIFICATION_NOT_SEND(HttpStatus.BAD_REQUEST, "NOTIFICATION_NOT_SEND", "메세지가 발송될 수 없습니다."),

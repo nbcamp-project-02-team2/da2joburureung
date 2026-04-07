@@ -2,17 +2,19 @@ package com.delivery.hub.interfaces.controller;
 
 import com.delivery.hub.application.dto.CreateHubCommand;
 import com.delivery.hub.application.dto.SearchHubCommand;
+import com.delivery.hub.application.dto.UpdateHubCommand;
+import com.delivery.hub.application.service.HubApiService;
 import com.delivery.hub.infrastructure.config.Redis.RestPage;
 import com.delivery.hub.interfaces.dto.Request.CreateHubRequest;
 import com.delivery.hub.interfaces.dto.Request.SearchHubRequest;
 import com.delivery.hub.interfaces.dto.Request.UpdateHubRequest;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;
 import common.dto.CommonResponse;
-import com.delivery.hub.application.service.HubApiService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,9 +26,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/hubs")
+@RequestMapping("/api/internal/hubs")
 @Tag(name = "Hub API", description = "허브 관리 API")
 public class HubController {
 
@@ -34,11 +37,14 @@ public class HubController {
 
     @PostMapping
     @Operation(summary = "신규 허브 저장", description = "새로운 허브를 저장합니다.")
-    public ResponseEntity<CommonResponse<HubResponse>> createHub(@RequestBody @Valid CreateHubRequest request) {
+    public ResponseEntity<CommonResponse<HubResponse>> createHub(
+            @Valid @RequestBody CreateHubRequest request,
+            @RequestHeader("X-User-Role") String userRole,
+            @RequestHeader("X-Username") String username) {
 
-        CreateHubCommand command = CreateHubCommand.of(request.hub_name(),request.address());
+        CreateHubCommand command = CreateHubCommand.of(request.hub_name(), request.address());
 
-        HubResponse response = hubApiService.createHub(command);
+        HubResponse response = hubApiService.createHub(command, userRole, username);
 
         return CommonResponse.created("허브가 성공적으로 생성되었습니다.", response);
     }
@@ -49,16 +55,10 @@ public class HubController {
             @ModelAttribute SearchHubRequest searchRequest,
             @PageableDefault(size = 10, page = 0, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        SearchHubCommand command = SearchHubCommand.of(searchRequest.hub_name(),searchRequest.address());
+        SearchHubCommand command = SearchHubCommand.of(searchRequest.hub_id(), searchRequest.hub_name(), searchRequest.address());
 
-        int size = pageable.getPageSize();
-        if (size != 10 && size != 30 && size != 50) {
-            pageable = PageRequest.of(
-                    pageable.getPageNumber(),
-
-                    10,
-                    pageable.getSort()
-            );
+        if (pageable.getPageSize() != 10 && pageable.getPageSize() != 30 && pageable.getPageSize() != 50) {
+            pageable = PageRequest.of(pageable.getPageNumber(), 10, pageable.getSort());
         }
 
         RestPage<HubResponse> response = hubApiService.getHubs(command, pageable);
@@ -68,7 +68,7 @@ public class HubController {
 
     @GetMapping("/{hub_id}")
     @Operation(summary = "특정 허브 검색", description = "특정 허브의 상세 정보를 받아옵니다")
-    public ResponseEntity<CommonResponse<HubResponse>> getHub(@Valid @PathVariable("hub_id") UUID hubId) {
+    public ResponseEntity<CommonResponse<HubResponse>> getHub(@PathVariable("hub_id") UUID hubId) {
 
         HubResponse response = hubApiService.getHub(hubId);
 
@@ -77,17 +77,27 @@ public class HubController {
 
     @PatchMapping("/{hub_id}")
     @Operation(summary = "특정 허브 수정", description = "특정 허브의 내용을 수정합니다")
-    public ResponseEntity<CommonResponse<HubResponse>> updateHub(@Valid @RequestBody UpdateHubRequest request, @PathVariable UUID hub_id) {
+    public ResponseEntity<CommonResponse<HubResponse>> updateHub(
+            @PathVariable("hub_id") UUID hubId,
+            @Valid @RequestBody UpdateHubRequest request,
+            @RequestHeader("X-User-Role") String userRole,
+            @RequestHeader("X-Username") String username) {
 
-        HubResponse response = hubApiService.updateHub(hub_id, request);
+        UpdateHubCommand command = UpdateHubCommand.of(hubId, request.hub_name(), request.address());
 
-        return CommonResponse.ok(response);
+        HubResponse response = hubApiService.updateHub(command, userRole, username);
+
+        return CommonResponse.ok("허브가 성공적으로 수정되었습니다.", response);
     }
 
     @DeleteMapping("/{hub_id}")
     @Operation(summary = "허브 삭제", description = "허브를 삭제합니다")
-    public ResponseEntity<CommonResponse<?>> deleteHub(@PathVariable("hub_id") UUID hub_id) {
-        hubApiService.deleteHub(hub_id);
+    public ResponseEntity<CommonResponse<?>> deleteHub(
+            @PathVariable("hub_id") UUID hubId,
+            @RequestHeader("X-User-Role") String userRole,
+            @RequestHeader("X-Username") String username) {
+
+        hubApiService.deleteHub(hubId, userRole, username);
 
         return CommonResponse.noContent();
     }

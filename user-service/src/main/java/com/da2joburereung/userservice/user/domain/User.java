@@ -28,6 +28,9 @@ public class User extends BaseEntity {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    @Column(name = "email", nullable = false, unique = true, length = 50)
+    private String email;
+
     @Column(name = "slack_id", nullable = false, length = 100)
     private String slackId;
 
@@ -51,6 +54,7 @@ public class User extends BaseEntity {
             String username,
             String password,
             String name,
+            String email,
             String slackId,
             UserRole role,
             UserStatus status,
@@ -61,6 +65,7 @@ public class User extends BaseEntity {
         this.username = username;
         this.password = password;
         this.name = name;
+        this.email = email;
         this.slackId = slackId;
         this.role = role;
         this.status = status;
@@ -72,6 +77,7 @@ public class User extends BaseEntity {
             String username,
             String password,
             String name,
+            String email,
             String slackId,
             UserRole role,
             UUID hubId,
@@ -82,6 +88,7 @@ public class User extends BaseEntity {
                 .username(username)
                 .password(password)
                 .name(name)
+                .email(email)
                 .slackId(slackId)
                 .role(role)
                 .status(UserStatus.PENDING)
@@ -101,6 +108,7 @@ public class User extends BaseEntity {
                 .username(username)
                 .password(password)
                 .name(name)
+                .email("master@email.com")
                 .slackId(slackId)
                 .role(UserRole.MASTER)
                 .status(UserStatus.APPROVED)

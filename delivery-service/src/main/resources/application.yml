@@ -1,8 +1,11 @@
 spring:
+  application:
+    name: delivery-service
+
   datasource:
-    url: jdbc:postgresql://localhost:5094/delivery_db
-    username: postgres
-    password: 1234
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/delivery_db}
+    username: ${SPRING_DATASOURCE_USERNAME:da2jobu}
+    password: ${SPRING_DATASOURCE_PASSWORD:p@ssw0rd}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -11,7 +14,10 @@ spring:
     show-sql: true
 
   kafka:
-    bootstrap-servers:  ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       group-id: delivery-service
       auto-offset-reset: earliest
@@ -24,11 +30,30 @@ kakao:
   api:
     key: ${KAKAO_API_KEY:}
 
-server:
-  port: 8094
+# 내부 API 보호용 Pre-shared secret.
+# 서비스 간 직접 호출 시 X-Internal-Secret 헤더에 이 값을 설정해야 한다.
+# 미설정(빈 값)이면 헤더 검증을 건너뛰고 네트워크 격리에만 의존한다.
+delivery:
+  internal:
+    api:
+      secret: ${INTERNAL_API_SECRET:}
 
+server:
+  port: ${DELIVERY_SERVER_PORT:8094}
 
 eureka:
   client:
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs

@@ -1,17 +1,20 @@
+server:
+  port: 8088
+
 spring:
   datasource:
-    url: jdbc:postgresql://company-db:5432/company
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/${COMPANY_DB:company_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:da2jobu}
+    password: ${SPRING_DATASOURCE_PASSWORD:p@ssw0rd}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
   data:
     redis:
       host: redis
-      port: 6739
+      port: 6379
   kafka:
     bootstrap-servers: kafka:9092
     producer:
@@ -28,8 +31,6 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 
-internal:
-  token: ${INTERNAL_TOKEN}
 
 resilience4j:
   circuitbreaker:
@@ -46,6 +47,8 @@ resilience4j:
       hubService:
         base-config: default
       orderService:
+        base-config: default
+      userService:
         base-config: default
   retry:
     retry-aspect-order: 2
@@ -64,8 +67,20 @@ resilience4j:
         base-config: default
       orderService:
         base-config: default
+      userService:
+        base-config: default
 
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka-server:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+    register-with-eureka: true
+    fetch-registry: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs

@@ -1,17 +1,18 @@
 package com.delivery.hubpath.interfaces.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 @Schema(description = "허브 경로 요청")
 public record CreateHubPathRequest(
 
-    @NotBlank(message = "출발 허브 이름은 필수 입니다")
-    @Schema(description = "허브 이름", example = "경기 남부 허브")
-    String departHubName,
+        @NotNull(message = "출발 허브 ID는 필수입니다")
+        @Schema(description = "허브 ID")
+        UUID departHubId,
 
-    @NotBlank(message = "도착 허브 이름은 필수 입니다.")
-    @Schema(description = "허브 이름", example = "경기 남부 허브")
-    String arriveHubName
+        @NotNull(message = "도착 허브 ID는 필수입니다")
+        @Schema(description = "허브 ID")
+        UUID arriveHubId
 
 ){}

@@ -1,5 +1,6 @@
 package com.delivery.hubpath.infrastructure.client;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PageResponse<T> {
 
     private List<T> content;          // 실제 데이터 리스트 (HubResponse 등)

@@ -25,7 +25,8 @@ public class OrderAcceptedEventListener {
                     event.supplierId(),
                     event.receiverId(),
                     event.requirements(),
-                    event.createdBy()
+                    event.createdBy(),
+                    event.desiredDeliveryAt()
             );
 
             createDeliveryFromOrderService.execute(command);

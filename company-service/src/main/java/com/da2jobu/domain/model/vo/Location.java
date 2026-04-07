@@ -1,5 +1,6 @@
 package com.da2jobu.domain.model.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,10 +11,16 @@ import java.math.BigDecimal;
 @Embeddable
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Schema(description = "업체 위치 정보 VO")
 public class Location {
 
+    @Schema(description = "주소", example = "서울특별시 강남구 테헤란로 123")
     private String address;
+
+    @Schema(description = "위도", example = "37.498095")
     private BigDecimal latitude;
+
+    @Schema(description = "경도", example = "127.027610")
     private BigDecimal longitude;
 
     public static Location of(String address, BigDecimal latitude, BigDecimal longitude) {

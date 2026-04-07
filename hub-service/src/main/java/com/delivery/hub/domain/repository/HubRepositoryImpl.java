@@ -2,7 +2,7 @@ package com.delivery.hub.domain.repository;
 
 import com.delivery.hub.application.dto.SearchHubCommand;
 import com.delivery.hub.domain.model.Hub;
-import com.delivery.hub.domain.model.QHub; // 빌드 시 생성된 Q클래스
+import com.delivery.hub.domain.model.QHub;
 import com.delivery.hub.interfaces.dto.Respone.HubResponse;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -26,12 +26,14 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
         List<Hub> content = queryFactory
                 .selectFrom(hub)
                 .where(
+                        hubIdEq(command.hub_id()),
                         nameContains(command.hub_name()),
-                        addressContains(command.address())
+                        addressContains(command.address()),
+                        isNotDeleted()
                 )
-                .offset(pageable.getOffset())   // 몇 번째부터 시작할지
-                .limit(pageable.getPageSize()) // 한 페이지에 몇 개 보여줄지
-                .orderBy(hub.createdAt.desc()) // 기본 정렬 (최신순)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(hub.createdAt.desc())
                 .fetch();
 
         // 전체 개수 조회
@@ -39,8 +41,10 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
                 .select(hub.count())
                 .from(hub)
                 .where(
+                        hubIdEq(command.hub_id()),
                         nameContains(command.hub_name()),
-                        addressContains(command.address())
+                        addressContains(command.address()),
+                        isNotDeleted()
                 )
                 .fetchOne();
 
@@ -51,6 +55,14 @@ public class HubRepositoryImpl implements HubRepositoryCustom {
 
         // total이 null일 경우를 대비해 0L 처리
         return new PageImpl<>(dtoList, pageable, total != null ? total : 0L);
+    }
+
+    private BooleanExpression hubIdEq(java.util.UUID hubId) {
+        return hubId != null ? QHub.hub.hubId.eq(hubId) : null;
+    }
+
+    private BooleanExpression isNotDeleted() {
+        return QHub.hub.deletedAt.isNull();
     }
 
     private BooleanExpression nameContains(String hubName) {

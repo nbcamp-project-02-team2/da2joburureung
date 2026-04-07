@@ -1,5 +1,6 @@
 package com.da2jobu.productservice.domain.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,36 +19,38 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
+@Schema(description = "상품 가격 변동 이력 엔티티")
 public class ProductPriceHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
+    @Schema(description = "가격 이력 ID", example = "44444444-4444-4444-4444-444444444444")
     private UUID id;
 
-    // 상품과의 N:1 관계 (외래키: product_id)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
+    @Schema(description = "상품")
     private Product product;
 
-    // 변경 전 가격
     @Column(name = "previous_price", nullable = false, precision = 15, scale = 2)
+    @Schema(description = "변경 전 가격", example = "1500.00")
     private BigDecimal previousPrice;
 
-    // 변경 후 가격
     @Column(name = "new_price", nullable = false, precision = 15, scale = 2)
+    @Schema(description = "변경 후 가격", example = "1700.00")
     private BigDecimal newPrice;
 
-    // 가격 변동 사유 (예: "원자재 가격 인상", "할인 이벤트")
     @Column(name = "reason", length = 500)
+    @Schema(description = "가격 변경 사유", example = "원자재 가격 인상", nullable = true)
     private String reason;
 
-    // 가격을 변경한 사용자 식별 정보
     @Column(name = "changed_by", nullable = false)
+    @Schema(description = "변경자", example = "honggildong")
     private String changedBy;
 
-    // 변경 일시
     @Column(name = "changed_at", nullable = false, updatable = false)
     @Builder.Default
+    @Schema(description = "변경 시각", example = "2026-04-07T11:00:00")
     private LocalDateTime changedAt = LocalDateTime.now();
 }

@@ -1,6 +1,6 @@
 package com.da2jobu.infrastructure.client;
 
-import com.da2jobu.application.service.HubClient;
+import com.da2jobu.application.client.HubClient;
 import common.exception.CustomException;
 import common.exception.ErrorCode;
 import feign.FeignException;
@@ -24,7 +24,7 @@ public class HubClientImpl implements HubClient {
     @CircuitBreaker(name = "hubService", fallbackMethod = "hubServiceFallback")
     public boolean validateHubExists(UUID hubId) {
         try {
-            hubFeignClient.getHub(hubId);
+            hubFeignClient.getHubs(hubId,10,0);
             return true;
         } catch (FeignException.NotFound e) {
             return false;

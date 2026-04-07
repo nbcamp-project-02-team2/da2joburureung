@@ -6,10 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -18,9 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @SuperBuilder
-@SQLRestriction("deleted_at IS NULL")
 @Schema(description = "허브 정보 엔티티")
-public class Hub extends BaseEntity{
+public class Hub extends BaseEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -29,7 +26,7 @@ public class Hub extends BaseEntity{
     @Schema(description = "허브 식별자 (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
     private UUID hubId;
 
-    @Column(name = "hub_name", nullable = false,unique = true)
+    @Column(name = "hub_name", nullable = false)
     @Schema(description = "허브 이름", example = "경기 남부 허브")
     private String hubName;
 
@@ -45,18 +42,17 @@ public class Hub extends BaseEntity{
     @Schema(description = "경도 (예: 127.1234)")
     private BigDecimal longitude;
 
-    public static Hub createHub(String hubName, String address, BigDecimal latitude, BigDecimal longitude) {
-        return Hub.builder()
+    public static Hub createHub(String hubName, String address, BigDecimal latitude, BigDecimal longitude, String createdBy) {
+        return (Hub) Hub.builder()
                 .hubName(hubName)
                 .address(address)
                 .latitude(latitude)
                 .longitude(longitude)
-                .createdBy("master")
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 
     public void updateHub(String hubName, String address, BigDecimal latitude, BigDecimal longitude, String updatedBy) {
+        this.hubName = hubName;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;

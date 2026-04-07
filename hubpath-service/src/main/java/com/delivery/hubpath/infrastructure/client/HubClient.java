@@ -1,23 +1,24 @@
 package com.delivery.hubpath.infrastructure.client;
 
+import com.delivery.hubpath.infrastructure.config.FeignClientInterceptor;
 import common.dto.CommonResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.UUID;
 
-@FeignClient(name = "hub-service", url = "http://localhost:8084")
+@FeignClient(name = "HUB-SERVICE", configuration = FeignClientInterceptor.class)
 public interface HubClient {
 
-    @GetMapping("/api/hubs")
-    CommonResponse<PageResponse<HubResponse>> getHubs(
-            @RequestParam(value = "hub_name", required = false) String hubName,
-            @RequestParam(value = "address", required = false) String address,
+    @GetMapping("/api/internal/hubs")
+    CommonResponse getHubs(
+            @RequestParam(value = "hub_id", required = false) UUID hubId,
             @RequestParam(value = "size") int size,
             @RequestParam(value = "page") int page
     );
 
-    @GetMapping("/api/hubs/all")
+    @GetMapping("/api/internal/hubs/all")
     CommonResponse<List<HubResponse>> getAllHubs();
 }

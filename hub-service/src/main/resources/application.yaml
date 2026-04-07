@@ -2,6 +2,12 @@ spring:
   application:
     name: hub-service
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key-spec: ${JWT_SECRET}
+
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:redis}
@@ -10,7 +16,7 @@ spring:
       type: redis
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://hub-db:5432/hub}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/${HUB_DB}}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver

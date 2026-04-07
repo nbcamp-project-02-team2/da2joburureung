@@ -2,6 +2,12 @@ spring:
   application:
     name: hubpath-service
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key-spec: ${JWT_SECRET}
+
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
@@ -10,7 +16,7 @@ spring:
       type: redis
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://hub-db:5432/hub}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/${HUB_DB}}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -26,9 +32,11 @@ spring:
         temp:
           use_jdbc_metadata_defaults: false
 
-  springdoc:
-    swagger-ui:
-      path: /swagger-ui.html
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
 
 logging:
   level:
@@ -38,7 +46,7 @@ logging:
 
 kakao:
   api:
-    key: ${KAKAO_API_KEY:496564f3c310718b565e9b52f14c43a0}
+    key: ${KAKAO_API_KEY}
 
 server:
   port: ${SERVER_PORT:8086}

@@ -2,6 +2,7 @@ package com.da2jobu.domain.model.entity;
 
 import com.da2jobu.domain.model.vo.*;
 import common.entity.BaseEntity;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,21 +16,26 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
+@Schema(description = "업체 엔티티")
 public class Company extends BaseEntity {
 
     @EmbeddedId
     @AttributeOverride(name = "companyId", column = @Column(name = "company_id"))
+    @Schema(description = "업체 ID")
     private CompanyId companyId;
 
     @Embedded
     @AttributeOverride(name = "hubId", column = @Column(name = "hub_id", nullable = false))
+    @Schema(description = "소속 허브 ID")
     private HubId hubId;
 
     @Column(nullable = false)
+    @Schema(description = "업체명", example = "서울상사")
     private String name;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Schema(description = "업체 타입", example = "PRODUCER")
     private CompanyType type;
 
     @Embedded
