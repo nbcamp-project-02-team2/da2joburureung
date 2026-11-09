@@ -5,6 +5,7 @@ import com.da2jobu.deliveryservice.application.delivery.command.CreateDeliveryFr
 import com.da2jobu.deliveryservice.application.delivery.dto.CreateDeliveryResponseDto;
 import com.da2jobu.deliveryservice.application.delivery.event.DeliveryCreatedEvent;
 import com.da2jobu.deliveryservice.application.delivery.event.DeliveryPreparedEvent;
+import com.da2jobu.deliveryservice.application.delivery.util.DistanceCalculator;
 import com.da2jobu.deliveryservice.application.deliveryManager.service.HubDeliveryAssignmentService;
 import com.da2jobu.deliveryservice.domain.delivery.repository.DeliveryRepository;
 import com.da2jobu.deliveryservice.domain.delivery.vo.DeliveryStatus;
@@ -30,10 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -86,6 +84,9 @@ class CreateDeliveryFromOrderServiceImplTest {
     @InjectMocks
     private CreateDeliveryFromOrderServiceImpl createDeliveryFromOrderService;
 
+    @Spy
+    private DistanceCalculator distanceCalculator = new DistanceCalculator();
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -105,23 +106,37 @@ class CreateDeliveryFromOrderServiceImplTest {
             createDeliveryFromOrderService.execute(fixture.command);
 
             // then
-            verify(userServiceClient, times(1)).getUserByUsername("receiver_manager");
-            verify(companyServiceClient, times(1)).getCompany(fixture.supplierId);
-            verify(companyServiceClient, times(1)).getCompany(fixture.receiverId);
+            verify(userServiceClient, times(1))
+                    .getUserByUsername("receiver_manager");
+            verify(companyServiceClient, times(1))
+                    .getCompany(fixture.supplierId);
+            verify(companyServiceClient, times(1))
+                    .getCompany(fixture.receiverId);
             verify(hubPathServiceClient, times(1))
                     .getHubPath("경기 북부 센터", "부산광역시 센터");
-            verify(orderServiceClient, times(1)).getOrder(fixture.orderId);
-            verify(productServiceClient, times(1)).getProduct(fixture.productId);
-            verify(deliveryService, times(1)).createDelivery(any());
-            verify(deliveryEventProducer, times(1)).publishDeliveryCreated(any());
-            verify(deliveryPreparedEventProducer, times(1)).publish(any());
-            verify(hubDeliveryAssignmentService, times(1))
-                    .assignHubDelivery(any(), any(), eq(fixture.supplierHubId));
+            verify(orderServiceClient, times(1))
+                    .getOrder(fixture.orderId);
+            verify(productServiceClient, times(1))
+                    .getProduct(fixture.productId);
+            verify(deliveryService, times(1))
+                    .createDelivery(any());
+            verify(deliveryEventProducer, times(1))
+                    .publishDeliveryCreated(any());
+            verify(deliveryPreparedEventProducer, times(1))
+                    .publish(any());
 
-            ArgumentCaptor<List<DeliveryRouteRecord>> routeRecordCaptor = ArgumentCaptor.forClass(List.class);
-            verify(deliveryRouteRecordRepository, times(1)).saveAll(routeRecordCaptor.capture());
+            // Hub delivery assignment is currently disabled.
+            verifyNoInteractions(hubDeliveryAssignmentService);
 
-            List<DeliveryRouteRecord> savedRecords = routeRecordCaptor.getValue();
+            ArgumentCaptor<List<DeliveryRouteRecord>> routeRecordCaptor =
+                    ArgumentCaptor.forClass(List.class);
+
+            verify(deliveryRouteRecordRepository, times(1))
+                    .saveAll(routeRecordCaptor.capture());
+
+            List<DeliveryRouteRecord> savedRecords =
+                    routeRecordCaptor.getValue();
+
             assertThat(savedRecords).hasSize(4);
 
             DeliveryRouteRecord route0 = savedRecords.get(0);
@@ -129,50 +144,88 @@ class CreateDeliveryFromOrderServiceImplTest {
             DeliveryRouteRecord route2 = savedRecords.get(2);
             DeliveryRouteRecord route3 = savedRecords.get(3);
 
-            assertThat(route0.getDeliveryId()).isEqualTo(fixture.deliveryId);
+            // Route 0: Supplier Company -> Origin Hub
+            assertThat(route0.getDeliveryId())
+                    .isEqualTo(fixture.deliveryId);
             assertThat(route0.getSequence()).isEqualTo(0);
-            assertThat(route0.getOriginId()).isEqualTo(fixture.supplierId);
-            assertThat(route0.getOriginType()).isEqualTo(RouteLocationType.COMPANY);
-            assertThat(route0.getDestinationId()).isEqualTo(fixture.supplierHubId);
-            assertThat(route0.getDestinationType()).isEqualTo(RouteLocationType.HUB);
-            assertThat(route0.getOriginLatitude()).isEqualTo(fixture.supplierCompany.latitude().doubleValue());
-            assertThat(route0.getOriginLongitude()).isEqualTo(fixture.supplierCompany.longitude().doubleValue());
-            assertThat(route0.getDestinationLatitude()).isEqualTo(fixture.originHub.latitude().doubleValue());
-            assertThat(route0.getDestinationLongitude()).isEqualTo(fixture.originHub.longitude().doubleValue());
-            assertThat(route0.getExpectedDistanceKm()).isEqualByComparingTo(BigDecimal.ZERO);
-            assertThat(route0.getExpectedDurationMin()).isEqualTo(0);
-            assertThat(route0.getRemainDurationMin()).isEqualTo(289);
+            assertThat(route0.getOriginId())
+                    .isEqualTo(fixture.supplierId);
+            assertThat(route0.getOriginType())
+                    .isEqualTo(RouteLocationType.COMPANY);
+            assertThat(route0.getDestinationId())
+                    .isEqualTo(fixture.supplierHubId);
+            assertThat(route0.getDestinationType())
+                    .isEqualTo(RouteLocationType.HUB);
 
-            assertThat(route1.getDeliveryId()).isEqualTo(fixture.deliveryId);
+            assertThat(route0.getOriginLatitude())
+                    .isEqualTo(fixture.supplierCompany.latitude().doubleValue());
+            assertThat(route0.getOriginLongitude())
+                    .isEqualTo(fixture.supplierCompany.longitude().doubleValue());
+            assertThat(route0.getDestinationLatitude())
+                    .isEqualTo(fixture.originHub.latitude().doubleValue());
+            assertThat(route0.getDestinationLongitude())
+                    .isEqualTo(fixture.originHub.longitude().doubleValue());
+
+            assertThat(route0.getExpectedDistanceKm())
+                    .isEqualByComparingTo(new BigDecimal("53.50"));
+            assertThat(route0.getExpectedDurationMin()).isEqualTo(54);
+            assertThat(route0.getRemainDurationMin()).isEqualTo(423);
+
+            // Route 1: Origin Hub -> Middle Hub
+            assertThat(route1.getDeliveryId())
+                    .isEqualTo(fixture.deliveryId);
             assertThat(route1.getSequence()).isEqualTo(1);
-            assertThat(route1.getOriginId()).isEqualTo(fixture.supplierHubId);
-            assertThat(route1.getOriginType()).isEqualTo(RouteLocationType.HUB);
-            assertThat(route1.getDestinationId()).isEqualTo(fixture.middleHubId);
-            assertThat(route1.getDestinationType()).isEqualTo(RouteLocationType.HUB);
-            assertThat(route1.getExpectedDistanceKm()).isEqualByComparingTo(new BigDecimal("205.82"));
+            assertThat(route1.getOriginId())
+                    .isEqualTo(fixture.supplierHubId);
+            assertThat(route1.getOriginType())
+                    .isEqualTo(RouteLocationType.HUB);
+            assertThat(route1.getDestinationId())
+                    .isEqualTo(fixture.middleHubId);
+            assertThat(route1.getDestinationType())
+                    .isEqualTo(RouteLocationType.HUB);
+
+            assertThat(route1.getExpectedDistanceKm())
+                    .isEqualByComparingTo(new BigDecimal("205.82"));
             assertThat(route1.getExpectedDurationMin()).isEqualTo(143);
-            assertThat(route1.getRemainDurationMin()).isEqualTo(289);
+            assertThat(route1.getRemainDurationMin()).isEqualTo(369);
 
-            assertThat(route2.getDeliveryId()).isEqualTo(fixture.deliveryId);
+            // Route 2: Middle Hub -> Destination Hub
+            assertThat(route2.getDeliveryId())
+                    .isEqualTo(fixture.deliveryId);
             assertThat(route2.getSequence()).isEqualTo(2);
-            assertThat(route2.getOriginId()).isEqualTo(fixture.middleHubId);
-            assertThat(route2.getOriginType()).isEqualTo(RouteLocationType.HUB);
-            assertThat(route2.getDestinationId()).isEqualTo(fixture.receiverHubId);
-            assertThat(route2.getDestinationType()).isEqualTo(RouteLocationType.HUB);
-            assertThat(route2.getExpectedDistanceKm()).isEqualByComparingTo(new BigDecimal("219.40"));
-            assertThat(route2.getExpectedDurationMin()).isEqualTo(146);
-            assertThat(route2.getRemainDurationMin()).isEqualTo(146);
+            assertThat(route2.getOriginId())
+                    .isEqualTo(fixture.middleHubId);
+            assertThat(route2.getOriginType())
+                    .isEqualTo(RouteLocationType.HUB);
+            assertThat(route2.getDestinationId())
+                    .isEqualTo(fixture.receiverHubId);
+            assertThat(route2.getDestinationType())
+                    .isEqualTo(RouteLocationType.HUB);
 
-            assertThat(route3.getDeliveryId()).isEqualTo(fixture.deliveryId);
+            assertThat(route2.getExpectedDistanceKm())
+                    .isEqualByComparingTo(new BigDecimal("219.40"));
+            assertThat(route2.getExpectedDurationMin()).isEqualTo(146);
+            assertThat(route2.getRemainDurationMin()).isEqualTo(226);
+
+            // Route 3: Destination Hub -> Receiver Company
+            assertThat(route3.getDeliveryId())
+                    .isEqualTo(fixture.deliveryId);
             assertThat(route3.getSequence()).isEqualTo(3);
-            assertThat(route3.getOriginId()).isEqualTo(fixture.receiverHubId);
-            assertThat(route3.getOriginType()).isEqualTo(RouteLocationType.HUB);
-            assertThat(route3.getDestinationId()).isEqualTo(fixture.receiverId);
-            assertThat(route3.getDestinationType()).isEqualTo(RouteLocationType.COMPANY);
-            assertThat(route3.getExpectedDistanceKm()).isEqualByComparingTo(BigDecimal.ZERO);
-            assertThat(route3.getExpectedDurationMin()).isEqualTo(0);
-            assertThat(route3.getRemainDurationMin()).isEqualTo(0);
+            assertThat(route3.getOriginId())
+                    .isEqualTo(fixture.receiverHubId);
+            assertThat(route3.getOriginType())
+                    .isEqualTo(RouteLocationType.HUB);
+            assertThat(route3.getDestinationId())
+                    .isEqualTo(fixture.receiverId);
+            assertThat(route3.getDestinationType())
+                    .isEqualTo(RouteLocationType.COMPANY);
+
+            assertThat(route3.getExpectedDistanceKm())
+                    .isEqualByComparingTo(new BigDecimal("79.53"));
+            assertThat(route3.getExpectedDurationMin()).isEqualTo(80);
+            assertThat(route3.getRemainDurationMin()).isEqualTo(80);
         }
+
 
         @Test
         @DisplayName("배송 생성 완료 후 DeliveryCreatedEvent와 DeliveryPreparedEvent를 발행한다")
@@ -236,7 +289,7 @@ class CreateDeliveryFromOrderServiceImplTest {
             assertThat(createCommand.supplierCompanyId()).isEqualTo(fixture.supplierId);
             assertThat(createCommand.receiverCompanyId()).isEqualTo(fixture.receiverId);
             assertThat(createCommand.requestNote()).isEqualTo("문 앞에 놔주세요");
-            assertThat(createCommand.expectedDurationTotalMin()).isEqualTo(289);
+            assertThat(createCommand.expectedDurationTotalMin()).isEqualTo(423);
             assertThat(createCommand.status()).isEqualTo(DeliveryStatus.HUB_WAITING);
             assertThat(createCommand.desiredDeliveryAt()).isEqualTo(fixture.desiredDeliveryAt);
         }
@@ -316,9 +369,11 @@ class CreateDeliveryFromOrderServiceImplTest {
         CommonResponse<HubResponse> middleHubResponse = success(fixture.middleHub);
         CommonResponse<HubResponse> destinationHubResponse = success(fixture.destinationHub);
         CommonResponse<HubPathResponseDto> hubPathResponse = success(fixture.hubPath);
+        CommonResponse<UserInfoDto> userResponse = success(fixture.userInfoDto);
+        CommonResponse<OrderInfoDto> orderResponse = success(fixture.orderInfoDto);
 
         when(deliveryRepository.existsByOrderIdAndDeletedAtIsNull(fixture.orderId)).thenReturn(false);
-        //when(userServiceClient.getUserByUsername("receiver_manager")).thenReturn(fixture.userInfoDto);
+        when(userServiceClient.getUserByUsername("receiver_manager")).thenReturn(userResponse);
         when(companyServiceClient.getCompany(fixture.supplierId)).thenReturn(fixture.supplierCompany);
         when(companyServiceClient.getCompany(fixture.receiverId)).thenReturn(fixture.receiverCompany);
 
@@ -329,7 +384,7 @@ class CreateDeliveryFromOrderServiceImplTest {
         when(hubPathServiceClient.getHubPath("경기 북부 센터", "부산광역시 센터"))
                 .thenReturn(hubPathResponse);
 
-        when(orderServiceClient.getOrder(fixture.orderId)).thenReturn(fixture.orderInfoDto);
+        when(orderServiceClient.getOrder(fixture.orderId)).thenReturn(orderResponse);
         when(productServiceClient.getProduct(fixture.productId)).thenReturn(fixture.productInfoDto);
         when(deliveryService.createDelivery(any())).thenReturn(fixture.createDeliveryResponseDto);
 
@@ -482,13 +537,17 @@ class CreateDeliveryFromOrderServiceImplTest {
                         productId,
                         50,
                         BigDecimal.valueOf(12000),
-                        BigDecimal.valueOf(600000),
                         "CREATED",
                         supplierId,
                         receiverId,
                         deliveryId,
+                        receiverHubId,
+                        "배송 요청사항 없음",
+                        LocalDateTime.of(2026, 4, 7, 10, 0),
+                        LocalDateTime.of(2026, 4, 5, 10, 0),
                         LocalDateTime.of(2026, 4, 5, 10, 0)
                 );
+
 
         private final ProductInfoDto productInfoDto =
                 new ProductInfoDto(
